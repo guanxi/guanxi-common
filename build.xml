@@ -1,0 +1,45 @@
+<!-- CVS Header
+   $Id$
+   $Log$
+   Revision 1.1  2005/04/03 14:23:21  seanskye
+   Initial import of code tree into module on SF.
+
+-->
+<project name="Guanxi::Common" default="all">
+  <property name="lib.dir" value="../lib" />
+
+  <property name="src.dir" value="src" />
+
+  <!-- Distribution directories -->
+  <property name="dist.dir" value="dist" />
+  <property name="dist.dir.classes" value="${dist.dir}/classes" />
+  <property name="dist.dir.jar" value="${dist.dir}/jar" />
+  <property name="jar.file" value="guanxi-common.jar" />
+
+  <!-- CLASSPATH -->
+  <path id="classpath">
+    <fileset dir="${lib.dir}">
+      <include name="**/*.jar" />
+    </fileset>
+  </path>
+
+  <!-- Prepare the directories for building and distribution -->
+  <target name="clean" description="Prepares directory structure for the build">
+    <delete dir="${dist.dir}"/>
+    <mkdir dir="${dist.dir}"/>
+    <mkdir dir="${dist.dir.classes}"/>
+    <mkdir dir="${dist.dir.jar}"/>
+  </target>
+
+  <target name="compile" depends="clean" description="Compiles the Guanxi Common source code">
+    <javac srcdir="${src.dir}" destdir="${dist.dir.classes}" deprecation="on" debug="true">
+      <classpath refid="classpath"/>
+    </javac>
+  </target>
+
+  <target name="jar" depends="compile" description="Builds a JAR file">
+    <jar jarfile="${dist.dir.jar}/${jar.file}" basedir="${dist.dir.classes}"/>
+  </target>
+
+  <target name="all" depends="clean,compile,jar" description="Builds everything into the distribution directory"/>
+</project>
