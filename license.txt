@@ -16,4 +16,6 @@
 //:
 //: Contributor(s):
 //: Alistair Young alistair@smo.uhi.ac.uk Lead developer Guanxi::Common
+//: Sean Mehan sean@smo.uhi.ac.uk
+//: Antony Corfield antony@smo.uhi.ac.uk
 //:
