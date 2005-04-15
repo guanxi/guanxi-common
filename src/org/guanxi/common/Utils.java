@@ -8,20 +8,17 @@
 //: License for the specific language governing rights and limitations
 //: under the License.
 //:
-//: The Original Code is Guanxi::Common (http://www.guanxi.uhi.ac.uk).
+//: The Original Code is Guanxi (http://www.guanxi.uhi.ac.uk).
 //:
 //: The Initial Developer of the Original Code is Alistair Young alistair@smo.uhi.ac.uk.
 //: Portions created by SMO WWW Development Group are Copyright (C) 2005 SMO WWW Development Group.
 //: All Rights Reserved.
 //:
-//: Contributor(s):
-//: Alistair Young alistair@smo.uhi.ac.uk Lead developer Guanxi::Common
-//:
 /* CVS Header
    $Id$
    $Log$
-   Revision 1.1  2005/04/03 14:23:21  seanskye
-   Initial import of code tree into module on SF.
+   Revision 1.2  2005/04/15 10:02:41  alistairskye
+   License updated
 
 */
 
