@@ -1,12 +1,15 @@
 <!-- CVS Header
    $Id$
    $Log$
+   Revision 1.2  2005/04/15 12:19:47  alistairskye
+   Now uses gx_lib directory
+
    Revision 1.1  2005/04/03 14:23:21  seanskye
    Initial import of code tree into module on SF.
 
 -->
 <project name="Guanxi::Common" default="all">
-  <property name="lib.dir" value="../lib" />
+  <property name="lib.dir" value="../../gx_lib" />
 
   <property name="src.dir" value="src" />
 
