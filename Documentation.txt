@@ -5,9 +5,9 @@ on how to build it.
 
 Contents
 --------
-1) What is Guanxi::Common?
-2) How do I build it?
-3) Contributors
+o What is Guanxi::Common?
+o How do I build it?
+o Contributors
 
 What is Guanxi::Common?
 =======================
