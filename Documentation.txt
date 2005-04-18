@@ -1,0 +1,31 @@
+Guanxi::Common
+==============
+This file provides information on what Guanxi::Common is as well as instructions
+on how to build it.
+
+Contents
+--------
+1) What is Guanxi::Common?
+2) How do I build it?
+3) Contributors
+
+What is Guanxi::Common?
+=======================
+Guanxi::Common is a support module for the other Guanxi components in the system. It's not
+designed to be a standalone module. It just provides handy functionality that other modules
+can use. You can even build it and use it outwith Guanxi.
+
+How do I build it?
+====================
+Guanxi::Common uses a normal, easy-peasy Ant build file, build.xml. There's nothing to do apart
+from typing:
+ant
+and watch it build.
+When the build completes, you can find the jar file in:
+[GUANXI::COMMON-HOME]/dist/jar
+
+Contributors
+============
+Alistair Young Lead developer alistair@smo.uhi.ac.uk
+Antony Corfield antony@smo.uhi.ac.uk
+Sean Mehan sean@smo.uhi.ac.uk
