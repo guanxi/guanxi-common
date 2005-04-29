@@ -2,7 +2,7 @@ Guanxi::Common - ReadMe
 =======================
 A Java tookit for use by other Guanxi modules or as a standalone common functionality toolkit for web applications
 
-Version 1.1.0
+Version 1.2.0
 -------------------
 http://www.guanxi.uhi.ac.uk/
 
