@@ -17,6 +17,9 @@
 /* CVS Header
    $Id$
    $Log$
+   Revision 1.3  2005/05/04 13:33:55  alistairskye
+   base64() moved here from org.Guanxi.SAMUEL.Utils.Utils
+
    Revision 1.2  2005/04/15 10:02:41  alistairskye
    License updated
 
@@ -24,10 +27,18 @@
 
 package org.Guanxi.Common;
 
+import org.w3c.dom.Document;
+import org.apache.xml.security.utils.Base64;
 import javax.servlet.http.HttpServletRequest;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
 import java.util.Hashtable;
 import java.util.Enumeration;
 import java.rmi.server.UID;
+import java.io.StringWriter;
 
 /**
  * <font size=5><b></b></font>
@@ -59,5 +70,20 @@ public class Utils
   public static String getUniqueID() {
     UID uid = new UID();
     return uid.toString();
+  }
+
+  public static String base64 (Document inDocToEncode) {
+    try {
+      DOMSource domSource = new DOMSource(inDocToEncode);
+      StringWriter writer = new StringWriter();
+      StreamResult result = new StreamResult(writer);
+      TransformerFactory tf = TransformerFactory.newInstance();
+      Transformer transformer = tf.newTransformer();
+      transformer.transform(domSource, result);
+      return Base64.encode(writer.toString().getBytes());
+    }
+    catch(TransformerException te) {
+      return null;
+    }
   }
 }
