@@ -1,6 +1,11 @@
 <!-- CVS Header
    $Id$
    $Log$
+   Revision 1.4  2005/05/04 15:11:09  alistairskye
+   Added:
+   samuel.lib.dir
+   servlet-api-jar
+
    Revision 1.3  2005/04/19 12:08:21  alistairskye
    Added support for build.properties
 
@@ -14,7 +19,9 @@
 <project name="Guanxi::Common" default="all">
   <property file="build.properties" />
 
+  <!-- CLASSPATH files -->
   <property name="gx_lib.dir" value="${gx_lib.home}" />
+  <property name="samuel.lib.dir" value="${samuel.home}/dist/jar" />
   
   <property name="src.dir" value="src" />
 
@@ -29,6 +36,10 @@
     <fileset dir="${gx_lib.dir}">
       <include name="**/*.jar" />
     </fileset>
+    <fileset dir="${samuel.lib.dir}">
+      <include name="**/*.jar" />
+    </fileset>
+    <pathelement path="${servlet-api-jar}" />
   </path>
 
   <!-- Prepare the directories for building and distribution -->
