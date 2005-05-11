@@ -1,6 +1,9 @@
 /* CVS Header
    $Id$
    $Log$
+   Revision 1.2  2005/05/11 13:11:53  alistairskye
+   Updated sign() to use new keyType in configNode to support DSA/RSA
+
    Revision 1.1  2005/05/04 13:29:00  alistairskye
    Moved here from org.Guanxi.SAMUEL.Utils
 
@@ -60,6 +63,10 @@ public class SecUtils {
     String privateKeyAlias = xUtils.getNodeValue(configNode, "private-key-alias");
     String privateKeyPass = xUtils.getNodeValue(configNode, "private-key-password");
     String certificateAlias = xUtils.getNodeValue(configNode, "certificate-alias");
+    String keyType = xUtils.getNodeValue(configNode, "key-type");
+
+    if (keyType.equalsIgnoreCase("dsa")) keyType = XMLSignature.ALGO_ID_SIGNATURE_DSA;
+    if (keyType.equalsIgnoreCase("rsa")) keyType = XMLSignature.ALGO_ID_SIGNATURE_RSA;
 
     try {
       //Constants.setSignatureSpecNSprefix("ds");
@@ -76,7 +83,7 @@ public class SecUtils {
       privateKey = (PrivateKey)ks.getKey(privateKeyAlias, privateKeyPass.toCharArray());
 
       XMLSignature sig = null;
-      sig = new XMLSignature(inDocToSign, "", XMLSignature.ALGO_ID_SIGNATURE_RSA, Canonicalizer.ALGO_ID_C14N_EXCL_OMIT_COMMENTS);
+      sig = new XMLSignature(inDocToSign, "", keyType, Canonicalizer.ALGO_ID_C14N_EXCL_OMIT_COMMENTS);
 
       // For Shibboleth 1.2.1, <ds:Signature> must be the first element after the root
       inDocToSign.getDocumentElement().insertBefore(sig.getElement(), inDocToSign.getDocumentElement().getFirstChild());
