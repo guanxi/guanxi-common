@@ -17,6 +17,9 @@
 /* CVS Header
    $Id$
    $Log$
+   Revision 1.5  2005/06/21 09:26:01  alistairskye
+   Modified decodeBase64() to return a String
+
    Revision 1.4  2005/06/21 09:14:40  alistairskye
    Added decodeBase64()
 
@@ -92,9 +95,9 @@ public class Utils
     }
   }
 
-  public static byte[] decodeBase64(String b64Data) {
+  public static String decodeBase64(String b64Data) {
     try {
-      return Base64.decode(b64Data);
+      return new String(Base64.decode(b64Data));
     }
     catch(Base64DecodingException bde) {
       return null;
