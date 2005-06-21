@@ -17,6 +17,9 @@
 /* CVS Header
    $Id$
    $Log$
+   Revision 1.4  2005/06/21 09:14:40  alistairskye
+   Added decodeBase64()
+
    Revision 1.3  2005/05/04 13:33:55  alistairskye
    base64() moved here from org.Guanxi.SAMUEL.Utils.Utils
 
@@ -29,6 +32,8 @@ package org.Guanxi.Common;
 
 import org.w3c.dom.Document;
 import org.apache.xml.security.utils.Base64;
+import org.apache.xml.security.exceptions.Base64DecodingException;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
@@ -53,7 +58,7 @@ public class Utils
    * @param request HTTP request object
    * @return Hashtable of parameters and their values
    */
-  public static Hashtable getRequestParameters (HttpServletRequest request) {
+  public static Hashtable getRequestParameters(HttpServletRequest request) {
     Hashtable params = new Hashtable();
     Enumeration e = request.getParameterNames();
     String name,value;
@@ -72,7 +77,7 @@ public class Utils
     return uid.toString();
   }
 
-  public static String base64 (Document inDocToEncode) {
+  public static String base64(Document inDocToEncode) {
     try {
       DOMSource domSource = new DOMSource(inDocToEncode);
       StringWriter writer = new StringWriter();
@@ -83,6 +88,15 @@ public class Utils
       return Base64.encode(writer.toString().getBytes());
     }
     catch(TransformerException te) {
+      return null;
+    }
+  }
+
+  public static byte[] decodeBase64(String b64Data) {
+    try {
+      return Base64.decode(b64Data);
+    }
+    catch(Base64DecodingException bde) {
       return null;
     }
   }
