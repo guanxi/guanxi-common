@@ -17,8 +17,19 @@ can use. You can even build it and use it outwith Guanxi.
 
 How do I build it?
 ====================
-Guanxi::Common uses a normal, easy-peasy Ant build file, build.xml. There's nothing to do apart
-from typing:
+To build Guanxi::Common, find the file build.properties in the root folder of the distribution and change the
+paths accordingly:
+
+build.properties:
+These won't need changed if you've downloaded Guanxi as a whole:
+gx_lib.home=../../gx_lib
+samuel.home=../../samuel
+
+You'll have to tell the build where your servlet environment is:
+servlet-api-jar=/usr/local/tomcat/common/lib/servlet-api.jar
+
+Once you've modified build.properties, usually only to set the servlet-api path, you
+just type:
 ant
 and watch it build.
 When the build completes, you can find the jar file in:
