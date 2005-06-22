@@ -17,8 +17,8 @@ can use. You can even build it and use it outwith Guanxi.
 
 How do I build it?
 ====================
-To build Guanxi::Common, find the file build.properties in the root folder of the distribution and change the
-paths accordingly:
+Before you can build Guanxi::Common you'll have to build SAMUEL first, then find the file
+build.properties in the root folder of the distribution and change the paths accordingly:
 
 build.properties:
 These won't need changed if you've downloaded Guanxi as a whole:
