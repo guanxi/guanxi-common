@@ -39,7 +39,8 @@ Installation:
  Please see the Documentation.txt file.
 
 ChangeLog:
- Now in ChangeLog
+ The Guanxi release history may be viewed on the Guanxi Wiki:
+ http://guanxi.uhi.ac.uk/xwiki/bin/view/Main/Releases
 
 Documentation:
  Basic documentation available in Documentation.txt
