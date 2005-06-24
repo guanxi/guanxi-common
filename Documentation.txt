@@ -1,7 +1,7 @@
 Guanxi::Common
 ==============
-This file provides information on what Guanxi::Common is as well as instructions
-on how to build it.
+This file provides information on what Guanxi::Common is ,as well as 
+instructions on how to build it.
 
 Contents
 --------
@@ -11,14 +11,16 @@ o Contributors
 
 What is Guanxi::Common?
 =======================
-Guanxi::Common is a support module for the other Guanxi components in the system. It's not
-designed to be a standalone module. It just provides handy functionality that other modules
-can use. You can even build it and use it outwith Guanxi.
+Guanxi::Common is a support module for the other Guanxi components in the 
+system. It's not designed to be a standalone module. It just provides handy 
+functionality that other modules can use. You can even build it and use 
+it outwith Guanxi.
 
 How do I build it?
 ====================
-Before you can build Guanxi::Common you'll have to build SAMUEL first, then find the file
-build.properties in the root folder of the distribution and change the paths accordingly:
+Before you can build Guanxi::Common you'll have to build SAMUEL first, 
+then find the file build.properties in the root folder of the distribution 
+and change the paths accordingly:
 
 build.properties:
 These won't need changed if you've downloaded Guanxi as a whole:
@@ -28,15 +30,16 @@ samuel.home=../../samuel
 You'll have to tell the build where your servlet environment is:
 servlet-api-jar=/usr/local/tomcat/common/lib/servlet-api.jar
 
-Once you've modified build.properties, usually only to set the servlet-api path, you
-just type:
+Once you've modified build.properties, usually only to set the 
+servlet-api path, you just type:
 ant
+
 and watch it build.
 When the build completes, you can find the jar file in:
 [GUANXI::COMMON-HOME]/dist/jar
 
 Contributors
 ============
-Alistair Young Lead developer alistair@smo.uhi.ac.uk
+Alistair Young, Lead Developer alistair@smo.uhi.ac.uk
 Antony Corfield antony@smo.uhi.ac.uk
 Sean Mehan sean@smo.uhi.ac.uk
