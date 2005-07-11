@@ -17,6 +17,9 @@
 /* CVS Header
    $Id$
    $Log$
+   Revision 1.6  2005/07/11 10:52:22  alistairskye
+   Package restructure
+
    Revision 1.5  2005/06/21 09:26:01  alistairskye
    Modified decodeBase64() to return a String
 
@@ -31,7 +34,7 @@
 
 */
 
-package org.Guanxi.Common;
+package org.guanxi.common;
 
 import org.w3c.dom.Document;
 import org.apache.xml.security.utils.Base64;

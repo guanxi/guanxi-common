@@ -17,6 +17,9 @@
 /* CVS Header
    $Id$
    $Log$
+   Revision 1.2  2005/07/11 10:52:05  alistairskye
+   Package restructure
+
    Revision 1.1  2005/05/04 13:29:14  alistairskye
    Moved here from org.Guanxi.SAMUEL.Utils
 
@@ -25,7 +28,7 @@
 
 */
 
-package org.Guanxi.Common.Security;
+package org.guanxi.common.security;
 
 import org.apache.xml.security.utils.resolver.ResourceResolverSpi;
 import org.apache.xml.security.utils.resolver.ResourceResolverException;

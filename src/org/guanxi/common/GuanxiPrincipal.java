@@ -17,12 +17,15 @@
 /* CVS Header
    $Id$
    $Log$
+   Revision 1.3  2005/07/11 10:52:24  alistairskye
+   Package restructure
+
    Revision 1.2  2005/04/15 10:00:56  alistairskye
    License updated
 
 */
 
-package org.Guanxi.Common;
+package org.guanxi.common;
 
 import javax.servlet.ServletContext;
 import java.security.Principal;

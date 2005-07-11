@@ -1,6 +1,25 @@
+//: "The contents of this file are subject to the Mozilla Public License
+//: Version 1.1 (the "License"); you may not use this file except in
+//: compliance with the License. You may obtain a copy of the License at
+//: http://www.mozilla.org/MPL/
+//:
+//: Software distributed under the License is distributed on an "AS IS"
+//: basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
+//: License for the specific language governing rights and limitations
+//: under the License.
+//:
+//: The Original Code is Guanxi (http://www.guanxi.uhi.ac.uk).
+//:
+//: The Initial Developer of the Original Code is Alistair Young alistair@smo.uhi.ac.uk.
+//: Portions created by SMO WWW Development Group are Copyright (C) 2005 SMO WWW Development Group.
+//: All Rights Reserved.
+//:
 /* CVS Header
    $Id$
    $Log$
+   Revision 1.3  2005/07/11 10:52:05  alistairskye
+   Package restructure
+
    Revision 1.2  2005/05/11 13:11:53  alistairskye
    Updated sign() to use new keyType in configNode to support DSA/RSA
 
@@ -12,7 +31,7 @@
 
 */
 
-package org.Guanxi.Common.Security;
+package org.guanxi.common.security;
 
 import org.w3c.dom.Node;
 import org.w3c.dom.Document;
@@ -21,9 +40,8 @@ import org.apache.xml.security.c14n.Canonicalizer;
 import org.apache.xml.security.transforms.Transforms;
 import org.apache.xml.security.transforms.params.InclusiveNamespaces;
 import org.apache.xml.security.exceptions.XMLSecurityException;
-import org.Guanxi.SAMUEL.Utils.XUtils;
-import org.Guanxi.Common.SOAPUtils;
-
+import org.guanxi.samuel.utils.XUtils;
+import org.guanxi.common.SOAPUtils;
 import java.security.*;
 import java.security.cert.X509Certificate;
 import java.security.cert.CertificateException;

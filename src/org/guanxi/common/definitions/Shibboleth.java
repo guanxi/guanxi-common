@@ -17,6 +17,9 @@
 /* CVS Header
    $Id$
    $Log$
+   Revision 1.2  2005/07/11 10:51:34  alistairskye
+   Package restructure
+
    Revision 1.1  2005/05/04 13:28:14  alistairskye
    Moved here from org.Guanxi.SAMUEL.Definitions
 
@@ -25,7 +28,7 @@
 
 */
 
-package org.Guanxi.Common.Definitions;
+package org.guanxi.common.definitions;
 
 /**
  * <font size=5><b></b></font>
