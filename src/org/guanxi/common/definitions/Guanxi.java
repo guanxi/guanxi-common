@@ -17,6 +17,9 @@
 /* CVS Header
    $Id$
    $Log$
+   Revision 1.3  2005/07/19 14:15:18  alistairskye
+   Added NS_IDP_NAME_IDENTIFIER
+
    Revision 1.2  2005/07/11 10:51:34  alistairskye
    Package restructure
 
@@ -33,5 +36,6 @@ package org.guanxi.common.definitions;
  * @author Alistair Young alistair@smo.uhi.ac.uk
  */
 public class Guanxi {
+  public static final String NS_IDP_NAME_IDENTIFIER = "urn:guanxi:idp";
   public static final String NS_SP_NAME_IDENTIFIER = "urn:guanxi:sp";
 }
