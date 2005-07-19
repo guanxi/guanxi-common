@@ -17,6 +17,9 @@
 /* CVS Header
    $Id$
    $Log$
+   Revision 1.5  2005/07/19 14:16:41  alistairskye
+   Modified sign() to use new namespace aware org.guanxi.samuel.utils.XUtils
+
    Revision 1.4  2005/07/18 15:52:01  alistairskye
    Added urn:guanxi:idp namespace to sign()
 
@@ -80,13 +83,13 @@ public class SecUtils {
 
   public Document sign(Node configNode, Document inDocToSign, String inElementToSign) {
     XUtils xUtils = XUtils.getInstance();
-    String keystoreType = xUtils.getNodeValue(configNode, "//*[local-name()='keystore-type' and namespace-uri()='" + Guanxi.NS_IDP_NAME_IDENTIFIER + "']");
-    String keystoreFile = xUtils.getNodeValue(configNode, "//*[local-name()='keystore-file' and namespace-uri()='" + Guanxi.NS_IDP_NAME_IDENTIFIER + "']");
-    String keystorePass = xUtils.getNodeValue(configNode, "//*[local-name()='keystore-password' and namespace-uri()='" + Guanxi.NS_IDP_NAME_IDENTIFIER + "']");
-    String privateKeyAlias = xUtils.getNodeValue(configNode, "//*[local-name()='private-key-alias' and namespace-uri()='" + Guanxi.NS_IDP_NAME_IDENTIFIER + "']");
-    String privateKeyPass = xUtils.getNodeValue(configNode, "//*[local-name()='private-key-password' and namespace-uri()='" + Guanxi.NS_IDP_NAME_IDENTIFIER + "']");
-    String certificateAlias = xUtils.getNodeValue(configNode, "//*[local-name()='certificate-alias' and namespace-uri()='" + Guanxi.NS_IDP_NAME_IDENTIFIER + "']");
-    String keyType = xUtils.getNodeValue(configNode, "//*[local-name()='key-type' and namespace-uri()='" + Guanxi.NS_IDP_NAME_IDENTIFIER + "']");
+    String keystoreType = xUtils.getNodeValue(configNode, Guanxi.NS_IDP_NAME_IDENTIFIER, "keystore-type");
+    String keystoreFile = xUtils.getNodeValue(configNode, Guanxi.NS_IDP_NAME_IDENTIFIER, "keystore-file");
+    String keystorePass = xUtils.getNodeValue(configNode, Guanxi.NS_IDP_NAME_IDENTIFIER, "keystore-password");
+    String privateKeyAlias = xUtils.getNodeValue(configNode, Guanxi.NS_IDP_NAME_IDENTIFIER, "private-key-alias");
+    String privateKeyPass = xUtils.getNodeValue(configNode, Guanxi.NS_IDP_NAME_IDENTIFIER, "private-key-password");
+    String certificateAlias = xUtils.getNodeValue(configNode, Guanxi.NS_IDP_NAME_IDENTIFIER, "certificate-alias");
+    String keyType = xUtils.getNodeValue(configNode, Guanxi.NS_IDP_NAME_IDENTIFIER, "key-type");
 
     if (keyType.equalsIgnoreCase("dsa")) keyType = XMLSignature.ALGO_ID_SIGNATURE_DSA;
     if (keyType.equalsIgnoreCase("rsa")) keyType = XMLSignature.ALGO_ID_SIGNATURE_RSA;
