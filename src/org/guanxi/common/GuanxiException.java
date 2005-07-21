@@ -17,6 +17,9 @@
 /* CVS Header
    $Id$
    $Log$
+   Revision 1.3  2005/07/21 13:02:01  alistairskye
+   GuanxiException(Exception) now calls superclass
+
    Revision 1.2  2005/07/11 10:52:24  alistairskye
    Package restructure
 
@@ -39,6 +42,7 @@ public class GuanxiException extends Exception {
   }
 
   public GuanxiException(Exception e) {
+    super(e);
   }
 
   public GuanxiException (String inMessage) {
