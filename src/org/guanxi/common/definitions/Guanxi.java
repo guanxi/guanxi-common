@@ -17,6 +17,9 @@
 /* CVS Header
    $Id$
    $Log$
+   Revision 1.5  2005/07/21 09:10:34  alistairskye
+   Added DEFAULT_AUTHENTICATOR_CONFIG_DIR and DEFAULT_AUTHCOOKIEHANDLER_CONFIG_DIR
+
    Revision 1.4  2005/07/21 09:06:42  alistairskye
    Added DEFAULT_ATTRIBUTOR_CONFIG_DIR
    Added javadocs
@@ -40,8 +43,14 @@ package org.guanxi.common.definitions;
  * @author Alistair Young alistair@smo.uhi.ac.uk
  */
 public class Guanxi {
+  /** Default location where the Authenticator implementations can find their config files */
+  public static final String DEFAULT_AUTHENTICATOR_CONFIG_DIR = "/WEB-INF/config/authenticators/";
+
   /** Default location where the Attributor implementations can find their config files */
   public static final String DEFAULT_ATTRIBUTOR_CONFIG_DIR = "/WEB-INF/config/attributors/";
+
+  /** Default location where the AuthCookieHandler implementations can find their config files */
+  public static final String DEFAULT_AUTHCOOKIEHANDLER_CONFIG_DIR = "/WEB-INF/config/authenticators/";
 
   /** The Guanxi IdP XML namespace */
   public static final String NS_IDP_NAME_IDENTIFIER = "urn:guanxi:idp";
