@@ -17,6 +17,9 @@
 /* CVS Header
    $Id$
    $Log$
+   Revision 1.7  2005/07/22 10:42:17  alistairskye
+   Added getConfigOption()
+
    Revision 1.6  2005/07/11 10:52:22  alistairskye
    Package restructure
 
@@ -37,6 +40,8 @@
 package org.guanxi.common;
 
 import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 import org.apache.xml.security.utils.Base64;
 import org.apache.xml.security.exceptions.Base64DecodingException;
 
@@ -105,5 +110,45 @@ public class Utils
     catch(Base64DecodingException bde) {
       return null;
     }
+  }
+
+  /**
+   * Gets the text value of a particular node in the config file
+   *
+   * @param configNode The parent node of the node we're interested in
+   * @param option The node whose text we want
+   * @return Text value of the node
+   */
+  public static String getConfigOption(Node configNode, String option) {
+    NodeList childNodes = null;
+    int childCount = 0;
+
+    NodeList nodes = configNode.getChildNodes();
+
+    if (nodes == null) return "-1";
+
+    for (int count=0; count < nodes.getLength(); count++) {
+      if (nodes.item(count).getLocalName() == null) continue;
+
+      // Have we found the node we're looking for?
+      if (nodes.item(count).getLocalName().equalsIgnoreCase(option)) {
+        // Get the child nodes. We're looking for the text node containing the value
+        childNodes = nodes.item(count).getChildNodes();
+
+        for (childCount=0; childCount < childNodes.getLength(); childCount++) {
+          // Got a text node?
+          if (childNodes.item(childCount).getNodeType() == Node.TEXT_NODE) {
+            // Anything in it?
+            if (childNodes.item(childCount).getNodeValue() != null)
+              // Sometimes you can get blank text nodes with Xerces
+              if (!childNodes.item(childCount).getNodeValue().equalsIgnoreCase("")) {
+                return childNodes.item(childCount).getNodeValue();
+            }
+          }
+        }
+      }
+    }
+
+    return "-1";
   }
 }
