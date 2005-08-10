@@ -17,6 +17,9 @@
 /* CVS Header
    $Id$
    $Log$
+   Revision 1.8  2005/08/10 13:05:42  alistairskye
+   Added dumpXML()
+
    Revision 1.7  2005/07/22 10:42:17  alistairskye
    Added getConfigOption()
 
@@ -44,6 +47,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.apache.xml.security.utils.Base64;
 import org.apache.xml.security.exceptions.Base64DecodingException;
+import org.apache.log4j.Logger;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.xml.transform.dom.DOMSource;
@@ -150,5 +154,18 @@ public class Utils
     }
 
     return "-1";
+  }
+
+  public static void dumpXML(Logger log, String xml, String message) {
+    log.debug("=======================================================" +
+              System.getProperty("line.separator") +
+              System.getProperty("line.separator") +
+              message +
+              System.getProperty("line.separator") +
+              System.getProperty("line.separator") +
+              xml +
+              System.getProperty("line.separator") +
+              System.getProperty("line.separator") +
+              "=======================================================");
   }
 }
