@@ -1,6 +1,9 @@
 /* CVS Header
    $Id$
    $Log$
+   Revision 1.2  2005/08/11 11:34:19  alistairskye
+   Constructor now throws GuanxiException
+
    Revision 1.1  2005/08/11 11:31:20  alistairskye
    Moved WSDL to org.guanxi.common
 
@@ -12,7 +15,6 @@
 package org.guanxi.common;
 
 import org.guanxi.samuel.utils.ParseErrorHandler;
-import org.guanxi.samuel.exception.SAMUELException;
 import org.xml.sax.InputSource;
 import org.xml.sax.Attributes;
 import org.xml.sax.XMLReader;
@@ -38,7 +40,7 @@ public class WSDL {
   private String portName = null;
   private String serviceName = null;
 
-  public WSDL(URL wsdlURL, int timeout) throws SAMUELException {
+  public WSDL(URL wsdlURL, int timeout) throws GuanxiException {
     SAXParserFactory factory = SAXParserFactory.newInstance();
     factory.setNamespaceAware(true);
     factory.setValidating(true);
@@ -60,7 +62,7 @@ public class WSDL {
       get.releaseConnection();
     }
     catch(Exception e) {
-      throw new SAMUELException(e);
+      throw new GuanxiException(e);
     }
   }
 
