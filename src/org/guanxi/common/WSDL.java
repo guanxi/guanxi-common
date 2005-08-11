@@ -1,12 +1,15 @@
 /* CVS Header
    $Id$
    $Log$
+   Revision 1.1  2005/08/11 11:31:20  alistairskye
+   Moved WSDL to org.guanxi.common
+
    Revision 1.1  2005/08/10 14:20:54  alistairskye
    WSDL parser
 
 */
 
-package org.guanxi.common.security;
+package org.guanxi.common;
 
 import org.guanxi.samuel.utils.ParseErrorHandler;
 import org.guanxi.samuel.exception.SAMUELException;
