@@ -1,6 +1,9 @@
 /* CVS Header
    $Id$
    $Log$
+   Revision 1.2  2005/08/12 09:03:14  alistairskye
+   Added SAML attribute gathering
+
    Revision 1.1  2005/08/11 14:18:52  alistairskye
    SAML attribute parser and container
 
@@ -17,6 +20,8 @@ import org.guanxi.samuel.utils.Resolver;
 import javax.xml.parsers.SAXParserFactory;
 import javax.xml.parsers.SAXParser;
 import java.util.HashMap;
+import java.util.Enumeration;
+import java.util.Hashtable;
 
 /**
  * <font size=5><b></b></font>
@@ -32,12 +37,14 @@ public class Bag {
   private String majorVersion = null;
   private String minorVersion = null;
   private StringBuffer value = new StringBuffer();
-  HashMap attributes = null;
+  Hashtable attributes = null;
 
   public Bag(InputSource in) throws GuanxiException {
     SAXParserFactory factory = SAXParserFactory.newInstance();
     factory.setNamespaceAware(true);
     factory.setValidating(true);
+
+    attributes = new Hashtable();
 
     try {
       String[] schemas = {"soap-envelope.xsd",
@@ -66,8 +73,17 @@ public class Bag {
   public String getMajorVersion() { return majorVersion; }
   public String getMinorVersion() { return minorVersion; }
 
+  public String getAttributeValue(String name) {
+    return (String)attributes.get(name);
+  }
+
+  public Enumeration getAttributeNames() {
+    return attributes.keys();
+  }
+
   class BagContentHandler extends DefaultHandler {
-    boolean inAssertion, inGuanxiGuardSessionID;
+    String name = null;
+    boolean inAssertion, inGuanxiGuardSessionID, inAttribute, inAttributeValue;
 
     public void startElement(String uri, String localName, String qName, Attributes attrs) {
       if (localName.equals("GuanxiGuardSessionID")) {
@@ -83,12 +99,32 @@ public class Bag {
 
         inAssertion = true;
       }
+
+      if (localName.equals("Attribute")) {
+        name = getAttribute(attrs, "AttributeName");
+
+        inAttribute = true;
+      }
+
+      if (localName.equals("AttributeValue")) {
+        inAttributeValue = true;
+      }
     }
 
     public void endElement(String uri, String localName, String qName) {
       if (inGuanxiGuardSessionID) {
         sessionID = getValue();
         inGuanxiGuardSessionID = false;
+      }
+
+      if (localName.equals("Attribute")) {
+        inAttribute = false;
+      }
+
+      if (localName.equals("AttributeValue")) {
+        addSAMLAttribute(name, getValue());
+
+        inAttributeValue = false;
       }
 
       value = new StringBuffer();
@@ -115,14 +151,16 @@ public class Bag {
 
       return "";
     }
-  }
 
-  public void addAttribute(String name, String value) {
-    if (attributes.containsKey(name)) {
-      String buffer = (String)attributes.get(name);
-      buffer += ";" + value;
-      attributes.remove(name);
-      attributes.put(name, buffer);
+    void addSAMLAttribute(String name, String value) {
+      if (attributes.containsKey(name)) {
+        String buffer = (String)attributes.get(name);
+        buffer += ";" + value;
+        attributes.remove(name);
+        attributes.put(name, buffer);
+      }
+      else
+        attributes.put(name, value);
     }
   }
 }
