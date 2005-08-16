@@ -17,6 +17,9 @@
 /* CVS Header
    $Id$
    $Log$
+   Revision 1.6  2005/08/16 10:34:50  alistairskye
+   Changed sign() to use XUtils.getNodeValue(Node, String)
+
    Revision 1.5  2005/07/19 14:16:41  alistairskye
    Modified sign() to use new namespace aware org.guanxi.samuel.utils.XUtils
 
@@ -83,13 +86,13 @@ public class SecUtils {
 
   public Document sign(Node configNode, Document inDocToSign, String inElementToSign) {
     XUtils xUtils = XUtils.getInstance();
-    String keystoreType = xUtils.getNodeValue(configNode, Guanxi.NS_IDP_NAME_IDENTIFIER, "keystore-type");
-    String keystoreFile = xUtils.getNodeValue(configNode, Guanxi.NS_IDP_NAME_IDENTIFIER, "keystore-file");
-    String keystorePass = xUtils.getNodeValue(configNode, Guanxi.NS_IDP_NAME_IDENTIFIER, "keystore-password");
-    String privateKeyAlias = xUtils.getNodeValue(configNode, Guanxi.NS_IDP_NAME_IDENTIFIER, "private-key-alias");
-    String privateKeyPass = xUtils.getNodeValue(configNode, Guanxi.NS_IDP_NAME_IDENTIFIER, "private-key-password");
-    String certificateAlias = xUtils.getNodeValue(configNode, Guanxi.NS_IDP_NAME_IDENTIFIER, "certificate-alias");
-    String keyType = xUtils.getNodeValue(configNode, Guanxi.NS_IDP_NAME_IDENTIFIER, "key-type");
+    String keystoreType = xUtils.getNodeValue(configNode, "keystore-type");
+    String keystoreFile = xUtils.getNodeValue(configNode, "keystore-file");
+    String keystorePass = xUtils.getNodeValue(configNode, "keystore-password");
+    String privateKeyAlias = xUtils.getNodeValue(configNode, "private-key-alias");
+    String privateKeyPass = xUtils.getNodeValue(configNode, "private-key-password");
+    String certificateAlias = xUtils.getNodeValue(configNode, "certificate-alias");
+    String keyType = xUtils.getNodeValue(configNode, "key-type");
 
     if (keyType.equalsIgnoreCase("dsa")) keyType = XMLSignature.ALGO_ID_SIGNATURE_DSA;
     if (keyType.equalsIgnoreCase("rsa")) keyType = XMLSignature.ALGO_ID_SIGNATURE_RSA;
