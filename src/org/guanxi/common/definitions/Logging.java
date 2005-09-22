@@ -17,6 +17,9 @@
 /* CVS Header
    $Id$
    $Log$
+   Revision 1.4  2005/09/22 08:34:08  alistairskye
+   IdP and SP now have separate log4j config files
+
    Revision 1.3  2005/08/12 12:47:29  alistairskye
    Added license
 
@@ -39,8 +42,11 @@ public class Logging {
   /** The location where plugins and system classes can put their log files */
   public static final String DEFAULT_LOG_DIR = "/WEB-INF/logs/";
 
-  /** The system's logging config file */
-  public static final String DEFAULT_CONFIG_FILE = "/WEB-INF/config/log4j.xml";
+  /** The IdP's logging config file */
+  public static final String DEFAULT_IDP_CONFIG_FILE = "/WEB-INF/config/idp-log4j.xml";
+
+  /** The IdP's logging config file */
+  public static final String DEFAULT_SP_CONFIG_FILE = "/WEB-INF/config/sp-log4j.xml";
 
   /** Default date format for loggers to use */
   public static final String DEFAULT_LAYOUT = "%d{dd MMMM yyyy HH:mm:ss} - %m%n";
