@@ -17,8 +17,8 @@
 /* CVS Header
    $Id$
    $Log$
-   Revision 1.1  2005/10/20 15:55:56  alistairskye
-   Handler for attribute mapping files
+   Revision 1.2  2005/10/20 16:09:23  alistairskye
+   Added support for mapping attributes to rules
 
    Revision 1.1  2005/09/19 12:09:28  alistairskye
    Class for mapping attributes from one form/value to another
@@ -34,8 +34,8 @@ import org.w3c.dom.NamedNodeMap;
 import org.guanxi.samuel.utils.ParserPool;
 import org.guanxi.samuel.utils.XUtils;
 import org.guanxi.samuel.exception.ParserPoolException;
-import org.guanxi.common.GuanxiException;
 import org.guanxi.common.definitions.Guanxi;
+import org.guanxi.common.security.SecUtils;
 import java.io.File;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
@@ -51,6 +51,7 @@ public class AttributeMap {
   private static final String MAP_ATTR_VALUE = "attrValue";
   private static final String MAP_ATTR_MAPPED_NAME = "mappedName";
   private static final String MAP_ATTR_MAPPED_VALUE = "mappedValue";
+  private static final String MAP_ATTR_MAPPED_RULE = "mappedRule";
 
   ParserPool parser = null;
   XUtils xUtils = null;
@@ -103,7 +104,12 @@ public class AttributeMap {
             // Rename the attribute...
             mappedName = mapAttrs.getNamedItem(MAP_ATTR_MAPPED_NAME).getNodeValue();
             // ...and transform the value
-            mappedValue = mapAttrs.getNamedItem(MAP_ATTR_MAPPED_VALUE).getNodeValue();
+            if (mapAttrs.getNamedItem(MAP_ATTR_MAPPED_RULE) != null) {
+              if (mapAttrs.getNamedItem(MAP_ATTR_MAPPED_RULE).getNodeValue().equals("encrypt"))
+                mappedValue = SecUtils.getInstance().encrypt(attrValue);
+            }
+            else
+              mappedValue = mapAttrs.getNamedItem(MAP_ATTR_MAPPED_VALUE).getNodeValue();
 
             return true;
           }
