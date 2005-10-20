@@ -17,6 +17,9 @@
 /* CVS Header
    $Id$
    $Log$
+   Revision 1.7  2005/10/20 16:06:46  alistairskye
+   Added encrypt()
+
    Revision 1.6  2005/08/16 10:34:50  alistairskye
    Changed sign() to use XUtils.getNodeValue(Node, String)
 
@@ -51,8 +54,6 @@ import org.apache.xml.security.transforms.params.InclusiveNamespaces;
 import org.apache.xml.security.exceptions.XMLSecurityException;
 import org.guanxi.samuel.utils.XUtils;
 import org.guanxi.common.SOAPUtils;
-import org.guanxi.common.definitions.Guanxi;
-
 import java.security.*;
 import java.security.cert.X509Certificate;
 import java.security.cert.CertificateException;
@@ -147,5 +148,28 @@ public class SecUtils {
     catch(UnrecoverableKeyException urke) {}
 
     return inDocToSign;
+  }
+
+  public String encrypt(String data) {
+    try {
+      char[] hexChars ={'0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F'};
+      MessageDigest md5 = MessageDigest.getInstance("MD5");
+      md5.reset();
+      md5.update(data.getBytes());
+      byte[] hashBytes = md5.digest();
+      String hex = "";
+      int msb;
+      int lsb = 0;
+      int i;
+      for (i = 0; i < hashBytes.length; i++) {
+        msb = ((int)hashBytes[i] & 0x000000FF) / 16;
+        lsb = ((int)hashBytes[i] & 0x000000FF) % 16;
+        hex = hex + hexChars[msb] + hexChars[lsb];
+      }
+      return(hex);
+    }
+    catch (NoSuchAlgorithmException e) {
+      return null;
+    }
   }
 }
