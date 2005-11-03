@@ -17,6 +17,9 @@
 /* CVS Header
    $Id$
    $Log$
+   Revision 1.7  2005/11/03 15:53:51  alistairskye
+   Added LOGFILE_PARAMETER
+
    Revision 1.6  2005/07/21 11:01:50  alistairskye
    Fixed bug with DEFAULT_AUTHCOOKIEHANDLER_CONFIG_DIR
 
@@ -60,4 +63,7 @@ public class Guanxi {
 
   /** The Guanxi SP XML namespace */
   public static final String NS_SP_NAME_IDENTIFIER = "urn:guanxi:sp";
+
+  /** The web.xml parameter name for specifying the log file for a servlet */
+  public static final String LOGFILE_PARAMETER = "log-file";
 }
