@@ -17,6 +17,9 @@
 /* CVS Header
    $Id$
    $Log$
+   Revision 1.8  2005/11/03 16:06:50  alistairskye
+   Added LOGDIR_PARAMETER
+
    Revision 1.7  2005/11/03 15:53:51  alistairskye
    Added LOGFILE_PARAMETER
 
@@ -64,6 +67,9 @@ public class Guanxi {
   /** The Guanxi SP XML namespace */
   public static final String NS_SP_NAME_IDENTIFIER = "urn:guanxi:sp";
 
-  /** The web.xml parameter name for specifying the log file for a servlet */
+  /** The web.xml parameter name for specifying the log directory for the components */
+  public static final String LOGDIR_PARAMETER = "log-dir";
+
+  /** The web.xml parameter name for specifying the log file for each component */
   public static final String LOGFILE_PARAMETER = "log-file";
 }
