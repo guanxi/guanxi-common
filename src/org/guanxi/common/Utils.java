@@ -17,6 +17,9 @@
 /* CVS Header
    $Id$
    $Log$
+   Revision 1.9  2005/11/03 16:34:00  alistairskye
+   Added initLogger()
+
    Revision 1.8  2005/08/10 13:05:42  alistairskye
    Added dumpXML()
 
@@ -48,8 +51,15 @@ import org.w3c.dom.NodeList;
 import org.apache.xml.security.utils.Base64;
 import org.apache.xml.security.exceptions.Base64DecodingException;
 import org.apache.log4j.Logger;
+import org.apache.log4j.PatternLayout;
+import org.apache.log4j.RollingFileAppender;
+import org.apache.log4j.xml.DOMConfigurator;
+import org.guanxi.common.definitions.Guanxi;
+import org.guanxi.common.definitions.Logging;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletConfig;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.TransformerFactory;
@@ -59,6 +69,7 @@ import java.util.Hashtable;
 import java.util.Enumeration;
 import java.rmi.server.UID;
 import java.io.StringWriter;
+import java.io.IOException;
 
 /**
  * <font size=5><b></b></font>
@@ -168,4 +179,38 @@ public class Utils
               System.getProperty("line.separator") +
               "=======================================================");
   }
+
+  public static void initLogger(ServletContext context, ServletConfig config, Logger log, String name) throws GuanxiException {
+    // Get the logfile path and name from web.xml...
+    String logDir = context.getInitParameter(Guanxi.LOGDIR_PARAMETER);
+    // ...work out if it's relative to the webapp root...
+    if ((logDir.startsWith("WEB-INF")) || (logDir.startsWith(System.getProperty("file.separator") + "WEB-INF")))
+      logDir = context.getRealPath(logDir);
+    // ...tidy it up...
+    if (!logDir.endsWith(System.getProperty("file.separator")))
+      logDir += System.getProperty("file.separator");
+    // ...and add the name of the log file
+    String logFile = logDir + config.getInitParameter(Guanxi.LOGFILE_PARAMETER);
+
+    DOMConfigurator.configure(context.getRealPath(Logging.DEFAULT_IDP_CONFIG_FILE));
+
+    PatternLayout defaultLayout = new PatternLayout(Logging.DEFAULT_LAYOUT);
+
+    RollingFileAppender rollingFileAppender = new RollingFileAppender();
+    rollingFileAppender.setName(name);
+    try {
+      rollingFileAppender.setFile(logFile, true, false, 0);
+    }
+    catch(IOException ioe) {
+      throw new GuanxiException(ioe.getMessage());
+    }
+    rollingFileAppender.setMaxFileSize("1MB");
+    rollingFileAppender.setMaxBackupIndex(5);
+    rollingFileAppender.setLayout(defaultLayout);
+
+    log.removeAllAppenders();
+    log.addAppender(rollingFileAppender);
+    log.setAdditivity(false);
+  }
+
 }
