@@ -17,6 +17,9 @@
 /* CVS Header
    $Id$
    $Log$
+   Revision 1.10  2005/11/07 09:38:23  alistairskye
+   initLogger takes log filename instead of ServletConfig now, to allow plugins to use it
+
    Revision 1.9  2005/11/03 16:34:00  alistairskye
    Added initLogger()
 
@@ -180,7 +183,7 @@ public class Utils
               "=======================================================");
   }
 
-  public static void initLogger(ServletContext context, ServletConfig config, Logger log, String name) throws GuanxiException {
+  public static void initLogger(ServletContext context, String logFilename, Logger log, String name) throws GuanxiException {
     // Get the logfile path and name from web.xml...
     String logDir = context.getInitParameter(Guanxi.LOGDIR_PARAMETER);
     // ...work out if it's relative to the webapp root...
@@ -190,7 +193,7 @@ public class Utils
     if (!logDir.endsWith(System.getProperty("file.separator")))
       logDir += System.getProperty("file.separator");
     // ...and add the name of the log file
-    String logFile = logDir + config.getInitParameter(Guanxi.LOGFILE_PARAMETER);
+    String logFile = logDir + logFilename;
 
     DOMConfigurator.configure(context.getRealPath(Logging.DEFAULT_IDP_CONFIG_FILE));
 
