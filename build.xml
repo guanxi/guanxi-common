@@ -1,6 +1,9 @@
 <!-- CVS Header
    $Id$
    $Log$
+   Revision 1.5  2006/01/17 22:12:42  alistairskye
+   Moved creation of dist dir in clean target to new initDistDirs target
+
    Revision 1.4  2005/05/04 15:11:09  alistairskye
    Added:
    samuel.lib.dir
@@ -45,6 +48,10 @@
   <!-- Prepare the directories for building and distribution -->
   <target name="clean" description="Prepares directory structure for the build">
     <delete dir="${dist.dir}"/>
+  </target>
+
+  <!-- Creates the directories required for building and distribution -->
+  <target name="initDistDirs">
     <mkdir dir="${dist.dir}"/>
     <mkdir dir="${dist.dir.classes}"/>
     <mkdir dir="${dist.dir.jar}"/>
@@ -60,5 +67,5 @@
     <jar jarfile="${dist.dir.jar}/${jar.file}" basedir="${dist.dir.classes}"/>
   </target>
 
-  <target name="all" depends="clean,compile,jar" description="Builds everything into the distribution directory"/>
+  <target name="all" depends="clean,initDistDirs,compile,jar" description="Builds everything into the distribution directory"/>
 </project>
