@@ -17,6 +17,9 @@
 /* CVS Header
    $Id$
    $Log$
+   Revision 1.9  2006/01/21 15:35:54  alistairskye
+   Updated to use new WEB-INF/guanxi_idp/config location
+
    Revision 1.8  2005/11/03 16:06:50  alistairskye
    Added LOGDIR_PARAMETER
 
@@ -53,13 +56,13 @@ package org.guanxi.common.definitions;
  */
 public class Guanxi {
   /** Default location where the Authenticator implementations can find their config files */
-  public static final String DEFAULT_AUTHENTICATOR_CONFIG_DIR = "/WEB-INF/config/authenticators/";
+  public static final String DEFAULT_AUTHENTICATOR_CONFIG_DIR = "/WEB-INF/guanxi_idp/config/authenticators/";
 
   /** Default location where the Attributor implementations can find their config files */
-  public static final String DEFAULT_ATTRIBUTOR_CONFIG_DIR = "/WEB-INF/config/attributors/";
+  public static final String DEFAULT_ATTRIBUTOR_CONFIG_DIR = "/WEB-INF/guanxi_idp/config/attributors/";
 
   /** Default location where the AuthCookieHandler implementations can find their config files */
-  public static final String DEFAULT_AUTHCOOKIEHANDLER_CONFIG_DIR = "/WEB-INF/config/cookies/";
+  public static final String DEFAULT_AUTHCOOKIEHANDLER_CONFIG_DIR = "/WEB-INF/guanxi_idp/config/cookies/";
 
   /** The Guanxi IdP XML namespace */
   public static final String NS_IDP_NAME_IDENTIFIER = "urn:guanxi:idp";
