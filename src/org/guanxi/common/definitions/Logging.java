@@ -17,6 +17,9 @@
 /* CVS Header
    $Id$
    $Log$
+   Revision 1.6  2006/01/21 18:36:50  alistairskye
+   Removed DEFAULT_LOG_DIR and added DEFAULT_IDP_LOG_DIR and DEFAULT_SP_LOG_DIR
+
    Revision 1.5  2006/01/21 17:06:50  alistairskye
    Updated new WEB-INF/guanxi_idp directory
 
@@ -42,14 +45,17 @@ package org.guanxi.common.definitions;
  * @author Alistair Young alistair@smo.uhi.ac.uk
  */
 public class Logging {
-  /** The location where plugins and system classes can put their log files */
-  public static final String DEFAULT_LOG_DIR = "/WEB-INF/guanxi_idp/logs/";
+  /** The location where IdP plugins and system classes can put their log files */
+  public static final String DEFAULT_IDP_LOG_DIR = "/WEB-INF/guanxi_idp/logs/";
 
   /** The IdP's logging config file */
   public static final String DEFAULT_IDP_CONFIG_FILE = "/WEB-INF/guanxi_idp/config/idp-log4j.xml";
 
+  /** Where the Engine and Guard can put their log files */
+  public static final String DEFAULT_SP_LOG_DIR = "/WEB-INF/logs/";
+
   /** The IdP's logging config file */
-  public static final String DEFAULT_SP_CONFIG_FILE = "/WEB-INF/guanxi_idp/config/sp-log4j.xml";
+  public static final String DEFAULT_SP_CONFIG_FILE = "/WEB-INF/config/sp-log4j.xml";
 
   /** Default date format for loggers to use */
   public static final String DEFAULT_LAYOUT = "%d{dd MMMM yyyy HH:mm:ss} - %m%n";
