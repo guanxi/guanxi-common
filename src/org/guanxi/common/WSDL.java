@@ -17,6 +17,9 @@
 /* CVS Header
    $Id$
    $Log$
+   Revision 1.4  2006/01/23 12:54:04  alistairskye
+   Updated to use SAMUEL parser properties
+
    Revision 1.3  2005/08/12 12:48:31  alistairskye
    Added license
 
@@ -34,6 +37,7 @@
 package org.guanxi.common;
 
 import org.guanxi.samuel.utils.ParseErrorHandler;
+import org.guanxi.samuel.definitions.SAMUEL;
 import org.xml.sax.InputSource;
 import org.xml.sax.Attributes;
 import org.xml.sax.XMLReader;
@@ -48,6 +52,7 @@ import java.net.URL;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ByteArrayInputStream;
+import java.util.ResourceBundle;
 
 /**
  * <font size=5><b></b></font>
@@ -58,17 +63,30 @@ public class WSDL {
   private String namespace = null;
   private String portName = null;
   private String serviceName = null;
+  private static ResourceBundle parserProps = null;
+
+  static {
+    parserProps = ResourceBundle.getBundle(SAMUEL.PARSER_PROPS_FILE);
+  }
 
   public WSDL(URL wsdlURL, int timeout) throws GuanxiException {
     SAXParserFactory factory = SAXParserFactory.newInstance();
     factory.setNamespaceAware(true);
-    factory.setValidating(true);
+
+    if (parserProps.getString(SAMUEL.PARSER_PROPS_SCHEMA_VALIDATION).equalsIgnoreCase("true"))
+      factory.setValidating(true);
+    else
+      factory.setValidating(false);
 
     try {
       SAXParser parser = factory.newSAXParser();
       XMLReader xmlReader = parser.getXMLReader();
-      xmlReader.setFeature("http://apache.org/xml/features/validation/schema", true);
-      xmlReader.setProperty("http://java.sun.com/xml/jaxp/properties/schemaSource", "wsdl.xsd");
+
+      if (parserProps.getString(SAMUEL.PARSER_PROPS_SCHEMA_VALIDATION).equalsIgnoreCase("true")) {
+        xmlReader.setFeature("http://apache.org/xml/features/validation/schema", true);
+        xmlReader.setProperty("http://java.sun.com/xml/jaxp/properties/schemaSource", "wsdl.xsd");
+      }
+
       xmlReader.setEntityResolver(new WSDLResolver());
       xmlReader.setErrorHandler(new ParseErrorHandler());
       xmlReader.setContentHandler(new WSDLContentHandler());

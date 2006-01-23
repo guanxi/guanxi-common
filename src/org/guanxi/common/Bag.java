@@ -17,6 +17,9 @@
 /* CVS Header
    $Id$
    $Log$
+   Revision 1.4  2006/01/23 12:53:50  alistairskye
+   Updated to use SAMUEL parser properties
+
    Revision 1.3  2005/08/12 12:48:31  alistairskye
    Added license
 
@@ -36,11 +39,14 @@ import org.xml.sax.Attributes;
 import org.xml.sax.helpers.DefaultHandler;
 import org.guanxi.samuel.utils.ParseErrorHandler;
 import org.guanxi.samuel.utils.Resolver;
+import org.guanxi.samuel.definitions.SAMUEL;
+
 import javax.xml.parsers.SAXParserFactory;
 import javax.xml.parsers.SAXParser;
 import java.util.HashMap;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.ResourceBundle;
 
 /**
  * <font size=5><b></b></font>
@@ -56,12 +62,21 @@ public class Bag {
   private String majorVersion = null;
   private String minorVersion = null;
   private StringBuffer value = new StringBuffer();
-  Hashtable attributes = null;
+  private Hashtable attributes = null;
+  private static ResourceBundle parserProps = null;
+
+  static {
+    parserProps = ResourceBundle.getBundle(SAMUEL.PARSER_PROPS_FILE);
+  }
 
   public Bag(InputSource in) throws GuanxiException {
     SAXParserFactory factory = SAXParserFactory.newInstance();
     factory.setNamespaceAware(true);
-    factory.setValidating(true);
+
+    if (parserProps.getString(SAMUEL.PARSER_PROPS_SCHEMA_VALIDATION).equalsIgnoreCase("true"))
+      factory.setValidating(true);
+    else
+      factory.setValidating(false);
 
     attributes = new Hashtable();
 
@@ -73,8 +88,11 @@ public class Bag {
                           "saml-schema-assertion-2.0.xsd"};
       SAXParser parser = factory.newSAXParser();
       XMLReader xmlReader = parser.getXMLReader();
-      xmlReader.setFeature("http://apache.org/xml/features/validation/schema", true);
-      xmlReader.setProperty("http://java.sun.com/xml/jaxp/properties/schemaSource", schemas);
+
+      if (parserProps.getString(SAMUEL.PARSER_PROPS_SCHEMA_VALIDATION).equalsIgnoreCase("true")) {
+        xmlReader.setFeature("http://apache.org/xml/features/validation/schema", true);
+        xmlReader.setProperty("http://java.sun.com/xml/jaxp/properties/schemaSource", schemas);
+      }
       xmlReader.setEntityResolver(new Resolver());
       xmlReader.setErrorHandler(new ParseErrorHandler());
       xmlReader.setContentHandler(new BagContentHandler());
