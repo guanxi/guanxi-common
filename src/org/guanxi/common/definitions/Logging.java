@@ -17,6 +17,9 @@
 /* CVS Header
    $Id$
    $Log$
+   Revision 1.7  2006/01/26 08:55:59  alistairskye
+   Split DEFAULT_SP_CONFIG_FILE into DEFAULT_SP_GUARD_CONFIG_FILE and DEFAULT_SP_ENGINE_CONFIG_FILE as the Guard is embedded
+
    Revision 1.6  2006/01/21 18:36:50  alistairskye
    Removed DEFAULT_LOG_DIR and added DEFAULT_IDP_LOG_DIR and DEFAULT_SP_LOG_DIR
 
@@ -54,8 +57,11 @@ public class Logging {
   /** Where the Engine and Guard can put their log files */
   public static final String DEFAULT_SP_LOG_DIR = "/WEB-INF/logs/";
 
-  /** The IdP's logging config file */
-  public static final String DEFAULT_SP_CONFIG_FILE = "/WEB-INF/config/sp-log4j.xml";
+  /** The SP Engine's logging config file */
+  public static final String DEFAULT_SP_ENGINE_CONFIG_FILE = "/WEB-INF/config/sp-log4j.xml";
+
+  /** The SP Guard's logging config file */
+  public static final String DEFAULT_SP_GUARD_CONFIG_FILE = "/WEB-INF/guanxi_sp_guard//config/sp-log4j.xml";
 
   /** Default date format for loggers to use */
   public static final String DEFAULT_LAYOUT = "%d{dd MMMM yyyy HH:mm:ss} - %m%n";
