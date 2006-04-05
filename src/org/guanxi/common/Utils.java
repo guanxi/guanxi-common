@@ -17,6 +17,9 @@
 /* CVS Header
    $Id$
    $Log$
+   Revision 1.11  2006/04/05 12:18:27  alistairskye
+   Added zipDirectory()
+
    Revision 1.10  2005/11/07 09:38:23  alistairskye
    initLogger takes log filename instead of ServletConfig now, to allow plugins to use it
 
@@ -70,9 +73,13 @@ import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
 import java.util.Hashtable;
 import java.util.Enumeration;
+import java.util.zip.ZipOutputStream;
+import java.util.zip.ZipEntry;
 import java.rmi.server.UID;
 import java.io.StringWriter;
 import java.io.IOException;
+import java.io.File;
+import java.io.FileInputStream;
 
 /**
  * <font size=5><b></b></font>
@@ -216,4 +223,41 @@ public class Utils
     log.setAdditivity(false);
   }
 
+  public static void zipDirectory(String dir, ZipOutputStream zipStream) {
+    try {
+      File dirToZip = new File(dir);
+
+      // Have a gander in the directory to see what's there
+      String[] dirList = dirToZip.list();
+
+      byte[] readBuffer = new byte[2156];
+      int bytesIn = 0;
+
+      for (int count=0; count < dirList.length; count++) {
+        File dirFile = new File(dirToZip, dirList[count]);
+
+        // If the next entity is a directory, call recursively
+        if (dirFile.isDirectory()) {
+          zipDirectory(dirFile.getPath(), zipStream);
+          continue;
+        }
+
+        // Get a handle to the file...
+        FileInputStream fis = new FileInputStream(dirFile);
+        // ...get an entry ready for it ...
+        ZipEntry zipEntry = new ZipEntry(dirFile.getPath());
+        // ...bung it in the ZIP stream...
+        zipStream.putNextEntry(zipEntry);
+        // ...and read the data into the ZIP stream
+        while ((bytesIn = fis.read(readBuffer)) != -1) {
+          zipStream.write(readBuffer, 0, bytesIn);
+        }
+        
+        fis.close();
+      }
+    }
+    catch(Exception e) {
+      System.out.println(e);
+    }
+  }
 }
