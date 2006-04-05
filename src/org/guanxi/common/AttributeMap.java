@@ -17,6 +17,9 @@
 /* CVS Header
    $Id$
    $Log$
+   Revision 1.3  2006/04/05 12:27:53  alistairskye
+   Updated to allow passthrough of mapped attribute's original value if no value rules are specified.
+
    Revision 1.2  2005/10/20 16:09:23  alistairskye
    Added support for mapping attributes to rules
 
@@ -108,8 +111,12 @@ public class AttributeMap {
               if (mapAttrs.getNamedItem(MAP_ATTR_MAPPED_RULE).getNodeValue().equals("encrypt"))
                 mappedValue = SecUtils.getInstance().encrypt(attrValue);
             }
-            else
-              mappedValue = mapAttrs.getNamedItem(MAP_ATTR_MAPPED_VALUE).getNodeValue();
+            else {
+              if (mapAttrs.getNamedItem(MAP_ATTR_MAPPED_VALUE) != null)
+                mappedValue = mapAttrs.getNamedItem(MAP_ATTR_MAPPED_VALUE).getNodeValue();
+              else
+                mappedValue = attrValue;
+            }
 
             return true;
           }
