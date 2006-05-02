@@ -1,6 +1,9 @@
 <!-- CVS Header
    $Id$
    $Log$
+   Revision 1.6  2006/05/02 13:56:39  alistairskye
+   Added source and target to compile task
+
    Revision 1.5  2006/01/17 22:12:42  alistairskye
    Moved creation of dist dir in clean target to new initDistDirs target
 
@@ -58,7 +61,8 @@
   </target>
 
   <target name="compile" depends="clean" description="Compiles the Guanxi Common source code">
-    <javac srcdir="${src.dir}" destdir="${dist.dir.classes}" deprecation="on" debug="true">
+    <javac srcdir="${src.dir}" destdir="${dist.dir.classes}" deprecation="on" debug="true"
+           source="${javac.source}" target="${javac.target}">
       <classpath refid="classpath"/>
     </javac>
   </target>
