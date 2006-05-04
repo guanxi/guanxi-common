@@ -17,6 +17,9 @@
 /* CVS Header
    $Id$
    $Log$
+   Revision 1.2  2006/05/04 15:24:37  alistairskye
+   Added new constructor arguments. Keystore path/name is now passed in instead of path to keystore directory. Trust store and password also now passed in.
+
    Revision 1.1  2006/04/06 11:06:05  alistairskye
    Class to wrap Http(s)URLConnection objects and use the custom SSL management if required
 
@@ -49,13 +52,18 @@ public class EntityConnection {
    * the custom SSL management will be used.
    * @param localEntityID The ID of the local entity which will be represented by the
    * custom SSL layer. If the connection is not secure, this parameter can be null.
+   * @param entityKeystore The full path of the entity's keystore
+   * @param entityKeystorePassword Password for the entity's keystore
+   * @param trustStore The full path to the Engine's truststore
+   * @param trustStorePassword The password for the Engine's truststore
    * @throws GuanxiException
    */
-  public EntityConnection(String endpoint, String localEntityID) throws GuanxiException {
+  public EntityConnection(String endpoint, String localEntityID, String entityKeystore, String entityKeystorePassword,
+                          String trustStore, String trustStorePassword) throws GuanxiException {
     try {
       SSLContext context = SSLContext.getInstance("SSL");
-      context.init(SSL.getKeyManagers(localEntityID, "/WWW/samlengine/WEB-INF/config/metadata/guards/protectedapp", "hohoho"),
-                   SSL.getTrustManagers("/WWW/samlengine/WEB-INF/config/metadata/truststore/enginetrust.jks", "hohoho"), null);
+      context.init(SSL.getKeyManagers(localEntityID, entityKeystore, entityKeystorePassword),
+                   SSL.getTrustManagers(trustStore, trustStorePassword), null);
 
       URL url = new URL(endpoint);
 
