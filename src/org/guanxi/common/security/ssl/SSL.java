@@ -17,6 +17,9 @@
 /* CVS Header
    $Id$
    $Log$
+   Revision 1.2  2006/05/04 15:25:17  alistairskye
+   Updated getKeyManagers() to work on keystore directly instead of building the name from path and guard id.
+
    Revision 1.1  2006/04/05 14:36:42  alistairskye
    Custom SSL layer for identity masquerading in the SP
 
@@ -53,15 +56,12 @@ public class SSL {
     }
   }
 
-  public static KeyManager[] getKeyManagers(String guardID, String keystoreDir, String password) {
+  public static KeyManager[] getKeyManagers(String guardID, String keystore, String password) {
     try {
       String alg = KeyManagerFactory.getDefaultAlgorithm();
       KeyManagerFactory kmFact = KeyManagerFactory.getInstance(alg);
 
-      if (!keystoreDir.endsWith(System.getProperty("file.separator")))
-         keystoreDir += System.getProperty("file.separator");
-
-      FileInputStream fis = new FileInputStream(keystoreDir + guardID + ".jks");
+      FileInputStream fis = new FileInputStream(keystore);
       KeyStore ks = KeyStore.getInstance("jks");
       ks.load(fis, password.toCharArray());
       fis.close();
