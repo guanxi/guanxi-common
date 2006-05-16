@@ -17,6 +17,9 @@
 /* CVS Header
    $Id$
    $Log$
+   Revision 1.3  2006/05/16 09:04:58  alistairskye
+   Added setRequestProperty(String, String)
+
    Revision 1.2  2006/05/04 15:24:37  alistairskye
    Added new constructor arguments. Keystore path/name is now passed in instead of path to keystore directory. Trust store and password also now passed in.
 
@@ -140,5 +143,12 @@ public class EntityConnection {
     catch(Exception e) {
       throw new GuanxiException(e);
     }
+  }
+
+  public void setRequestProperty(String key, String value) {
+    if (secure)
+      httpsURL.setRequestProperty(key, value);
+    else
+      httpURL.setRequestProperty(key, value);
   }
 }
