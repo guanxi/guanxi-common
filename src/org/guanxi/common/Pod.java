@@ -17,6 +17,9 @@
 /* CVS Header
    $Id$
    $Log$
+   Revision 1.3  2006/05/18 09:24:23  alistairskye
+   Now stores original request
+
    Revision 1.2  2005/08/12 12:48:31  alistairskye
    Added license
 
@@ -27,6 +30,8 @@
 
 package org.guanxi.common;
 
+import javax.servlet.ServletRequest;
+
 /**
  * <font size=5><b></b></font>
  *
@@ -36,6 +41,7 @@ public class Pod {
   private String requestURL = null;
   private String sessionID = null;
   private Bag attributes = null;
+  private ServletRequest request = null;
 
   public void setRequestURL(String requestURL) {
     this.requestURL = requestURL;
@@ -49,7 +55,12 @@ public class Pod {
     this.attributes = attributes;
   }
 
+  public void setRequest(ServletRequest request) {
+    this.request = request;
+  }
+
   public String getRequestURL() { return requestURL; }
   public String getSessionID() { return sessionID; }
   public Bag getAttributes() { return attributes; }
+  public ServletRequest getRequest() { return request; }
 }
