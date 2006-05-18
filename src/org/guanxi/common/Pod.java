@@ -17,6 +17,10 @@
 /* CVS Header
    $Id$
    $Log$
+   Revision 1.4  2006/05/18 13:30:51  alistairskye
+   Removed original request.
+   Now only stores parameters from original request
+
    Revision 1.3  2006/05/18 09:24:23  alistairskye
    Now stores original request
 
@@ -30,7 +34,8 @@
 
 package org.guanxi.common;
 
-import javax.servlet.ServletRequest;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * <font size=5><b></b></font>
@@ -38,10 +43,14 @@ import javax.servlet.ServletRequest;
  * @author Alistair Young alistair@smo.uhi.ac.uk
  */
 public class Pod {
+  /** The URL of the original request */
   private String requestURL = null;
+  /** The Guard session ID associated with this Pod */
   private String sessionID = null;
+  /** The collection of SAML attributes */
   private Bag attributes = null;
-  private ServletRequest request = null;
+  /** The parameters from the original request */
+  private HashMap requestParameters = null;
 
   public void setRequestURL(String requestURL) {
     this.requestURL = requestURL;
@@ -55,12 +64,13 @@ public class Pod {
     this.attributes = attributes;
   }
 
-  public void setRequest(ServletRequest request) {
-    this.request = request;
+  public void setRequestParameters(Map requestParameters) {
+    this.requestParameters = new HashMap();
+    this.requestParameters.putAll(requestParameters);
   }
 
   public String getRequestURL() { return requestURL; }
   public String getSessionID() { return sessionID; }
   public Bag getAttributes() { return attributes; }
-  public ServletRequest getRequest() { return request; }
+  public HashMap getRequestParameters() { return requestParameters; }
 }
