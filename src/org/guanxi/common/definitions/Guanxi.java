@@ -17,6 +17,9 @@
 /* CVS Header
    $Id$
    $Log$
+   Revision 1.12  2006/07/25 12:52:24  alistairskye
+   Added GUARD_CONFIG_OBJECT
+
    Revision 1.11  2006/07/25 11:34:17  alistairskye
    Added ENGINE_CONFIG_OBJECT
 
@@ -86,6 +89,9 @@ public class Guanxi {
 
   /** The key under which the Engine's configuration object is stored in the servlet context */
   public static final String ENGINE_CONFIG_OBJECT = "engineConfig";
+
+  /** The key under which the Guard's configuration object is stored in the servlet context */
+  public static final String GUARD_CONFIG_OBJECT = "guardConfig";
 
   // AxisProperty settings for web services
 
