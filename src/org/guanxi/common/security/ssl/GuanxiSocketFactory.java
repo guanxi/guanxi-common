@@ -1,6 +1,9 @@
 /* CVS Header
    $Id$
    $Log$
+   Revision 1.2  2006/07/25 12:43:55  alistairskye
+   Updated create(). Now uses Guanxi definitions to get AxisProperties values
+
    Revision 1.1  2006/07/25 11:07:25  alistairskye
    Provides custom keystore and truststore handling for secure web services communication
 
@@ -11,6 +14,8 @@ package org.guanxi.common.security.ssl;
 import org.apache.axis.components.net.JSSESocketFactory;
 import org.apache.axis.components.net.BooleanHolder;
 import org.apache.axis.AxisProperties;
+import org.guanxi.common.definitions.Guanxi;
+
 import javax.net.ssl.SSLContext;
 import java.util.Hashtable;
 import java.io.IOException;
@@ -66,11 +71,11 @@ public class GuanxiSocketFactory extends JSSESocketFactory  {
     if (port == -1)
       port = 443;
 
-    SSLContext context = initSSLContext(AxisProperties.getProperty("guanxi.entityID"),
-                                        AxisProperties.getProperty("guanxi.keystore"),
-                                        AxisProperties.getProperty("guanxi.keystorePassword"),
-                                        AxisProperties.getProperty("guanxi.truststore"),
-                                        AxisProperties.getProperty("guanxi.truststorePassword"));
+    SSLContext context = initSSLContext(AxisProperties.getProperty(Guanxi.AXIS_PROPERTY_KEYSTORE_ALIAS),
+                                        AxisProperties.getProperty(Guanxi.AXIS_PROPERTY_KEYSTORE),
+                                        AxisProperties.getProperty(Guanxi.AXIS_PROPERTY_KEYSTORE_PASSWORD),
+                                        AxisProperties.getProperty(Guanxi.AXIS_PROPERTY_TRUSTSTORE),
+                                        AxisProperties.getProperty(Guanxi.AXIS_PROPERTY_TRUSTSTORE_PASSWORD));
 
     if (context != null) {
       return context.getSocketFactory().createSocket(host, port);
