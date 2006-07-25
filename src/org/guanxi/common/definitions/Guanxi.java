@@ -17,6 +17,9 @@
 /* CVS Header
    $Id$
    $Log$
+   Revision 1.10  2006/07/25 11:08:28  alistairskye
+   Added AxisProperties definitions for secure web services communication
+
    Revision 1.9  2006/01/21 15:35:54  alistairskye
    Updated to use new WEB-INF/guanxi_idp/config location
 
@@ -49,6 +52,8 @@
 
 package org.guanxi.common.definitions;
 
+import org.apache.axis.AxisProperties;
+
 /**
  * <font size=5><b></b></font>
  *
@@ -75,4 +80,17 @@ public class Guanxi {
 
   /** The web.xml parameter name for specifying the log file for each component */
   public static final String LOGFILE_PARAMETER = "log-file";
+
+  // AxisProperty settings for web services
+
+  /** The alias to use within a keystore when making a secure connection */
+  public static final String AXIS_PROPERTY_KEYSTORE_ALIAS = "guanxi.alias";
+  /** The keystore to use when making a secure connection */
+  public static final String AXIS_PROPERTY_KEYSTORE = "guanxi.keystore";
+  /** The keystore password to use when making a secure connection */
+  public static final String AXIS_PROPERTY_KEYSTORE_PASSWORD = "guanxi.keystorePassword";
+  /** The truststore to use when accepting a secure connection */
+  public static final String AXIS_PROPERTY_TRUSTSTORE = "guanxi.truststore";
+  /** The truststore password to use when accepting a secure connection */
+  public static final String AXIS_PROPERTY_TRUSTSTORE_PASSWORD = "guanxi.truststorePassword";
 }
