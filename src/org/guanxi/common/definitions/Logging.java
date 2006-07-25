@@ -17,6 +17,9 @@
 /* CVS Header
    $Id$
    $Log$
+   Revision 1.8  2006/07/25 14:17:38  alistairskye
+   Updated to split log dirs into Engine and Guard versions as the Guard should log inside WEB-INF/guanxi_sp_guard
+
    Revision 1.7  2006/01/26 08:55:59  alistairskye
    Split DEFAULT_SP_CONFIG_FILE into DEFAULT_SP_GUARD_CONFIG_FILE and DEFAULT_SP_ENGINE_CONFIG_FILE as the Guard is embedded
 
@@ -55,7 +58,10 @@ public class Logging {
   public static final String DEFAULT_IDP_CONFIG_FILE = "/WEB-INF/guanxi_idp/config/idp-log4j.xml";
 
   /** Where the Engine and Guard can put their log files */
-  public static final String DEFAULT_SP_LOG_DIR = "/WEB-INF/logs/";
+  public static final String DEFAULT_SP_ENGINE_LOG_DIR = "/WEB-INF/logs/";
+
+  /** Where the Engine and Guard can put their log files */
+  public static final String DEFAULT_SP_GUARD_LOG_DIR = "/WEB-INF/guanxi_sp_guard/logs/";
 
   /** The SP Engine's logging config file */
   public static final String DEFAULT_SP_ENGINE_CONFIG_FILE = "/WEB-INF/config/sp-log4j.xml";
