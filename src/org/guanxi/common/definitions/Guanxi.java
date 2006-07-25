@@ -17,6 +17,9 @@
 /* CVS Header
    $Id$
    $Log$
+   Revision 1.11  2006/07/25 11:34:17  alistairskye
+   Added ENGINE_CONFIG_OBJECT
+
    Revision 1.10  2006/07/25 11:08:28  alistairskye
    Added AxisProperties definitions for secure web services communication
 
@@ -80,6 +83,9 @@ public class Guanxi {
 
   /** The web.xml parameter name for specifying the log file for each component */
   public static final String LOGFILE_PARAMETER = "log-file";
+
+  /** The key under which the Engine's configuration object is stored in the servlet context */
+  public static final String ENGINE_CONFIG_OBJECT = "engineConfig";
 
   // AxisProperty settings for web services
 
