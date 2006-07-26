@@ -17,6 +17,9 @@
 /* CVS Header
    $Id$
    $Log$
+   Revision 1.5  2006/07/26 09:35:37  alistairskye
+   Updated getTrustManagers to return GuanxiX509ProbingTrustManager instead of GuanxiX509TrustManager if in probing mode
+
    Revision 1.4  2006/07/26 09:27:24  alistairskye
    Updated javadocs
 
@@ -51,7 +54,7 @@ public class SSL {
    * Can be null if probeForServerCert is true.
    * @param password The password for the truststore.
    * Can be null if probeForServerCert is true.
-   * @param probeForServerCert If this is true, then an instance of GuanxiX509TrustManager will
+   * @param probeForServerCert If this is true, then an instance of GuanxiX509ProbingTrustManager will
    * be returned. This is to allow probing servers to extract their certificates.
    * @return An array of TrustManage objects that can be used by the JVM to verify an HTTPS connection
    *  or null if an error occurred.
@@ -60,7 +63,7 @@ public class SSL {
     try {
       // If we're just after the server's certificate, delegate trust checking to Guanxi
       if (probeForServerCert)
-        return new TrustManager[]{new GuanxiX509TrustManager()};
+        return new TrustManager[]{new GuanxiX509ProbingTrustManager()};
 
       // First, get the default TrustManagerFactory.
       String alg = TrustManagerFactory.getDefaultAlgorithm();
