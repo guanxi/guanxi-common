@@ -1,6 +1,10 @@
 /* CVS Header
    $Id$
    $Log$
+   Revision 1.3  2006/07/26 09:29:50  alistairskye
+   Updated javadocs
+   Updated initSSLContext() to pass new probing parameter to the SSL layer
+
    Revision 1.2  2006/07/25 12:43:55  alistairskye
    Updated create(). Now uses Guanxi definitions to get AxisProperties values
 
@@ -24,6 +28,8 @@ import java.security.NoSuchAlgorithmException;
 import java.security.KeyManagementException;
 
 /**
+ * Provides a way to use custom keystores and truststores for Axis calls. The class uses the Guanxi
+ * SSL layer to initialise the custom keystore and truststore.
  *
  * @author Alistair Young alistair@smo.uhi.ac.uk
  */
@@ -100,7 +106,7 @@ public class GuanxiSocketFactory extends JSSESocketFactory  {
     try {
       context = SSLContext.getInstance("SSL");
       context.init(SSL.getKeyManagers(entityID, keystore, keystorePassword),
-                   SSL.getTrustManagers(truststore, truststorePassword), null);
+                   SSL.getTrustManagers(truststore, truststorePassword, false), null);
     }
     catch(NoSuchAlgorithmException nsae) {
     }
