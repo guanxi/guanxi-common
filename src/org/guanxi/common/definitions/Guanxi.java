@@ -17,6 +17,12 @@
 /* CVS Header
    $Id$
    $Log$
+   Revision 1.13  2006/07/26 13:23:08  alistairskye
+   Added:
+   AXIS_PROPERTY_CERT_PROBING
+   AXIS_PROPERTY_CERT_PROBING_ON
+   AXIS_PROPERTY_CERT_PROBING_OFF
+
    Revision 1.12  2006/07/25 12:52:24  alistairskye
    Added GUARD_CONFIG_OBJECT
 
@@ -105,4 +111,10 @@ public class Guanxi {
   public static final String AXIS_PROPERTY_TRUSTSTORE = "guanxi.truststore";
   /** The truststore password to use when accepting a secure connection */
   public static final String AXIS_PROPERTY_TRUSTSTORE_PASSWORD = "guanxi.truststorePassword";
+  /** The value of this determines whether the web service call is authenticated */
+  public static final String AXIS_PROPERTY_CERT_PROBING = "guanxi.CertProbing";
+  /** The value to turn on cert probing in the Guanxi SSL layer */
+  public static final String AXIS_PROPERTY_CERT_PROBING_ON = "on";
+  /** The value to turn off cert probing in the Guanxi SSL layer */
+  public static final String AXIS_PROPERTY_CERT_PROBING_OFF = "off";
 }
