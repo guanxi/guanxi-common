@@ -17,6 +17,9 @@
 /* CVS Header
    $Id$
    $Log$
+   Revision 1.3  2006/07/26 09:17:51  alistairskye
+   Added new boolean parameter to getTrustManagers(). If this is true then the method will return a special Guanxi TrustManager to allow for probing servers for their certificates
+
    Revision 1.2  2006/05/04 15:25:17  alistairskye
    Updated getKeyManagers() to work on keystore directly instead of building the name from path and guard id.
 
@@ -32,8 +35,11 @@ import java.security.KeyStore;
 import java.io.FileInputStream;
 
 public class SSL {
-  public static TrustManager[] getTrustManagers(String trustStore, String password) {
+  public static TrustManager[] getTrustManagers(String trustStore, String password, boolean probeForServerCert) {
     try {
+      if (probeForServerCert)
+        return new TrustManager[]{new GuanxiX509TrustManager()};
+      
       // First, get the default TrustManagerFactory.
       String alg = TrustManagerFactory.getDefaultAlgorithm();
       TrustManagerFactory tmFact = TrustManagerFactory.getInstance(alg);
