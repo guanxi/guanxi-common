@@ -17,6 +17,10 @@
 /* CVS Header
    $Id$
    $Log$
+   Revision 1.4  2006/07/26 09:16:20  alistairskye
+   Added getServerCertificates(), disconnect() and javadocs.
+   Added new boolean parameter to the constructor to allow for probing servers for their certificates. This tells EntityConnection to use a special Guanxi TrustManager that allows HTTPS connections in order to inspect the certificate
+
    Revision 1.3  2006/05/16 09:04:58  alistairskye
    Added setRequestProperty(String, String)
 
@@ -34,14 +38,18 @@ import org.guanxi.common.security.ssl.GuanxiHostVerifier;
 import org.guanxi.common.security.ssl.SSL;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLPeerUnverifiedException;
 import java.net.URL;
 import java.net.HttpURLConnection;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.security.cert.Certificate;
 
 /**
  * Wraps either an HttpsURLConnection or HttpsURLConnection. The HttpsURLConnection
  * uses the org.guanxi.common.security.ssl.SSL defined custom SSL layer.
+ *
+ * @author Alistair Young alistair@smo.uhi.ac.uk
  */
 public class EntityConnection {
   boolean secure = false;
@@ -62,11 +70,11 @@ public class EntityConnection {
    * @throws GuanxiException
    */
   public EntityConnection(String endpoint, String localEntityID, String entityKeystore, String entityKeystorePassword,
-                          String trustStore, String trustStorePassword) throws GuanxiException {
+                          String trustStore, String trustStorePassword, boolean probeForServerCert) throws GuanxiException {
     try {
       SSLContext context = SSLContext.getInstance("SSL");
       context.init(SSL.getKeyManagers(localEntityID, entityKeystore, entityKeystorePassword),
-                   SSL.getTrustManagers(trustStore, trustStorePassword), null);
+                   SSL.getTrustManagers(trustStore, trustStorePassword, probeForServerCert), null);
 
       URL url = new URL(endpoint);
 
@@ -85,6 +93,20 @@ public class EntityConnection {
     }
   }
 
+  /**
+   * Set the method for the URL request, one of:
+   * GET
+   * POST
+   * HEAD
+   * OPTIONS
+   * PUT
+   * DELETE
+   * TRACE
+   * are legal, subject to protocol restrictions. The default method is GET
+   *
+   * @param requestMethod The HTTP method
+   * @throws GuanxiException
+   */
   public void setRequestMethod(String requestMethod) throws GuanxiException {
     try {
       if (secure)
@@ -97,6 +119,14 @@ public class EntityConnection {
     }
   }
 
+  /**
+   * Sets the value of the doOutput field for this EntityConnection to the specified value.
+   * A URL connection can be used for input and/or output. Set the DoOutput flag to true
+   * if you intend to use the EntityConnection for output, false if not. The default is false.
+   *
+   * @param doIt The new value
+   * @throws GuanxiException
+   */
   public void setDoOutput(boolean doIt) throws GuanxiException {
     try {
       if (secure)
@@ -109,6 +139,19 @@ public class EntityConnection {
     }
   }
 
+  /**
+   * Opens a communications link to the resource referenced by this URL, if such a connection
+   * has not already been established.
+   * If the connect method is called when the connection has already been opened (indicated by
+   * the connected field having the value true), the call is ignored.
+   * EntityConnection objects go through two phases: first they are created, then they are connected.
+   * After being created, and before being connected, various options can be specified
+   * (e.g., doInput and UseCaches). After connecting, it is an error to try to set them.
+   * Operations that depend on being connected, like getContentLength, will implicitly perform the connection,
+   * if necessary
+   *
+   * @throws GuanxiException
+   */
   public void connect() throws GuanxiException {
     try {
       if (secure)
@@ -121,6 +164,14 @@ public class EntityConnection {
     }
   }
 
+  /**
+   * Returns an input stream that reads from this open connection. A SocketTimeoutException can be
+   * thrown when reading from the returned input stream if the read timeout expires before data is
+   * available for read
+   *
+   * @return An input stream that reads from this open connection
+   * @throws GuanxiException
+   */
   public InputStream getInputStream() throws GuanxiException {
     try {
       if (secure)
@@ -133,6 +184,12 @@ public class EntityConnection {
     }
   }
 
+  /**
+   * Returns an output stream that writes to this connection
+   *
+   * @return An output stream that writes to this connection
+   * @throws GuanxiException
+   */
   public OutputStream getOutputStream() throws GuanxiException {
     try {
       if (secure)
@@ -145,10 +202,53 @@ public class EntityConnection {
     }
   }
 
+  /**
+   * Sets the general request property. If a property with the key already exists, overwrite its
+   * value with the new value.
+   * NOTE: HTTP requires all request properties which can legally have multiple instances with the
+   * same key to use a comma-seperated list syntax which enables multiple properties to be appended
+   * into a single property
+   *
+   * @param key The keyword by which the request is known (e.g., "accept").
+   * @param value The value associated with it
+   */
   public void setRequestProperty(String key, String value) {
     if (secure)
       httpsURL.setRequestProperty(key, value);
     else
       httpURL.setRequestProperty(key, value);
+  }
+
+  /**
+   * Returns the server's certificate chain which was established as part of defining the session.
+   * Note: This method can be used only when using certificate-based cipher suites; using it with
+   * non-certificate-based cipher suites, such as Kerberos, will cause it to return null.
+   *
+   * @return An ordered array of server certificates, with the peer's own certificate first followed
+   * by any certificate authorities. If an error occurred it will return null.
+   */
+  public Certificate[] getServerCertificates() {
+    if (secure) {
+      try {
+        return httpsURL.getServerCertificates();
+      }
+      catch(SSLPeerUnverifiedException spue) {
+        return null;
+      }
+    }
+    else
+      return null;
+  }
+
+  /**
+   * Indicates that other requests to the server are unlikely in the near future.
+   * Calling disconnect() should not imply that this HttpURLConnection instance
+   * can be reused for other requests
+   */
+  public void disconnect() {
+    if (secure)
+      httpsURL.disconnect();
+    else
+      httpURL.disconnect();
   }
 }
