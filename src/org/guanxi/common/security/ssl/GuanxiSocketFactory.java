@@ -17,6 +17,9 @@
 /* CVS Header
    $Id$
    $Log$
+   Revision 1.5  2006/07/26 13:21:20  alistairskye
+   Updated initSSLContext() to support SSL layer probing
+
    Revision 1.4  2006/07/26 09:38:10  alistairskye
    Added license
 
@@ -100,7 +103,8 @@ public class GuanxiSocketFactory extends JSSESocketFactory  {
                                         AxisProperties.getProperty(Guanxi.AXIS_PROPERTY_KEYSTORE),
                                         AxisProperties.getProperty(Guanxi.AXIS_PROPERTY_KEYSTORE_PASSWORD),
                                         AxisProperties.getProperty(Guanxi.AXIS_PROPERTY_TRUSTSTORE),
-                                        AxisProperties.getProperty(Guanxi.AXIS_PROPERTY_TRUSTSTORE_PASSWORD));
+                                        AxisProperties.getProperty(Guanxi.AXIS_PROPERTY_TRUSTSTORE_PASSWORD),
+                                        AxisProperties.getProperty(Guanxi.AXIS_PROPERTY_CERT_PROBING));
 
     if (context != null) {
       return context.getSocketFactory().createSocket(host, port);
@@ -110,22 +114,30 @@ public class GuanxiSocketFactory extends JSSESocketFactory  {
   }
 
   /**
+   * Initialises the SSL context for the socket.
    *
    * @param entityID The alias to use in the keystore
-   * @param keystore
-   * @param keystorePassword
-   * @param truststore
-   * @param truststorePassword
+   * @param keystore The full path and name of the keystore to use if client authentication is required
+   * @param keystorePassword The password for the keystore
+   * @param truststore The truststore to use to authenticate the remote end of the socket or null
+   * if probingForCert is true
+   * @param truststorePassword The password for the truststore or null if probingForCert is true
+   * @param probingForCert One of Guanxi.AXIS_PROPERTY_CERT_PROBING_ON or Guanxi.AXIS_PROPERTY_CERT_PROBING_Off.
+   * This determines whether authentication of the remote end of the socket is required.
    * @return Custom SSLContext configured by the Guanxi SSL layer
    */
   private SSLContext initSSLContext(String entityID, String keystore, String keystorePassword,
-                                    String truststore, String truststorePassword) {
+                                    String truststore, String truststorePassword,
+                                    String probingForCert) {
     SSLContext context = null;
+
+    // Probing mode turns off server authentication
+    boolean probe = (probingForCert.equals(Guanxi.AXIS_PROPERTY_CERT_PROBING_ON));
 
     try {
       context = SSLContext.getInstance("SSL");
       context.init(SSL.getKeyManagers(entityID, keystore, keystorePassword),
-                   SSL.getTrustManagers(truststore, truststorePassword, false), null);
+                   SSL.getTrustManagers(truststore, truststorePassword, probe), null);
     }
     catch(NoSuchAlgorithmException nsae) {
     }
