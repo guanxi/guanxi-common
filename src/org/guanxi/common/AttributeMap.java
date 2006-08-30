@@ -17,6 +17,9 @@
 /* CVS Header
    $Id$
    $Log$
+   Revision 1.4  2006/08/30 12:27:45  alistairskye
+   Updated to provide mapping to support eduPersonPrincipalName
+
    Revision 1.3  2006/04/05 12:27:53  alistairskye
    Updated to allow passthrough of mapped attribute's original value if no value rules are specified.
 
@@ -47,6 +50,7 @@ import java.util.regex.Matcher;
  * <font size=5><b></b></font>
  *
  * @author Alistair Young alistair@smo.uhi.ac.uk
+ * @author Aggie Booth bmb6agb@ds.leeds.ac.uk
  */
 public class AttributeMap {
   private static final String MAP_ATTR_ID = "id";
@@ -108,8 +112,13 @@ public class AttributeMap {
             mappedName = mapAttrs.getNamedItem(MAP_ATTR_MAPPED_NAME).getNodeValue();
             // ...and transform the value
             if (mapAttrs.getNamedItem(MAP_ATTR_MAPPED_RULE) != null) {
+                
               if (mapAttrs.getNamedItem(MAP_ATTR_MAPPED_RULE).getNodeValue().equals("encrypt"))
                 mappedValue = SecUtils.getInstance().encrypt(attrValue);
+              
+              if (mapAttrs.getNamedItem(MAP_ATTR_MAPPED_RULE).getNodeValue().equals("append_domain"))
+                  // signal to the attributor that it needs to add the domain
+                  mappedValue = attrValue + "@";
             }
             else {
               if (mapAttrs.getNamedItem(MAP_ATTR_MAPPED_VALUE) != null)
