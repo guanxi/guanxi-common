@@ -17,6 +17,9 @@
 /* CVS Header
    $Id$
    $Log$
+   Revision 1.5  2006/11/17 14:55:23  alistairskye
+   Updated setRequestParameters() to fix bug when adding extra request parameters for non spring applications
+
    Revision 1.4  2006/05/18 13:30:51  alistairskye
    Removed original request.
    Now only stores parameters from original request
@@ -65,7 +68,8 @@ public class Pod {
   }
 
   public void setRequestParameters(Map requestParameters) {
-    this.requestParameters = new HashMap();
+    if (this.requestParameters == null)
+      this.requestParameters = new HashMap();
     this.requestParameters.putAll(requestParameters);
   }
 
