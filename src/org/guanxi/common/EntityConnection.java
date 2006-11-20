@@ -17,6 +17,9 @@
 /* CVS Header
    $Id$
    $Log$
+   Revision 1.5  2006/11/20 09:29:24  alistairskye
+   Updated javadoc on constructor
+
    Revision 1.4  2006/07/26 09:16:20  alistairskye
    Added getServerCertificates(), disconnect() and javadocs.
    Added new boolean parameter to the constructor to allow for probing servers for their certificates. This tells EntityConnection to use a special Guanxi TrustManager that allows HTTPS connections in order to inspect the certificate
@@ -67,6 +70,7 @@ public class EntityConnection {
    * @param entityKeystorePassword Password for the entity's keystore
    * @param trustStore The full path to the Engine's truststore
    * @param trustStorePassword The password for the Engine's truststore
+   * @param probeForServerCert true if the connection is only going to be used to obtain an entity's SSL certificate
    * @throws GuanxiException
    */
   public EntityConnection(String endpoint, String localEntityID, String entityKeystore, String entityKeystorePassword,
