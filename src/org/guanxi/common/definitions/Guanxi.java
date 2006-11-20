@@ -17,6 +17,9 @@
 /* CVS Header
    $Id$
    $Log$
+   Revision 1.14  2006/11/20 11:54:02  alistairskye
+   Added BOUNCY_CASTLE_PROVIDER_NAME
+
    Revision 1.13  2006/07/26 13:23:08  alistairskye
    Added:
    AXIS_PROPERTY_CERT_PROBING
@@ -63,8 +66,6 @@
 */
 
 package org.guanxi.common.definitions;
-
-import org.apache.axis.AxisProperties;
 
 /**
  * <font size=5><b></b></font>
@@ -117,4 +118,7 @@ public class Guanxi {
   public static final String AXIS_PROPERTY_CERT_PROBING_ON = "on";
   /** The value to turn off cert probing in the Guanxi SSL layer */
   public static final String AXIS_PROPERTY_CERT_PROBING_OFF = "off";
+
+  /** The name of the BouncyCastle provider */
+  private static final String BOUNCY_CASTLE_PROVIDER_NAME = "BC";
 }
