@@ -17,6 +17,9 @@
 /* CVS Header
    $Id$
    $Log$
+   Revision 1.15  2006/11/20 11:54:59  alistairskye
+   Oops, BOUNCY_CASTLE_PROVIDER_NAME was private!
+
    Revision 1.14  2006/11/20 11:54:02  alistairskye
    Added BOUNCY_CASTLE_PROVIDER_NAME
 
@@ -120,5 +123,5 @@ public class Guanxi {
   public static final String AXIS_PROPERTY_CERT_PROBING_OFF = "off";
 
   /** The name of the BouncyCastle provider */
-  private static final String BOUNCY_CASTLE_PROVIDER_NAME = "BC";
+  public static final String BOUNCY_CASTLE_PROVIDER_NAME = "BC";
 }
