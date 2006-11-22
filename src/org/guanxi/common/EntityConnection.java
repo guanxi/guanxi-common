@@ -17,6 +17,14 @@
 /* CVS Header
    $Id$
    $Log$
+   Revision 1.6  2006/11/22 14:53:47  alistairskye
+   PROBING_ON and PROBING_OFF moved from Engine
+   Added:
+   getServerCertChain()
+   getServerCertificate()
+   getContentLength()
+   getContentAsString()
+
    Revision 1.5  2006/11/20 09:29:24  alistairskye
    Updated javadoc on constructor
 
@@ -46,7 +54,11 @@ import java.net.URL;
 import java.net.HttpURLConnection;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.ByteArrayInputStream;
 import java.security.cert.Certificate;
+import java.security.cert.X509Certificate;
+import java.security.cert.CertificateFactory;
+import java.security.cert.CertificateException;
 
 /**
  * Wraps either an HttpsURLConnection or HttpsURLConnection. The HttpsURLConnection
@@ -55,7 +67,13 @@ import java.security.cert.Certificate;
  * @author Alistair Young alistair@smo.uhi.ac.uk
  */
 public class EntityConnection {
+  /** For passing to EntityConnection when we want to probe a remote entity for it's X509 Certificate */
+  public static final boolean PROBING_ON = true;
+  /** For passing to EntityConnection when we want full HTTPS functionality */
+  public static final boolean PROBING_OFF = false;
+  
   boolean secure = false;
+  boolean probing = false;
   HttpsURLConnection httpsURL = null;
   HttpURLConnection httpURL = null;
 
@@ -71,7 +89,7 @@ public class EntityConnection {
    * @param trustStore The full path to the Engine's truststore
    * @param trustStorePassword The password for the Engine's truststore
    * @param probeForServerCert true if the connection is only going to be used to obtain an entity's SSL certificate
-   * @throws GuanxiException
+   * @throws GuanxiException if an error occurred
    */
   public EntityConnection(String endpoint, String localEntityID, String entityKeystore, String entityKeystorePassword,
                           String trustStore, String trustStorePassword, boolean probeForServerCert) throws GuanxiException {
@@ -81,6 +99,8 @@ public class EntityConnection {
                    SSL.getTrustManagers(trustStore, trustStorePassword, probeForServerCert), null);
 
       URL url = new URL(endpoint);
+
+      probing = probeForServerCert;
 
       if (endpoint.toLowerCase().startsWith("https")) {
         secure = true;
@@ -109,7 +129,7 @@ public class EntityConnection {
    * are legal, subject to protocol restrictions. The default method is GET
    *
    * @param requestMethod The HTTP method
-   * @throws GuanxiException
+   * @throws GuanxiException if an error occurred
    */
   public void setRequestMethod(String requestMethod) throws GuanxiException {
     try {
@@ -129,7 +149,7 @@ public class EntityConnection {
    * if you intend to use the EntityConnection for output, false if not. The default is false.
    *
    * @param doIt The new value
-   * @throws GuanxiException
+   * @throws GuanxiException if an error occurred
    */
   public void setDoOutput(boolean doIt) throws GuanxiException {
     try {
@@ -154,7 +174,7 @@ public class EntityConnection {
    * Operations that depend on being connected, like getContentLength, will implicitly perform the connection,
    * if necessary
    *
-   * @throws GuanxiException
+   * @throws GuanxiException if an error occurred
    */
   public void connect() throws GuanxiException {
     try {
@@ -174,7 +194,7 @@ public class EntityConnection {
    * available for read
    *
    * @return An input stream that reads from this open connection
-   * @throws GuanxiException
+   * @throws GuanxiException if an error occurred
    */
   public InputStream getInputStream() throws GuanxiException {
     try {
@@ -192,7 +212,7 @@ public class EntityConnection {
    * Returns an output stream that writes to this connection
    *
    * @return An output stream that writes to this connection
-   * @throws GuanxiException
+   * @throws GuanxiException if an error occurred
    */
   public OutputStream getOutputStream() throws GuanxiException {
     try {
@@ -254,5 +274,107 @@ public class EntityConnection {
       httpsURL.disconnect();
     else
       httpURL.disconnect();
+  }
+
+  /**
+   * When in probing mode, connects to the remote entity and extracts it's certificate chain
+   *
+   * @return array of X509Certificate representing the remote entity's certificate chain
+   * @throws GuanxiException if an error occurred. Will be thrown if the EntityConnection is
+   * not in probing mode.
+   */
+  public X509Certificate[] getServerCertChain() throws GuanxiException {
+    // We can only do this in probing mode
+    if (!probing)
+      throw new GuanxiException("EntityConnection not in probing mode");
+    
+    // Connect to the server
+    connect();
+
+    // Get the certificate or chain the server is using...
+    Certificate[] certChain = getServerCertificates();
+
+    // Disconnect from the server
+    disconnect();
+
+    // Did we get any certificates?
+    if (certChain.length == 0)
+      throw new GuanxiException("No server certificates available");
+
+    try {
+      // Get ready for X509 processing
+      CertificateFactory certFactory = CertificateFactory.getInstance("X509");
+      X509Certificate[] x509CertChain = new X509Certificate[certChain.length];
+
+      // Cycle through the server's certificate chain, converting to X509 format
+      for (int c=0; c < certChain.length; c++) {
+        x509CertChain[c] = (X509Certificate)certFactory.generateCertificate(new ByteArrayInputStream(certChain[c].getEncoded()));
+      }
+
+      // Return the server's X509 chain
+      return x509CertChain;
+    }
+    catch(CertificateException ce) {
+      throw new GuanxiException(ce);
+    }
+  }
+
+  /**
+   * When in probing mode, connects to the remote entity and extracts it's certificate. This is the
+   * certificate in the chain that identifies the remote entity. The certificate chain is not processed.
+   *
+   * @return X509Certificate representing the remote entity's identity
+   * @throws GuanxiException if an error occurred. Will be thrown if the EntityConnection is
+   * not in probing mode.
+   */
+  public X509Certificate getServerCertificate() throws GuanxiException {
+    // According to the javadocs, the server's own certificate is first in the chain
+    return getServerCertChain()[0];
+  }
+
+  /**
+   * Returns the length of the content available from the connection
+   *
+   * @return length of content available in bytes
+   */
+  public int getContentLength() {
+    if (secure)
+      return httpsURL.getContentLength();
+    else
+      return httpURL.getContentLength();
+  }
+
+  /**
+   * Returns content from a connection as a String
+   *
+   * @return String containing the content from the connection
+   */
+  public String getContentAsString() {
+    InputStream in = null;
+    int contentLength;
+
+    try {
+      if (secure) {
+        in = httpsURL.getInputStream();
+        contentLength = httpsURL.getContentLength();
+      }
+      else {
+        in = httpURL.getInputStream();
+        contentLength = httpURL.getContentLength();
+      }
+
+      byte[] bytes = new byte[contentLength];
+      int bytesRead = 0;
+      while (bytesRead < contentLength) {
+        bytesRead += in.read(bytes, bytesRead, contentLength - bytesRead);
+      }
+      
+      in.close();
+      
+      return new String(bytes);
+    }
+    catch(Exception e) {
+      return null;
+    }
   }
 }
