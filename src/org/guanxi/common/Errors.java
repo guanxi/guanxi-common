@@ -17,6 +17,9 @@
 /* CVS Header
    $Id$
    $Log$
+   Revision 1.4  2006/11/22 14:48:22  alistairskye
+   Added GUARD_CERT_PROBE_FAILED and MISSING_PARAM
+
    Revision 1.3  2005/08/16 14:57:51  alistairskye
    Added license
 
@@ -40,6 +43,8 @@ public class Errors {
   public static final String ENGINE_WAYF_LOCATION_NO_GUARD_ID = "ENGINE_WAYF_LOCATION_NO_GUARD_ID";
   public static final String ENGINE_WAYF_LOCATION_GUARD_FAILED_VERIFICATION = "ENGINE_WAYF_LOCATION_GUARD_FAILED_VERIFICATION";
   public static final String ENGINE_CURRENTLY_INITIALISING = "ENGINE_CURRENTLY_INITIALISING";
+  public static final String GUARD_CERT_PROBE_FAILED = "GUARD_CERT_PROBE_FAILED";
+  public static final String MISSING_PARAM = "MISSING_PARAM";
 
   public static boolean isError(String text) {
     if ((text.equals(ENGINE_WAYF_LOCATION_EXCEPTION)) ||
