@@ -17,6 +17,9 @@
 /* CVS Header
    $Id$
    $Log$
+   Revision 1.8  2006/11/22 14:49:20  alistairskye
+   Added createSelfSignedKeystore()
+
    Revision 1.7  2005/10/20 16:06:46  alistairskye
    Added encrypt()
 
@@ -54,12 +57,19 @@ import org.apache.xml.security.transforms.params.InclusiveNamespaces;
 import org.apache.xml.security.exceptions.XMLSecurityException;
 import org.guanxi.samuel.utils.XUtils;
 import org.guanxi.common.SOAPUtils;
+import org.guanxi.common.GuanxiException;
+import org.bouncycastle.asn1.x509.X509Name;
+import org.bouncycastle.openssl.PEMWriter;
+import org.bouncycastle.x509.X509V3CertificateGenerator;
+
 import java.security.*;
 import java.security.cert.X509Certificate;
 import java.security.cert.CertificateException;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
+import java.io.*;
+import java.util.Hashtable;
+import java.util.Date;
+import java.util.Random;
+import java.math.BigInteger;
 
 /**
  * <font size=5><b></b></font>
@@ -170,6 +180,83 @@ public class SecUtils {
     }
     catch (NoSuchAlgorithmException e) {
       return null;
+    }
+  }
+
+  /**
+   * Generates a self signed public/private key pair and puts them and the associated certificate in
+   * a KeyStore.
+   *
+   * @param cn The CN of the X509 containing the public key, e.g. "cn=guanxi_sp,ou=smo,o=uhi"
+   * @param keystoreFile The full path and name of the KeyStore to create or add the certificate to
+   * @param keystorePassword The password for the KeyStore
+   * @param privateKeyPassword The password for the private key associated with the public key certificate
+   * @param privateKeyAlias The alias under which the private key will be stored
+   * @throws GuanxiException if an error occurred
+   */
+  public void createSelfSignedKeystore(String cn, String keystoreFile, String keystorePassword,
+                                       String privateKeyPassword, String privateKeyAlias) throws GuanxiException {
+    try {
+      KeyStore ks = KeyStore.getInstance("JKS");
+
+      // Does the keystore exist?
+      File keyStore = new File(keystoreFile);
+      if (keyStore.exists())
+        ks.load(new FileInputStream(keystoreFile), keystorePassword.toCharArray());
+      else
+        ks.load(null, null);
+
+      // Generate a new public/private key pair
+      KeyPairGenerator keyGen = KeyPairGenerator.getInstance("DSA");
+      keyGen.initialize(1024, new SecureRandom());
+      KeyPair keypair = keyGen.generateKeyPair();
+      PrivateKey privkey = keypair.getPrivate();
+      PublicKey pubkey = keypair.getPublic();
+
+      /* Set the attributes of the X509 Certificate that will contain the public key.
+       * This is a self signed certificate so the issuer and subject will be the same.
+       */
+      Hashtable attrs = new Hashtable();
+      attrs.put(X509Name.CN, cn);
+      X509Name issuerDN = new X509Name(attrs);
+      X509Name subjectDN = new X509Name(attrs);
+
+      // Certificate valid from now
+      Date validFrom = new Date();
+      validFrom.setTime(validFrom.getTime() - (10 * 60 * 1000));
+      Date validTo = new Date();
+      validTo.setTime(validTo.getTime() + (20 * (24 * 60 * 60 * 1000)));
+
+      // Initialise the X509 Certificate information...
+      X509V3CertificateGenerator x509 = new X509V3CertificateGenerator();
+      x509.setSignatureAlgorithm("SHA1withDSA");
+      x509.setIssuerDN(issuerDN);
+      x509.setSubjectDN(subjectDN);
+      x509.setPublicKey(pubkey);
+      x509.setNotBefore(validFrom);
+      x509.setNotAfter(validTo);
+      x509.setSerialNumber(new BigInteger(128, new Random()));
+
+      // ...generate it...
+      X509Certificate[] cert = new X509Certificate[1];
+      cert[0] = x509.generateX509Certificate(privkey);
+
+      // ...and add the self signed certificate as the certificate chain
+      java.security.cert.Certificate[] chain = new java.security.cert.Certificate[1];
+      chain[0] = cert[0];
+
+      // Under the alias, store the X509 Certificate and it's public key...
+      ks.setKeyEntry(privateKeyAlias, privkey, privateKeyPassword.toCharArray(), cert);
+      // ...and the chain...
+      ks.setKeyEntry(privateKeyAlias, privkey, privateKeyPassword.toCharArray(), chain);
+      // ...and write the keystore to disk
+      ks.store(new FileOutputStream(keystoreFile), keystorePassword.toCharArray());
+    }
+    catch(Exception se) {
+      /* We'll end up here if a security manager is installed and it refuses us
+       * permission to add the BouncyCastle provider
+       */
+      throw new GuanxiException(se);
     }
   }
 }
