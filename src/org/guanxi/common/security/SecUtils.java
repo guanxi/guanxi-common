@@ -17,6 +17,9 @@
 /* CVS Header
    $Id$
    $Log$
+   Revision 1.9  2006/11/22 14:50:35  alistairskye
+   Removed unused import
+
    Revision 1.8  2006/11/22 14:49:20  alistairskye
    Added createSelfSignedKeystore()
 
@@ -59,9 +62,7 @@ import org.guanxi.samuel.utils.XUtils;
 import org.guanxi.common.SOAPUtils;
 import org.guanxi.common.GuanxiException;
 import org.bouncycastle.asn1.x509.X509Name;
-import org.bouncycastle.openssl.PEMWriter;
 import org.bouncycastle.x509.X509V3CertificateGenerator;
-
 import java.security.*;
 import java.security.cert.X509Certificate;
 import java.security.cert.CertificateException;
