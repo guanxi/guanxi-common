@@ -17,6 +17,10 @@
 /* CVS Header
    $Id$
    $Log$
+   Revision 1.16  2006/11/22 14:46:52  alistairskye
+   Added new constants to support REST services
+   Added new constants for holding keystores and truststores to support REST services
+
    Revision 1.15  2006/11/20 11:54:59  alistairskye
    Oops, BOUNCY_CASTLE_PROVIDER_NAME was private!
 
@@ -124,4 +128,42 @@ public class Guanxi {
 
   /** The name of the BouncyCastle provider */
   public static final String BOUNCY_CASTLE_PROVIDER_NAME = "BC";
+
+  /** Engine context attribute indicating the Engine has finished initialising */
+  public static final String CONTEXT_ATTR_ENGINE_INIT_DONE = "INIT";
+
+  /** Absolute path to Guards metadata dir stored under this Engine servlet context key */
+  public static final String CONTEXT_ATTR_GUARDS_METADATA_DIR = "GUARDSMETADATADIR";
+  /** Absolute path to IdP metadata dir stored under this Engine servlet context key */
+  public static final String CONTEXT_ATTR_IDP_METADATA_DIR = "IDPMETADATADIR";
+
+  /** Absolute path to Engine's keystore stored under this Engine servlet context key */
+  public static final String CONTEXT_ATTR_ENGINE_KEYSTORE = "ENGINEKEYSTORE";
+  /** Engine's keystore password stored under this Engine servlet context key */
+  public static final String CONTEXT_ATTR_ENGINE_KEYSTORE_PASSWORD = "ENGINEKEYSTOREPASSWORD";
+  /** Absolute path to Engine's truststore stored under this Engine servlet context key */
+  public static final String CONTEXT_ATTR_ENGINE_TRUSTSTORE = "ENGINETRUSTSTORE";
+  /** Engine's truststore password stored under this Engine servlet context key */
+  public static final String CONTEXT_ATTR_ENGINE_TRUSTSTORE_PASSWORD = "ENGINETRUSTSTOREPASSWORD";
+
+  /** Absolute path to Guard's keystore stored under this Guard servlet context key */
+  public static final String CONTEXT_ATTR_GUARD_KEYSTORE = "GUARDKEYSTORE";
+  /** Guard's keystore password stored under this Guard servlet context key */
+  public static final String CONTEXT_ATTR_GUARD_KEYSTORE_PASSWORD = "GUARDKEYSTOREPASSWORD";
+  /** Absolute path to Guard's truststore stored under this Guard servlet context key */
+  public static final String CONTEXT_ATTR_GUARD_TRUSTSTORE = "GUARDTRUSTSTORE";
+  /** Guard's truststore password stored under this Guard servlet context key */
+  public static final String CONTEXT_ATTR_GUARD_TRUSTSTORE_PASSWORD = "GUARDTRUSTSTOREPASSWORD";
+
+  /** The Guard ID request parameter for WAYFLocation service */
+  public static final String WAYF_PARAM_GUARD_ID = "guardid";
+  /** The Guard Session ID request parameter for WAYFLocation service */
+  public static final String WAYF_PARAM_SESSION_ID = "sessionid";
+
+  /** The Guard Session ID request parameter for SessionVerifier service */
+  public static final String SESSION_VERIFIER_PARAM_SESSION_ID = "sessionid";
+  /** SessionVerifier return value indicating session was verified */
+  public static final String SESSION_VERIFIER_RETURN_VERIFIED = "verified";
+  /** SessionVerifier return value indicating session was not verified */
+  public static final String SESSION_VERIFIER_RETURN_NOT_VERIFIED = "notverified";
 }
