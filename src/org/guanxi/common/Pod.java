@@ -17,6 +17,9 @@
 /* CVS Header
    $Id$
    $Log$
+   Revision 1.6  2006/11/23 14:31:22  alistairskye
+   Added support for request scheme and hostname to fix HTTPS bug when Guard comms are using HTTPS
+
    Revision 1.5  2006/11/17 14:55:23  alistairskye
    Updated setRequestParameters() to fix bug when adding extra request parameters for non spring applications
 
@@ -46,6 +49,10 @@ import java.util.Map;
  * @author Alistair Young alistair@smo.uhi.ac.uk
  */
 public class Pod {
+  /** Original request is either HTTP or HTTPS */
+  private String requestScheme = null;
+  /** The host name of the original request */
+  private String hostName = null;
   /** The URL of the original request */
   private String requestURL = null;
   /** The Guard session ID associated with this Pod */
@@ -54,6 +61,14 @@ public class Pod {
   private Bag attributes = null;
   /** The parameters from the original request */
   private HashMap requestParameters = null;
+
+  public void setRequestScheme(String requestScheme) {
+    this.requestScheme = requestScheme;
+  }
+
+  public void setHostName(String hostName) {
+    this.hostName = hostName;
+  }
 
   public void setRequestURL(String requestURL) {
     this.requestURL = requestURL;
@@ -73,6 +88,8 @@ public class Pod {
     this.requestParameters.putAll(requestParameters);
   }
 
+  public String getRequestScheme() { return requestScheme; }
+  public String getHostName() { return hostName; }
   public String getRequestURL() { return requestURL; }
   public String getSessionID() { return sessionID; }
   public Bag getAttributes() { return attributes; }
