@@ -17,6 +17,9 @@
 /* CVS Header
    $Id$
    $Log$
+   Revision 1.17  2006/11/24 11:31:35  alistairskye
+   Added CONTEXT_ATTR_IDP_CONFIG
+
    Revision 1.16  2006/11/22 14:46:52  alistairskye
    Added new constants to support REST services
    Added new constants for holding keystores and truststores to support REST services
@@ -154,6 +157,8 @@ public class Guanxi {
   public static final String CONTEXT_ATTR_GUARD_TRUSTSTORE = "GUARDTRUSTSTORE";
   /** Guard's truststore password stored under this Guard servlet context key */
   public static final String CONTEXT_ATTR_GUARD_TRUSTSTORE_PASSWORD = "GUARDTRUSTSTOREPASSWORD";
+  /** The servlet context key under which the IdP will store it's config */
+  public static final String CONTEXT_ATTR_IDP_CONFIG = "IDPCONFIG";
 
   /** The Guard ID request parameter for WAYFLocation service */
   public static final String WAYF_PARAM_GUARD_ID = "guardid";
