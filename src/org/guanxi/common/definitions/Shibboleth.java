@@ -17,6 +17,9 @@
 /* CVS Header
    $Id$
    $Log$
+   Revision 1.3  2006/11/24 11:41:30  alistairskye
+   Added more namespace and prefix definitions
+
    Revision 1.2  2005/07/11 10:51:34  alistairskye
    Package restructure
 
@@ -45,4 +48,13 @@ public class Shibboleth {
   // Namespaces
   public static final String NS_NAME_IDENTIFIER = "urn:mace:shibboleth:1.0:nameIdentifier";
   public static final String NS_ATTRIBUTES = "urn:mace:shibboleth:1.0:attributeNamespace:uri";
+  public static final String NS_SAML_10_PROTOCOL = "urn:oasis:names:tc:SAML:1.0:protocol";
+  public static final String NS_SAML_10_ASSERTION = "urn:oasis:names:tc:SAML:1.0:assertion";
+  public static final String NS_PREFIX_SAML_10_PROTOCOL = "samlp";
+  public static final String NS_PREFIX_SAML_10_ASSERTION = "saml";
+
+  /** SAML Status value for success */
+  public static final String SAMLP_SUCCESS = "samlp:Success";
+  /** SAML Status value for success */
+  public static final String SAMLP_ERROR = "samlp:Error";
 }
