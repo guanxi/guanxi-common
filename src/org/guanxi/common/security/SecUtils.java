@@ -17,6 +17,9 @@
 /* CVS Header
    $Id$
    $Log$
+   Revision 1.10  2006/11/24 13:31:42  alistairskye
+   Modified sign() to use SecUtilsConfig
+
    Revision 1.9  2006/11/22 14:50:35  alistairskye
    Removed unused import
 
@@ -51,14 +54,12 @@
 
 package org.guanxi.common.security;
 
-import org.w3c.dom.Node;
 import org.w3c.dom.Document;
 import org.apache.xml.security.signature.XMLSignature;
 import org.apache.xml.security.c14n.Canonicalizer;
 import org.apache.xml.security.transforms.Transforms;
 import org.apache.xml.security.transforms.params.InclusiveNamespaces;
 import org.apache.xml.security.exceptions.XMLSecurityException;
-import org.guanxi.samuel.utils.XUtils;
 import org.guanxi.common.SOAPUtils;
 import org.guanxi.common.GuanxiException;
 import org.bouncycastle.asn1.x509.X509Name;
@@ -96,22 +97,19 @@ public class SecUtils {
     org.apache.xml.security.Init.init();
   }
 
-  public Document sign(Node configNode, Document inDocToSign, String inElementToSign) {
-    XUtils xUtils = XUtils.getInstance();
-    String keystoreType = xUtils.getNodeValue(configNode, "keystore-type");
-    String keystoreFile = xUtils.getNodeValue(configNode, "keystore-file");
-    String keystorePass = xUtils.getNodeValue(configNode, "keystore-password");
-    String privateKeyAlias = xUtils.getNodeValue(configNode, "private-key-alias");
-    String privateKeyPass = xUtils.getNodeValue(configNode, "private-key-password");
-    String certificateAlias = xUtils.getNodeValue(configNode, "certificate-alias");
-    String keyType = xUtils.getNodeValue(configNode, "key-type");
+  public Document sign(SecUtilsConfig config, Document inDocToSign, String inElementToSign) {
+    String keystoreType = config.getKeystoreType();
+    String keystoreFile = config.getKeystoreFile();
+    String keystorePass = config.getKeystorePass();
+    String privateKeyAlias = config.getPrivateKeyAlias();
+    String privateKeyPass = config.getPrivateKeyPass();
+    String certificateAlias = config.getCertificateAlias();
+    String keyType = config.getKeyType();
 
     if (keyType.equalsIgnoreCase("dsa")) keyType = XMLSignature.ALGO_ID_SIGNATURE_DSA;
     if (keyType.equalsIgnoreCase("rsa")) keyType = XMLSignature.ALGO_ID_SIGNATURE_RSA;
 
     try {
-      //Constants.setSignatureSpecNSprefix("ds");
-
       KeyStore ks = null;
       ks = KeyStore.getInstance(keystoreType);
 
