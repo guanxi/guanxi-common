@@ -17,6 +17,9 @@
 /* CVS Header
    $Id$
    $Log$
+   Revision 1.12  2006/11/24 10:50:44  alistairskye
+   Added createNCNameID()
+
    Revision 1.11  2006/04/05 12:18:27  alistairskye
    Added zipDirectory()
 
@@ -259,5 +262,18 @@ public class Utils
     catch(Exception e) {
       System.out.println(e);
     }
+  }
+
+  /**
+   * Creates an ID that is compatible with XML Schema
+   *
+   * @return ID that is compatible with XML Schema
+   */
+  public static String createNCNameID() {
+    // xsd:NCName is derived from xsd:Name, which can't start with a number
+    String id = new UID().toString();
+    id = id.replaceAll(":", "-");
+    id = "GUANXI-" + id;
+    return id;
   }
 }
