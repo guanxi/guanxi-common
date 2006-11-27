@@ -17,6 +17,9 @@
 /* CVS Header
    $Id$
    $Log$
+   Revision 1.11  2006/11/27 10:40:35  alistairskye
+   Added createTrustStore()
+
    Revision 1.10  2006/11/24 13:31:42  alistairskye
    Modified sign() to use SecUtilsConfig
 
@@ -255,6 +258,25 @@ public class SecUtils {
       /* We'll end up here if a security manager is installed and it refuses us
        * permission to add the BouncyCastle provider
        */
+      throw new GuanxiException(se);
+    }
+  }
+
+  /**
+   * Creates an empty truststore
+   *
+   * @param trustStoreFile Full path and name of the truststore to create
+   * @param trustStorePassword Password for the truststore
+   * @throws GuanxiException if an error occurred
+   */
+  public void createTrustStore(String trustStoreFile, String trustStorePassword) throws GuanxiException {
+    try {
+      KeyStore trustStore = KeyStore.getInstance("JKS");
+      File truststoreFile = new File(trustStoreFile);
+      trustStore.load(null, null);
+      trustStore.store(new FileOutputStream(truststoreFile), trustStorePassword.toCharArray());
+    }
+    catch(Exception se) {
       throw new GuanxiException(se);
     }
   }
