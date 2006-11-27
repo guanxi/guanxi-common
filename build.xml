@@ -1,6 +1,9 @@
 <!-- CVS Header
    $Id$
    $Log$
+   Revision 1.7  2006/11/27 08:26:15  alistairskye
+   Added jar versioning support
+
    Revision 1.6  2006/05/02 13:56:39  alistairskye
    Added source and target to compile task
 
@@ -23,6 +26,12 @@
 
 -->
 <project name="Guanxi::Common" default="all">
+  <!-- Initialise TODAY, DSTAMP and TSTAMP -->
+  <tstamp>
+    <format property="TODAY" pattern="d MMMM yyyy" locale="en"/>
+    <format property="TSTAMP" pattern="hh:mm:ss" locale="en"/>
+  </tstamp>
+  
   <property file="build.properties" />
 
   <!-- CLASSPATH files -->
@@ -35,7 +44,7 @@
   <property name="dist.dir" value="dist" />
   <property name="dist.dir.classes" value="${dist.dir}/classes" />
   <property name="dist.dir.jar" value="${dist.dir}/jar" />
-  <property name="jar.file" value="guanxi-common.jar" />
+  <property name="jar.file" value="guanxi-common-${version}.jar" />
 
   <!-- CLASSPATH -->
   <path id="classpath">
@@ -68,7 +77,15 @@
   </target>
 
   <target name="jar" depends="compile" description="Builds a JAR file">
-    <jar jarfile="${dist.dir.jar}/${jar.file}" basedir="${dist.dir.classes}"/>
+    <jar jarfile="${dist.dir.jar}/${jar.file}" basedir="${dist.dir.classes}">
+      <manifest>
+        <attribute name="Implementation-Vendor" value="${implementation-vendor}"/>
+        <attribute name="Implementation-Title" value="${module.name}"/>
+        <attribute name="Implementation-Version" value="${version}"/>
+        <attribute name="Implementation-Date" value="${TODAY} ${TSTAMP}"/>
+        <attribute name="Built-By" value="${user.name}"/>
+      </manifest>
+    </jar>
   </target>
 
   <target name="all" depends="clean,initDistDirs,compile,jar" description="Builds everything into the distribution directory"/>
