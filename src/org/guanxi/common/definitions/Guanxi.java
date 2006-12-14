@@ -17,6 +17,9 @@
 /* CVS Header
    $Id$
    $Log$
+   Revision 1.18  2006/12/14 14:37:50  alistairskye
+   Removed a load of context attribute definitions as modules now use config object
+
    Revision 1.17  2006/11/24 11:31:35  alistairskye
    Added CONTEXT_ATTR_IDP_CONFIG
 
@@ -104,61 +107,11 @@ public class Guanxi {
   /** The web.xml parameter name for specifying the log file for each component */
   public static final String LOGFILE_PARAMETER = "log-file";
 
-  /** The key under which the Engine's configuration object is stored in the servlet context */
-  public static final String ENGINE_CONFIG_OBJECT = "engineConfig";
-
-  /** The key under which the Guard's configuration object is stored in the servlet context */
-  public static final String GUARD_CONFIG_OBJECT = "guardConfig";
-
-  // AxisProperty settings for web services
-
-  /** The alias to use within a keystore when making a secure connection */
-  public static final String AXIS_PROPERTY_KEYSTORE_ALIAS = "guanxi.alias";
-  /** The keystore to use when making a secure connection */
-  public static final String AXIS_PROPERTY_KEYSTORE = "guanxi.keystore";
-  /** The keystore password to use when making a secure connection */
-  public static final String AXIS_PROPERTY_KEYSTORE_PASSWORD = "guanxi.keystorePassword";
-  /** The truststore to use when accepting a secure connection */
-  public static final String AXIS_PROPERTY_TRUSTSTORE = "guanxi.truststore";
-  /** The truststore password to use when accepting a secure connection */
-  public static final String AXIS_PROPERTY_TRUSTSTORE_PASSWORD = "guanxi.truststorePassword";
-  /** The value of this determines whether the web service call is authenticated */
-  public static final String AXIS_PROPERTY_CERT_PROBING = "guanxi.CertProbing";
-  /** The value to turn on cert probing in the Guanxi SSL layer */
-  public static final String AXIS_PROPERTY_CERT_PROBING_ON = "on";
-  /** The value to turn off cert probing in the Guanxi SSL layer */
-  public static final String AXIS_PROPERTY_CERT_PROBING_OFF = "off";
-
   /** The name of the BouncyCastle provider */
   public static final String BOUNCY_CASTLE_PROVIDER_NAME = "BC";
 
   /** Engine context attribute indicating the Engine has finished initialising */
   public static final String CONTEXT_ATTR_ENGINE_INIT_DONE = "INIT";
-
-  /** Absolute path to Guards metadata dir stored under this Engine servlet context key */
-  public static final String CONTEXT_ATTR_GUARDS_METADATA_DIR = "GUARDSMETADATADIR";
-  /** Absolute path to IdP metadata dir stored under this Engine servlet context key */
-  public static final String CONTEXT_ATTR_IDP_METADATA_DIR = "IDPMETADATADIR";
-
-  /** Absolute path to Engine's keystore stored under this Engine servlet context key */
-  public static final String CONTEXT_ATTR_ENGINE_KEYSTORE = "ENGINEKEYSTORE";
-  /** Engine's keystore password stored under this Engine servlet context key */
-  public static final String CONTEXT_ATTR_ENGINE_KEYSTORE_PASSWORD = "ENGINEKEYSTOREPASSWORD";
-  /** Absolute path to Engine's truststore stored under this Engine servlet context key */
-  public static final String CONTEXT_ATTR_ENGINE_TRUSTSTORE = "ENGINETRUSTSTORE";
-  /** Engine's truststore password stored under this Engine servlet context key */
-  public static final String CONTEXT_ATTR_ENGINE_TRUSTSTORE_PASSWORD = "ENGINETRUSTSTOREPASSWORD";
-
-  /** Absolute path to Guard's keystore stored under this Guard servlet context key */
-  public static final String CONTEXT_ATTR_GUARD_KEYSTORE = "GUARDKEYSTORE";
-  /** Guard's keystore password stored under this Guard servlet context key */
-  public static final String CONTEXT_ATTR_GUARD_KEYSTORE_PASSWORD = "GUARDKEYSTOREPASSWORD";
-  /** Absolute path to Guard's truststore stored under this Guard servlet context key */
-  public static final String CONTEXT_ATTR_GUARD_TRUSTSTORE = "GUARDTRUSTSTORE";
-  /** Guard's truststore password stored under this Guard servlet context key */
-  public static final String CONTEXT_ATTR_GUARD_TRUSTSTORE_PASSWORD = "GUARDTRUSTSTOREPASSWORD";
-  /** The servlet context key under which the IdP will store it's config */
-  public static final String CONTEXT_ATTR_IDP_CONFIG = "IDPCONFIG";
 
   /** The Guard ID request parameter for WAYFLocation service */
   public static final String WAYF_PARAM_GUARD_ID = "guardid";
@@ -171,4 +124,7 @@ public class Guanxi {
   public static final String SESSION_VERIFIER_RETURN_VERIFIED = "verified";
   /** SessionVerifier return value indicating session was not verified */
   public static final String SESSION_VERIFIER_RETURN_NOT_VERIFIED = "notverified";
+
+  public static final String CONTEXT_ATTR_ENGINE_CONFIG = "CONTEXT_ATTR_ENGINE_CONFIG";
+  public static final String CONTEXT_ATTR_GUARD_CONFIG = "CONTEXT_ATTR_GUARD_CONFIG";
 }
