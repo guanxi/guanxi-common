@@ -17,6 +17,9 @@
 /* CVS Header
    $Id$
    $Log$
+   Revision 1.19  2007/01/04 13:55:44  alistairskye
+   Put CONTEXT_ATTR_IDP_CONFIG back. It seems to have been removed for some reason.
+
    Revision 1.18  2006/12/14 14:37:50  alistairskye
    Removed a load of context attribute definitions as modules now use config object
 
@@ -125,6 +128,10 @@ public class Guanxi {
   /** SessionVerifier return value indicating session was not verified */
   public static final String SESSION_VERIFIER_RETURN_NOT_VERIFIED = "notverified";
 
+  /** The servlet context attribute that holds the Engine's config object */
   public static final String CONTEXT_ATTR_ENGINE_CONFIG = "CONTEXT_ATTR_ENGINE_CONFIG";
+  /** The servlet context attribute that holds the Guard's config object */
   public static final String CONTEXT_ATTR_GUARD_CONFIG = "CONTEXT_ATTR_GUARD_CONFIG";
+  /** The servlet context attribute that holds the IdP's config object */
+  public static final String CONTEXT_ATTR_IDP_CONFIG = "CONTEXT_ATTR_GUARD_CONFIG";
 }
