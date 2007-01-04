@@ -17,6 +17,10 @@
 /* CVS Header
    $Id$
    $Log$
+   Revision 1.7  2007/01/04 13:30:51  alistairskye
+   Changed get/setAttributes() to get/setBag().
+   Updated javadoc.
+
    Revision 1.6  2006/11/23 14:31:22  alistairskye
    Added support for request scheme and hostname to fix HTTPS bug when Guard comms are using HTTPS
 
@@ -44,7 +48,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * <font size=5><b></b></font>
+ * The Pod contains information about the original request, the Guard session ID and the
+ * attributes obtained from an IdP via the Engine, which are contained in a Bag object
+ * within the Pod.
  *
  * @author Alistair Young alistair@smo.uhi.ac.uk
  */
@@ -78,7 +84,7 @@ public class Pod {
     this.sessionID = sessionID;
   }
 
-  public void setAttributes(Bag attributes) {
+  public void setBag(Bag attributes) {
     this.attributes = attributes;
   }
 
@@ -92,6 +98,6 @@ public class Pod {
   public String getHostName() { return hostName; }
   public String getRequestURL() { return requestURL; }
   public String getSessionID() { return sessionID; }
-  public Bag getAttributes() { return attributes; }
+  public Bag getBag() { return attributes; }
   public HashMap getRequestParameters() { return requestParameters; }
 }
