@@ -17,6 +17,9 @@
 /* CVS Header
    $Id$
    $Log$
+   Revision 1.6  2007/01/04 13:41:18  alistairskye
+   Updated javadoc
+
    Revision 1.5  2007/01/04 13:38:25  alistairskye
    Rewritten to remove SAX parsing of raw SOAP message from Engine.
    Now stores original SAML Response as a String.
@@ -41,7 +44,12 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 
 /**
- * <font size=5><b></b></font>
+ * The Bag contains SAML attributes as convenience objects (Strings). The Bag sits in a Pod which
+ * is associated with a Guard session. The Bag provides a way to easily work with SAML attributes
+ * by treating them as simple String/Value pairs.
+ * The Bag also stores the original SAML Response XML as a String to allow applications to parse
+ * and interpret the raw SAML as they see fit. This allows policy rules to be enforced etc, as
+ * the attributes do not contain any information other than their names and values.
  *
  * @author Alistair Young alistair@smo.uhi.ac.uk
  */
@@ -54,6 +62,9 @@ public class Bag {
   /** The attributes as Strings */
   private Hashtable attributes = null;
 
+  /**
+   * Default constructor
+   */
   public Bag() {
     attributes = new Hashtable();
   }
