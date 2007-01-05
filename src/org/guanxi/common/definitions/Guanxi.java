@@ -17,6 +17,9 @@
 /* CVS Header
    $Id$
    $Log$
+   Revision 1.20  2007/01/05 15:20:10  alistairskye
+   Added DEFAULT_ARP_FILE and DEFAULT_MAP_FILE
+
    Revision 1.19  2007/01/04 13:55:44  alistairskye
    Put CONTEXT_ATTR_IDP_CONFIG back. It seems to have been removed for some reason.
 
@@ -97,6 +100,12 @@ public class Guanxi {
 
   /** Default location where the AuthCookieHandler implementations can find their config files */
   public static final String DEFAULT_AUTHCOOKIEHANDLER_CONFIG_DIR = "/WEB-INF/guanxi_idp/config/cookies/";
+
+  /** Default Attribute Release Policy (ARP) file. Attributors should put their policies in here */
+  public static final String DEFAULT_ARP_FILE = "/WEB-INF/guanxi_idp/config/arp.xml";
+
+  /** Default attribute mapping file. Attributors should put their mapping rules in here */
+  public static final String DEFAULT_MAP_FILE = "/WEB-INF/guanxi_idp/config/map.xml";
 
   /** The Guanxi IdP XML namespace */
   public static final String NS_IDP_NAME_IDENTIFIER = "urn:guanxi:idp";
