@@ -17,6 +17,9 @@
 /* CVS Header
    $Id$
    $Log$
+   Revision 1.22  2007/01/05 21:24:30  alistairskye
+   Fixed bug with DEFAULT_ARP_FILE and DEFAULT_MAP_FILE which were pointing to wrong directory
+
    Revision 1.21  2007/01/05 20:13:08  alistairskye
    Added DEFAULT_SHARED_CONFIG_DIR
 
@@ -108,10 +111,10 @@ public class Guanxi {
   public static final String DEFAULT_AUTHCOOKIEHANDLER_CONFIG_DIR = "/WEB-INF/guanxi_idp/config/cookies/";
 
   /** Default Attribute Release Policy (ARP) file. Attributors should put their policies in here */
-  public static final String DEFAULT_ARP_FILE = "/WEB-INF/guanxi_idp/config/arp.xml";
+  public static final String DEFAULT_ARP_FILE = DEFAULT_SHARED_CONFIG_DIR + "arp.xml";
 
   /** Default attribute mapping file. Attributors should put their mapping rules in here */
-  public static final String DEFAULT_MAP_FILE = "/WEB-INF/guanxi_idp/config/map.xml";
+  public static final String DEFAULT_MAP_FILE = DEFAULT_SHARED_CONFIG_DIR + "map.xml";
 
   /** The Guanxi IdP XML namespace */
   public static final String NS_IDP_NAME_IDENTIFIER = "urn:guanxi:idp";
