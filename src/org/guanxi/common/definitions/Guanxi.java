@@ -17,6 +17,9 @@
 /* CVS Header
    $Id$
    $Log$
+   Revision 1.21  2007/01/05 20:13:08  alistairskye
+   Added DEFAULT_SHARED_CONFIG_DIR
+
    Revision 1.20  2007/01/05 15:20:10  alistairskye
    Added DEFAULT_ARP_FILE and DEFAULT_MAP_FILE
 
@@ -97,6 +100,9 @@ public class Guanxi {
 
   /** Default location where the Attributor implementations can find their config files */
   public static final String DEFAULT_ATTRIBUTOR_CONFIG_DIR = "/WEB-INF/guanxi_idp/config/attributors/";
+
+  /** Default location where implementations that share the same files can find their config files */
+  public static final String DEFAULT_SHARED_CONFIG_DIR = "/WEB-INF/guanxi_idp/config/shared/";
 
   /** Default location where the AuthCookieHandler implementations can find their config files */
   public static final String DEFAULT_AUTHCOOKIEHANDLER_CONFIG_DIR = "/WEB-INF/guanxi_idp/config/cookies/";
