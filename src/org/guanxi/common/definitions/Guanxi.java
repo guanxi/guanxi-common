@@ -17,6 +17,9 @@
 /* CVS Header
    $Id$
    $Log$
+   Revision 1.23  2007/01/09 11:22:24  alistairskye
+   Fixed bug with CONTEXT_ATTR_IDP_CONFIG
+
    Revision 1.22  2007/01/05 21:24:30  alistairskye
    Fixed bug with DEFAULT_ARP_FILE and DEFAULT_MAP_FILE which were pointing to wrong directory
 
@@ -151,5 +154,5 @@ public class Guanxi {
   /** The servlet context attribute that holds the Guard's config object */
   public static final String CONTEXT_ATTR_GUARD_CONFIG = "CONTEXT_ATTR_GUARD_CONFIG";
   /** The servlet context attribute that holds the IdP's config object */
-  public static final String CONTEXT_ATTR_IDP_CONFIG = "CONTEXT_ATTR_GUARD_CONFIG";
+  public static final String CONTEXT_ATTR_IDP_CONFIG = "CONTEXT_ATTR_IDP_CONFIG";
 }
