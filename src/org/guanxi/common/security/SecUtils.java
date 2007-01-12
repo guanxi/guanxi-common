@@ -17,6 +17,9 @@
 /* CVS Header
    $Id$
    $Log$
+   Revision 1.12  2007/01/12 13:44:32  alistairskye
+   Fixed bug where it synchronising on SOAPUtils
+
    Revision 1.11  2006/11/27 10:40:35  alistairskye
    Added createTrustStore()
 
@@ -63,7 +66,6 @@ import org.apache.xml.security.c14n.Canonicalizer;
 import org.apache.xml.security.transforms.Transforms;
 import org.apache.xml.security.transforms.params.InclusiveNamespaces;
 import org.apache.xml.security.exceptions.XMLSecurityException;
-import org.guanxi.common.SOAPUtils;
 import org.guanxi.common.GuanxiException;
 import org.bouncycastle.asn1.x509.X509Name;
 import org.bouncycastle.x509.X509V3CertificateGenerator;
@@ -86,7 +88,7 @@ public class SecUtils {
 
   static public SecUtils getInstance() {
     if (_instance == null) {
-      synchronized(SOAPUtils.class) {
+      synchronized(SecUtils.class) {
         if (_instance == null) {
           _instance = new SecUtils();
         }
