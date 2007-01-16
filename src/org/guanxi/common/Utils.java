@@ -17,6 +17,9 @@
 /* CVS Header
    $Id$
    $Log$
+   Revision 1.13  2007/01/16 08:44:18  alistairskye
+   Tidied up imports
+
    Revision 1.12  2006/11/24 10:50:44  alistairskye
    Added createNCNameID()
 
@@ -65,10 +68,8 @@ import org.apache.log4j.RollingFileAppender;
 import org.apache.log4j.xml.DOMConfigurator;
 import org.guanxi.common.definitions.Guanxi;
 import org.guanxi.common.definitions.Logging;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.ServletContext;
-import javax.servlet.ServletConfig;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.TransformerFactory;
