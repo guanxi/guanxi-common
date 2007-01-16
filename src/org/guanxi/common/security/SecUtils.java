@@ -17,6 +17,9 @@
 /* CVS Header
    $Id$
    $Log$
+   Revision 1.13  2007/01/16 10:18:21  alistairskye
+   Updated createSelfSignedKeystore() for latest BouncyCastle
+
    Revision 1.12  2007/01/12 13:44:32  alistairskye
    Fixed bug where it synchronising on SOAPUtils
 
@@ -76,6 +79,7 @@ import java.io.*;
 import java.util.Hashtable;
 import java.util.Date;
 import java.util.Random;
+import java.util.Vector;
 import java.math.BigInteger;
 
 /**
@@ -221,9 +225,12 @@ public class SecUtils {
        * This is a self signed certificate so the issuer and subject will be the same.
        */
       Hashtable attrs = new Hashtable();
+      Vector ordering = new Vector();
+      ordering.add(X509Name.CN);
+
       attrs.put(X509Name.CN, cn);
-      X509Name issuerDN = new X509Name(attrs);
-      X509Name subjectDN = new X509Name(attrs);
+      X509Name issuerDN = new X509Name(ordering, attrs);
+      X509Name subjectDN = new X509Name(ordering, attrs);
 
       // Certificate valid from now
       Date validFrom = new Date();
@@ -243,7 +250,7 @@ public class SecUtils {
 
       // ...generate it...
       X509Certificate[] cert = new X509Certificate[1];
-      cert[0] = x509.generateX509Certificate(privkey);
+      cert[0] = x509.generate(privkey, "BC");
 
       // ...and add the self signed certificate as the certificate chain
       java.security.cert.Certificate[] chain = new java.security.cert.Certificate[1];
