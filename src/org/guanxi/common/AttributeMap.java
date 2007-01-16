@@ -17,6 +17,9 @@
 /* CVS Header
    $Id$
    $Log$
+   Revision 1.5  2007/01/16 09:26:19  alistairskye
+   Updated to use XMLBeans
+
    Revision 1.4  2006/08/30 12:27:45  alistairskye
    Updated to provide mapping to support eduPersonPrincipalName
 
@@ -33,96 +36,97 @@
 
 package org.guanxi.common;
 
-import org.w3c.dom.Document;
-import org.w3c.dom.NodeList;
-import org.w3c.dom.Node;
-import org.w3c.dom.NamedNodeMap;
-import org.guanxi.samuel.utils.ParserPool;
-import org.guanxi.samuel.utils.XUtils;
-import org.guanxi.samuel.exception.ParserPoolException;
-import org.guanxi.common.definitions.Guanxi;
 import org.guanxi.common.security.SecUtils;
+import org.guanxi.xal.idp.AttributeMapDocument;
+import org.guanxi.xal.idp.Map;
 import java.io.File;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 
 /**
- * <font size=5><b></b></font>
+ * <p>AttributeMap</p>
+ * Provides mapping functionality for attributes.
  *
  * @author Alistair Young alistair@smo.uhi.ac.uk
  * @author Aggie Booth bmb6agb@ds.leeds.ac.uk
  */
 public class AttributeMap {
-  private static final String MAP_ATTR_ID = "id";
-  private static final String MAP_ATTR_NAME = "attrName";
-  private static final String MAP_ATTR_VALUE = "attrValue";
-  private static final String MAP_ATTR_MAPPED_NAME = "mappedName";
-  private static final String MAP_ATTR_MAPPED_VALUE = "mappedValue";
-  private static final String MAP_ATTR_MAPPED_RULE = "mappedRule";
+  /** Our map file */
+  private AttributeMapDocument.AttributeMap attributeMap = null;
+  /** The new name of the attribute passed to map() */
+  private String mappedName = null;
+  /** The new value of the attribute passed to map() */
+  private String mappedValue = null;
 
-  ParserPool parser = null;
-  XUtils xUtils = null;
-  Document map = null;
-  NodeList mapNodes = null;
-  String mappedName, mappedValue;
-
+  /**
+   * Default constructor
+   *
+   * @param mapXMLFile Full path and name of the map file to use
+   * @throws GuanxiException if an error occurred parsing the map file
+   */
   public AttributeMap(String mapXMLFile) throws GuanxiException {
-    // Get a parser
     try {
-      parser = ParserPool.getInstance();
+      AttributeMapDocument attrMapDoc = AttributeMapDocument.Factory.parse(new File(mapXMLFile));
+      attributeMap = attrMapDoc.getAttributeMap();
     }
-    catch(ParserPoolException ppe) {
-      throw new GuanxiException(ppe);
+    catch(Exception e) {
+      throw new GuanxiException(e);
     }
-
-    xUtils = XUtils.getInstance();
-
-    // Load up the config file
-    try {
-      map = parser.parse(new File(mapXMLFile));
-    }
-    catch(ParserPoolException ppe) {
-      throw new GuanxiException(ppe);
-    }
-
-    // Get an iterator for the <server> nodes in the config file
-    mapNodes = map.getElementsByTagNameNS(Guanxi.NS_IDP_NAME_IDENTIFIER, "map");
   }
 
-  public boolean map(String id, String attrName, String attrValue) {
-    Node mapNode = null;
-    NamedNodeMap mapAttrs = null;
+  /**
+   * Maps attributes and values. The method searches all <map> elements in the map file unless
+   * mapName has been specified (is not null), in which case the method will only use that
+   * particular map entry.
+   * Once the mapping has been done, the application should use the helper methods to retrieve
+   * the mapped attribute name and value:
+   * getMappedName
+   * getMappedValue
+   *
+   * @param mapName If not null, specifies the particular Map to use. This should be the content of
+   * an 'name' attribute on a Map element. If this is null, all Map elements are searched until a
+   * matching Map is found.
+   * @param attrName The name of the attribute to map
+   * @param attrValue The value to give the mapped attribute
+   * @return true if the attribute was mapped otherwise false
+   */
+  public boolean map(String mapName, String attrName, String attrValue) {
     Pattern pattern = null;
     Matcher matcher = null;
 
-    for (int count=0; count < mapNodes.getLength(); count++) {
-      mapNode = mapNodes.item(count);
-      mapAttrs = mapNode.getAttributes();
+    for (int count=0; count < attributeMap.getMapArray().length; count++) {
+      Map map = attributeMap.getMapArray(count);
 
-      // Should we restrict the map to a certain mapping id?
-      if ((id == null) || (id.equals(mapAttrs.getNamedItem(MAP_ATTR_ID).getNodeValue()))) {
+      // Should we restrict the map to a certain mapping name?
+      if ((mapName == null) || (mapName.equals(map.getName()))) {
         // Have we got the correct attribute to map?
-        if (attrName.equals(mapAttrs.getNamedItem(MAP_ATTR_NAME).getNodeValue())) {
-          pattern = Pattern.compile(mapAttrs.getNamedItem(MAP_ATTR_VALUE).getNodeValue());
+        if (attrName.equals(map.getAttrName())) {
+          pattern = Pattern.compile(map.getAttrValue());
           matcher = pattern.matcher(attrValue);
 
           // Match the value of the attribute before mapping
           if (matcher.find()) {
             // Rename the attribute...
-            mappedName = mapAttrs.getNamedItem(MAP_ATTR_MAPPED_NAME).getNodeValue();
-            // ...and transform the value
-            if (mapAttrs.getNamedItem(MAP_ATTR_MAPPED_RULE) != null) {
-                
-              if (mapAttrs.getNamedItem(MAP_ATTR_MAPPED_RULE).getNodeValue().equals("encrypt"))
+            mappedName = map.getMappedName();
+            
+            // ...and transform the value if required
+            if (map.getMappedRule() != null) {
+
+              // Encrypt the attribute value
+              if (map.getMappedRule().equals("encrypt"))
                 mappedValue = SecUtils.getInstance().encrypt(attrValue);
-              
-              if (mapAttrs.getNamedItem(MAP_ATTR_MAPPED_RULE).getNodeValue().equals("append_domain"))
-                  // signal to the attributor that it needs to add the domain
+
+              /* Append the domain to the attribute value by signalling to the
+               * attributor that it needs to add the domain.
+               */
+              if (map.getMappedRule().equals("append_domain"))
                   mappedValue = attrValue + "@";
             }
             else {
-              if (mapAttrs.getNamedItem(MAP_ATTR_MAPPED_VALUE) != null)
-                mappedValue = mapAttrs.getNamedItem(MAP_ATTR_MAPPED_VALUE).getNodeValue();
+              // Attribute value is what it says in the map...
+              if (map.getMappedValue() != null)
+                mappedValue = map.getMappedValue();
+              // ...or just use the original attribute value
               else
                 mappedValue = attrValue;
             }
@@ -136,10 +140,22 @@ public class AttributeMap {
     return false;
   }
 
+  /**
+   * Retrieves the new name of the attribute passed to the map method
+   *
+   * @return the new name of the attribute passed to the map method
+   * or null if map has not been called or no mappings were found.
+   */
   public String getMappedName() {
     return mappedName;
   }
 
+  /**
+   * Retrieves the new value of the attribute passed to the map method
+   *
+   * @return the new value of the attribute passed to the map method
+   * or null if map has not been called or no mappings were found.
+   */
   public String getMappedValue() {
     return mappedValue;
   }
