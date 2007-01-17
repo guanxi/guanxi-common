@@ -17,6 +17,12 @@
 /* CVS Header
    $Id$
    $Log$
+   Revision 1.24  2007/01/17 17:35:32  alistairskye
+   Added:
+   CONTEXT_ATTR_GUARD_COOKIE_PREFIX
+   CONTEXT_ATTR_GUARD_ID
+   CONTEXT_ATTR_GUARD_COOKIE_NAME
+
    Revision 1.23  2007/01/09 11:22:24  alistairskye
    Fixed bug with CONTEXT_ATTR_IDP_CONFIG
 
@@ -155,4 +161,11 @@ public class Guanxi {
   public static final String CONTEXT_ATTR_GUARD_CONFIG = "CONTEXT_ATTR_GUARD_CONFIG";
   /** The servlet context attribute that holds the IdP's config object */
   public static final String CONTEXT_ATTR_IDP_CONFIG = "CONTEXT_ATTR_IDP_CONFIG";
+
+  /** The servlet context attribute that holds the Guard's cookie prefix */
+  public static final String CONTEXT_ATTR_GUARD_COOKIE_PREFIX = "CONTEXT_ATTR_GUARD_COOKIE_PREFIX";
+  /** The servlet context attribute that holds the ID of that webapp's Guard */
+  public static final String CONTEXT_ATTR_GUARD_ID = "CONTEXT_ATTR_GUARD_ID";
+  /** The servlet context attribute that holds the full cookie name that webapp's Guard */
+  public static final String CONTEXT_ATTR_GUARD_COOKIE_NAME = "CONTEXT_ATTR_GUARD_COOKIE_NAME";
 }
