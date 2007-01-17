@@ -17,6 +17,9 @@
 /* CVS Header
    $Id$
    $Log$
+   Revision 1.8  2007/01/17 17:36:32  alistairskye
+   Added ServletContext storing
+
    Revision 1.7  2007/01/04 13:30:51  alistairskye
    Changed get/setAttributes() to get/setBag().
    Updated javadoc.
@@ -44,6 +47,7 @@
 
 package org.guanxi.common;
 
+import javax.servlet.ServletContext;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -55,6 +59,8 @@ import java.util.Map;
  * @author Alistair Young alistair@smo.uhi.ac.uk
  */
 public class Pod {
+  /** The ServletContext where the Pod lives */
+  private ServletContext context = null;
   /** Original request is either HTTP or HTTPS */
   private String requestScheme = null;
   /** The host name of the original request */
@@ -67,6 +73,10 @@ public class Pod {
   private Bag attributes = null;
   /** The parameters from the original request */
   private HashMap requestParameters = null;
+
+  public void setContext(ServletContext context) {
+    this.context = context;
+  }
 
   public void setRequestScheme(String requestScheme) {
     this.requestScheme = requestScheme;
@@ -94,6 +104,7 @@ public class Pod {
     this.requestParameters.putAll(requestParameters);
   }
 
+  public ServletContext getContext() { return context; }
   public String getRequestScheme() { return requestScheme; }
   public String getHostName() { return hostName; }
   public String getRequestURL() { return requestURL; }
