@@ -17,6 +17,9 @@
 /* CVS Header
    $Id$
    $Log$
+   Revision 1.4  2007/01/17 13:09:28  alistairskye
+   Updated SAMLP_SUCCESS to solve namespace problems in IdP.
+
    Revision 1.3  2006/11/24 11:41:30  alistairskye
    Added more namespace and prefix definitions
 
@@ -54,7 +57,7 @@ public class Shibboleth {
   public static final String NS_PREFIX_SAML_10_ASSERTION = "saml";
 
   /** SAML Status value for success */
-  public static final String SAMLP_SUCCESS = "samlp:Success";
+  public static final String SAMLP_SUCCESS = "Success";
   /** SAML Status value for success */
   public static final String SAMLP_ERROR = "samlp:Error";
 }
