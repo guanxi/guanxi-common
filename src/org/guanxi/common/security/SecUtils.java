@@ -17,6 +17,9 @@
 /* CVS Header
    $Id$
    $Log$
+   Revision 1.14  2007/01/22 14:31:06  alistairskye
+   Updated sign() to throw GuanxiException
+
    Revision 1.13  2007/01/16 10:18:21  alistairskye
    Updated createSelfSignedKeystore() for latest BouncyCastle
 
@@ -68,13 +71,11 @@ import org.apache.xml.security.signature.XMLSignature;
 import org.apache.xml.security.c14n.Canonicalizer;
 import org.apache.xml.security.transforms.Transforms;
 import org.apache.xml.security.transforms.params.InclusiveNamespaces;
-import org.apache.xml.security.exceptions.XMLSecurityException;
 import org.guanxi.common.GuanxiException;
 import org.bouncycastle.asn1.x509.X509Name;
 import org.bouncycastle.x509.X509V3CertificateGenerator;
 import java.security.*;
 import java.security.cert.X509Certificate;
-import java.security.cert.CertificateException;
 import java.io.*;
 import java.util.Hashtable;
 import java.util.Date;
@@ -106,7 +107,7 @@ public class SecUtils {
     org.apache.xml.security.Init.init();
   }
 
-  public Document sign(SecUtilsConfig config, Document inDocToSign, String inElementToSign) {
+  public Document sign(SecUtilsConfig config, Document inDocToSign, String inElementToSign) throws GuanxiException {
     String keystoreType = config.getKeystoreType();
     String keystoreFile = config.getKeystoreFile();
     String keystorePass = config.getKeystorePass();
@@ -157,13 +158,9 @@ public class SecUtils {
 
       sig.sign(privateKey);
     }
-    catch(XMLSecurityException xse) {}
-    catch(KeyStoreException kse) {}
-    catch(FileNotFoundException fnfe) {}
-    catch(NoSuchAlgorithmException nsae) {}
-    catch(CertificateException ce) {}
-    catch(IOException ioe) {}
-    catch(UnrecoverableKeyException urke) {}
+    catch(Exception e) {
+      throw new GuanxiException(e);
+    }
 
     return inDocToSign;
   }
