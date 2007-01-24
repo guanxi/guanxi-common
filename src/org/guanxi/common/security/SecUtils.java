@@ -17,6 +17,9 @@
 /* CVS Header
    $Id$
    $Log$
+   Revision 1.15  2007/01/24 09:22:26  alistairskye
+   Updated sign() to provide correct c14n
+
    Revision 1.14  2007/01/22 14:31:06  alistairskye
    Updated sign() to throw GuanxiException
 
@@ -144,7 +147,7 @@ public class SecUtils {
        */
       transforms.addTransform(Transforms.TRANSFORM_ENVELOPED_SIGNATURE);
       transforms.addTransform(Transforms.TRANSFORM_C14N_EXCL_OMIT_COMMENTS);
-      transforms.item(1).getElement().appendChild(inDocToSign.createTextNode(new InclusiveNamespaces(inDocToSign, "#default saml samlp ds code kind rw typens").getInclusiveNamespaces()));
+      transforms.item(1).getElement().appendChild(new InclusiveNamespaces(inDocToSign, "#default saml samlp ds code kind rw typens").getElement());
 
       sig.addDocument(inElementToSign, transforms);
 
