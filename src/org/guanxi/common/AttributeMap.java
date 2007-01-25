@@ -17,6 +17,9 @@
 /* CVS Header
    $Id$
    $Log$
+   Revision 1.6  2007/01/25 08:58:21  alistairskye
+   Added support for chaining map files
+
    Revision 1.5  2007/01/16 09:26:19  alistairskye
    Updated to use XMLBeans
 
@@ -39,9 +42,13 @@ package org.guanxi.common;
 import org.guanxi.common.security.SecUtils;
 import org.guanxi.xal.idp.AttributeMapDocument;
 import org.guanxi.xal.idp.Map;
+import org.apache.xmlbeans.XmlException;
+
 import java.io.File;
+import java.io.IOException;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
+import java.util.Vector;
 
 /**
  * <p>AttributeMap</p>
@@ -51,8 +58,8 @@ import java.util.regex.Matcher;
  * @author Aggie Booth bmb6agb@ds.leeds.ac.uk
  */
 public class AttributeMap {
-  /** Our map file */
-  private AttributeMapDocument.AttributeMap attributeMap = null;
+  /** Our map files */
+  private Vector mapFiles = null;
   /** The new name of the attribute passed to map() */
   private String mappedName = null;
   /** The new value of the attribute passed to map() */
@@ -65,13 +72,8 @@ public class AttributeMap {
    * @throws GuanxiException if an error occurred parsing the map file
    */
   public AttributeMap(String mapXMLFile) throws GuanxiException {
-    try {
-      AttributeMapDocument attrMapDoc = AttributeMapDocument.Factory.parse(new File(mapXMLFile));
-      attributeMap = attrMapDoc.getAttributeMap();
-    }
-    catch(Exception e) {
-      throw new GuanxiException(e);
-    }
+    mapFiles = new Vector();
+    loadMaps(mapXMLFile);
   }
 
   /**
@@ -82,6 +84,11 @@ public class AttributeMap {
    * the mapped attribute name and value:
    * getMappedName
    * getMappedValue
+   *
+   * The process of mapping is thus:
+   *   Attribute is renamed if there is a mappedName entry
+   *   Attribute value is changed to what is in the mappedValue entry if there is one
+   *   Attribute value is further changed by any rule defined in the mappedRule entry if there is one
    *
    * @param mapName If not null, specifies the particular Map to use. This should be the content of
    * an 'name' attribute on a Map element. If this is null, all Map elements are searched until a
@@ -94,48 +101,54 @@ public class AttributeMap {
     Pattern pattern = null;
     Matcher matcher = null;
 
-    for (int count=0; count < attributeMap.getMapArray().length; count++) {
-      Map map = attributeMap.getMapArray(count);
+    for (int mapFilesCount = 0; mapFilesCount < mapFiles.size(); mapFilesCount++) {
+      AttributeMapDocument.AttributeMap attributeMap = (AttributeMapDocument.AttributeMap)mapFiles.get(mapFilesCount);
 
-      // Should we restrict the map to a certain mapping name?
-      if ((mapName == null) || (mapName.equals(map.getName()))) {
-        // Have we got the correct attribute to map?
-        if (attrName.equals(map.getAttrName())) {
-          pattern = Pattern.compile(map.getAttrValue());
-          matcher = pattern.matcher(attrValue);
+      for (int count=0; count < attributeMap.getMapArray().length; count++) {
+        Map map = attributeMap.getMapArray(count);
 
-          // Match the value of the attribute before mapping
-          if (matcher.find()) {
-            // Rename the attribute...
-            mappedName = map.getMappedName();
-            
-            // ...and transform the value if required
-            if (map.getMappedRule() != null) {
+        // Should we restrict the map to a certain mapping name?
+        if ((mapName == null) || (mapName.equals(map.getName()))) {
+          // Have we got the correct attribute to map?
+          if (attrName.equals(map.getAttrName())) {
+            pattern = Pattern.compile(map.getAttrValue());
+            matcher = pattern.matcher(attrValue);
 
-              // Encrypt the attribute value
-              if (map.getMappedRule().equals("encrypt"))
-                mappedValue = SecUtils.getInstance().encrypt(attrValue);
+            // Match the value of the attribute before mapping
+            if (matcher.find()) {
+              // Rename the attribute...
+              if (map.getMappedName() != null)
+                mappedName = map.getMappedName();
+              else
+                mappedName = attrName;
 
-              /* Append the domain to the attribute value by signalling to the
-               * attributor that it needs to add the domain.
-               */
-              if (map.getMappedRule().equals("append_domain"))
-                  mappedValue = attrValue + "@";
-            }
-            else {
               // Attribute value is what it says in the map...
               if (map.getMappedValue() != null)
                 mappedValue = map.getMappedValue();
               // ...or just use the original attribute value
               else
                 mappedValue = attrValue;
-            }
 
-            return true;
+              // ...and transform the value if required
+              if (map.getMappedRule() != null) {
+
+                // Encrypt the attribute value
+                if (map.getMappedRule().equals("encrypt"))
+                  mappedValue = SecUtils.getInstance().encrypt(mappedValue);
+
+                /* Append the domain to the attribute value by signalling to the
+                 * attributor that it needs to add the domain.
+                 */
+                if (map.getMappedRule().equals("append_domain"))
+                    mappedValue = mappedValue + "@";
+              }
+
+              return true;
+            }
           }
         }
-      }
-    }
+      } // for (int count=0; count < attributeMap.getMapArray().length; count++)
+    } // for (int mapFilesCount = 0; mapFilesCount < mapFiles.size(); mapFilesCount++)
 
     return false;
   }
@@ -158,5 +171,33 @@ public class AttributeMap {
    */
   public String getMappedValue() {
     return mappedValue;
+  }
+
+  /**
+   * Loads up the chain of map files to use. The chain will always have at least one in it.
+   *
+   * @param mapXMLFile The full path and name of the root map file
+   * @throws GuanxiException if an error occurs
+   */
+  private void loadMaps(String mapXMLFile) throws GuanxiException {
+    try {
+      // Load up the root map file
+      AttributeMapDocument attrMapDoc = AttributeMapDocument.Factory.parse(new File(mapXMLFile));
+      mapFiles.add(attrMapDoc.getAttributeMap());
+
+      // Do we have any other map files to include?
+      if (attrMapDoc.getAttributeMap().getIncludeArray() != null) {
+        for (int c=0; c < attrMapDoc.getAttributeMap().getIncludeArray().length; c++) {
+          // Load up any further included map files
+          loadMaps(attrMapDoc.getAttributeMap().getIncludeArray(c).getMapFile());
+        }
+      }
+    }
+    catch(XmlException xe) {
+      throw new GuanxiException(xe);
+    }
+    catch(IOException ioe) {
+      throw new GuanxiException(ioe);
+    }
   }
 }
