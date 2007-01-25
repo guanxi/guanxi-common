@@ -17,6 +17,9 @@
 /* CVS Header
    $Id$
    $Log$
+   Revision 1.7  2007/01/25 11:16:34  alistairskye
+   Now based on provderId groupings of mapping rules
+
    Revision 1.6  2007/01/25 08:58:21  alistairskye
    Added support for chaining map files
 
@@ -42,8 +45,8 @@ package org.guanxi.common;
 import org.guanxi.common.security.SecUtils;
 import org.guanxi.xal.idp.AttributeMapDocument;
 import org.guanxi.xal.idp.Map;
+import org.guanxi.xal.idp.MapProvider;
 import org.apache.xmlbeans.XmlException;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.regex.Pattern;
@@ -58,8 +61,10 @@ import java.util.Vector;
  * @author Aggie Booth bmb6agb@ds.leeds.ac.uk
  */
 public class AttributeMap {
-  /** Our map files */
-  private Vector mapFiles = null;
+  /** Our provider groupings and mapping rules */
+  private Vector maps = null;
+  private Vector providers = null;
+
   /** The new name of the attribute passed to map() */
   private String mappedName = null;
   /** The new value of the attribute passed to map() */
@@ -72,14 +77,13 @@ public class AttributeMap {
    * @throws GuanxiException if an error occurred parsing the map file
    */
   public AttributeMap(String mapXMLFile) throws GuanxiException {
-    mapFiles = new Vector();
+    maps = new Vector();
+    providers = new Vector();
     loadMaps(mapXMLFile);
   }
 
   /**
-   * Maps attributes and values. The method searches all <map> elements in the map file unless
-   * mapName has been specified (is not null), in which case the method will only use that
-   * particular map entry.
+   * Maps attributes and values.
    * Once the mapping has been done, the application should use the helper methods to retrieve
    * the mapped attribute name and value:
    * getMappedName
@@ -90,66 +94,73 @@ public class AttributeMap {
    *   Attribute value is changed to what is in the mappedValue entry if there is one
    *   Attribute value is further changed by any rule defined in the mappedRule entry if there is one
    *
-   * @param mapName If not null, specifies the particular Map to use. This should be the content of
-   * an 'name' attribute on a Map element. If this is null, all Map elements are searched until a
-   * matching Map is found.
+   * @param spProviderId This should be the content of a 'providerId' attribute on a map element.
+   * If no maps are found that match this value then no attributes will be mapped. If any mapping
+   * rules are service provider agnostic, they should have a "providerId" set to "*" on their
+   * provider element.
    * @param attrName The name of the attribute to map
    * @param attrValue The value to give the mapped attribute
    * @return true if the attribute was mapped otherwise false
    */
-  public boolean map(String mapName, String attrName, String attrValue) {
+  public boolean map(String spProviderId, String attrName, String attrValue) {
     Pattern pattern = null;
     Matcher matcher = null;
 
-    for (int mapFilesCount = 0; mapFilesCount < mapFiles.size(); mapFilesCount++) {
-      AttributeMapDocument.AttributeMap attributeMap = (AttributeMapDocument.AttributeMap)mapFiles.get(mapFilesCount);
+    // Look for provider groups that are either specific to this providerId or wildcard
+    for (int providersCount = 0; providersCount < providers.size(); providersCount++) {
+      MapProvider provider = (MapProvider)providers.get(providersCount);
 
-      for (int count=0; count < attributeMap.getMapArray().length; count++) {
-        Map map = attributeMap.getMapArray(count);
+      if ((provider.getProviderId().equals(spProviderId)) || provider.getProviderId().equals("*")) {
+        // Load up the mapping references for this provider
+        for (int mapRefsCount = 0; mapRefsCount < provider.getMapRefArray().length; mapRefsCount++) {
+          // Look for the map in the maps cache
+          for (int mapsCount = 0; mapsCount < maps.size(); mapsCount++) {
+            Map map = (Map)maps.get(mapsCount);
+            if (map.getName().equals(provider.getMapRefArray(mapRefsCount).getName())) {
+              // Have we got the correct attribute to map?
+              if (attrName.equals(map.getAttrName())) {
+                pattern = Pattern.compile(map.getAttrValue());
+                matcher = pattern.matcher(attrValue);
 
-        // Should we restrict the map to a certain mapping name?
-        if ((mapName == null) || (mapName.equals(map.getName()))) {
-          // Have we got the correct attribute to map?
-          if (attrName.equals(map.getAttrName())) {
-            pattern = Pattern.compile(map.getAttrValue());
-            matcher = pattern.matcher(attrValue);
+                // Match the value of the attribute before mapping
+                if (matcher.find()) {
+                  // Rename the attribute...
+                  if (map.getMappedName() != null)
+                    mappedName = map.getMappedName();
+                  else
+                    mappedName = attrName;
 
-            // Match the value of the attribute before mapping
-            if (matcher.find()) {
-              // Rename the attribute...
-              if (map.getMappedName() != null)
-                mappedName = map.getMappedName();
-              else
-                mappedName = attrName;
+                  // Attribute value is what it says in the map...
+                  if (map.getMappedValue() != null)
+                    mappedValue = map.getMappedValue();
+                  // ...or just use the original attribute value
+                  else
+                    mappedValue = attrValue;
 
-              // Attribute value is what it says in the map...
-              if (map.getMappedValue() != null)
-                mappedValue = map.getMappedValue();
-              // ...or just use the original attribute value
-              else
-                mappedValue = attrValue;
+                  // ...and transform the value if required
+                  if (map.getMappedRule() != null) {
 
-              // ...and transform the value if required
-              if (map.getMappedRule() != null) {
+                    // Encrypt the attribute value
+                    if (map.getMappedRule().equals("encrypt"))
+                      mappedValue = SecUtils.getInstance().encrypt(mappedValue);
 
-                // Encrypt the attribute value
-                if (map.getMappedRule().equals("encrypt"))
-                  mappedValue = SecUtils.getInstance().encrypt(mappedValue);
+                    /* Append the domain to the attribute value by signalling to the
+                     * attributor that it needs to add the domain.
+                     */
+                    if (map.getMappedRule().equals("append_domain"))
+                        mappedValue = mappedValue + "@";
+                  }
 
-                /* Append the domain to the attribute value by signalling to the
-                 * attributor that it needs to add the domain.
-                 */
-                if (map.getMappedRule().equals("append_domain"))
-                    mappedValue = mappedValue + "@";
-              }
+                  return true;
+                }
+              } // if (attrName.equals(map.getAttrName()))
+            } // if (map.getName().equals(provider.getMapRefArray(mapRefsCount)))
+          } // for (int mapsCount = 0; mapsCount < maps.size(); mapsCount++)
+        } // for (int mapRefsCount = 0; mapRefsCount < provider.getMapRefArray().length; mapRefsCount++)
+      } // if ((provider.getProviderId().equals(spProviderId)) || provider.getProviderId().equals("*"))
+    } // for (int providersCount = 0; providersCount < providers.size(); providersCount++)
 
-              return true;
-            }
-          }
-        }
-      } // for (int count=0; count < attributeMap.getMapArray().length; count++)
-    } // for (int mapFilesCount = 0; mapFilesCount < mapFiles.size(); mapFilesCount++)
-
+    // No mappings found for the attribute
     return false;
   }
 
@@ -183,7 +194,16 @@ public class AttributeMap {
     try {
       // Load up the root map file
       AttributeMapDocument attrMapDoc = AttributeMapDocument.Factory.parse(new File(mapXMLFile));
-      mapFiles.add(attrMapDoc.getAttributeMap());
+
+      // Cache all the maps...
+      for (int c = 0; c < attrMapDoc.getAttributeMap().getMapArray().length; c++ ) {
+        maps.add(attrMapDoc.getAttributeMap().getMapArray(c));
+      }
+
+      // ...and providers
+      for (int c = 0; c < attrMapDoc.getAttributeMap().getProviderArray().length; c++ ) {
+        providers.add(attrMapDoc.getAttributeMap().getProviderArray(c));
+      }
 
       // Do we have any other map files to include?
       if (attrMapDoc.getAttributeMap().getIncludeArray() != null) {
