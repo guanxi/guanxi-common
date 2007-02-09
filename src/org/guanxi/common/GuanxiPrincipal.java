@@ -17,6 +17,9 @@
 /* CVS Header
    $Id$
    $Log$
+   Revision 1.4  2007/02/09 10:59:57  alistairskye
+   Added support for storing ServletContext for logout functionality
+
    Revision 1.3  2005/07/11 10:52:24  alistairskye
    Package restructure
 
@@ -40,10 +43,9 @@ public class GuanxiPrincipal implements Principal {
   private String id = null;
   private String providerID = null;
   private Object userData = null;
+  private ServletContext context = null;
 
   public GuanxiPrincipal() {}
-
-  public GuanxiPrincipal(ServletContext context) {}
 
   public void setName(String inName) {
     name = inName;
@@ -75,5 +77,13 @@ public class GuanxiPrincipal implements Principal {
 
   public Object getUserData() {
     return userData;
+  }
+
+  public void setServletContext(ServletContext context) {
+    this.context = context;
+  }
+
+  public ServletContext getServletContext() {
+    return context;
   }
 }
