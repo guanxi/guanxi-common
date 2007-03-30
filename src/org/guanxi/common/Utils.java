@@ -17,6 +17,9 @@
 /* CVS Header
    $Id$
    $Log$
+   Revision 1.14  2007/03/30 08:18:06  alistairskye
+   Updated to add SLASH and LINE_ENDING constants
+
    Revision 1.13  2007/01/16 08:44:18  alistairskye
    Tidied up imports
 
@@ -90,8 +93,12 @@ import java.io.FileInputStream;
  *
  * @author Alistair Young alistair@smo.uhi.ac.uk
  */
-public class Utils
-{
+public class Utils {
+  /** OS dependent path separator, e.g. / */
+  public static final String SLASH = System.getProperty("file.separator");
+  /** OS dependent line engine, e.g. \n */
+  public static final String LINE_ENDING = System.getProperty("line.separator");
+
   /**
    * Returns the parameters and their values from an HTTP request
    *
@@ -183,14 +190,11 @@ public class Utils
 
   public static void dumpXML(Logger log, String xml, String message) {
     log.debug("=======================================================" +
-              System.getProperty("line.separator") +
-              System.getProperty("line.separator") +
+              LINE_ENDING + LINE_ENDING +
               message +
-              System.getProperty("line.separator") +
-              System.getProperty("line.separator") +
+              LINE_ENDING + LINE_ENDING +
               xml +
-              System.getProperty("line.separator") +
-              System.getProperty("line.separator") +
+              LINE_ENDING + LINE_ENDING +
               "=======================================================");
   }
 
@@ -198,11 +202,11 @@ public class Utils
     // Get the logfile path and name from web.xml...
     String logDir = context.getInitParameter(Guanxi.LOGDIR_PARAMETER);
     // ...work out if it's relative to the webapp root...
-    if ((logDir.startsWith("WEB-INF")) || (logDir.startsWith(System.getProperty("file.separator") + "WEB-INF")))
+    if ((logDir.startsWith("WEB-INF")) || (logDir.startsWith(SLASH + "WEB-INF")))
       logDir = context.getRealPath(logDir);
     // ...tidy it up...
-    if (!logDir.endsWith(System.getProperty("file.separator")))
-      logDir += System.getProperty("file.separator");
+    if (!logDir.endsWith(SLASH))
+      logDir += SLASH;
     // ...and add the name of the log file
     String logFile = logDir + logFilename;
 
