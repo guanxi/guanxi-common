@@ -17,6 +17,9 @@
 /* CVS Header
    $Id$
    $Log$
+   Revision 1.26  2007/05/16 08:06:49  alistairskye
+   Added DEFAULT_FILTERS_CONFIG_DIR
+
    Revision 1.25  2007/02/09 11:00:30  alistairskye
    Added CONTEXT_ATTR_IDP_COOKIE_PREFIX, CONTEXT_ATTR_IDP_ID and CONTEXT_ATTR_IDP_COOKIE_NAME
 
@@ -122,6 +125,9 @@ public class Guanxi {
   /** Default location where the AuthCookieHandler implementations can find their config files */
   public static final String DEFAULT_AUTHCOOKIEHANDLER_CONFIG_DIR = "/WEB-INF/guanxi_idp/config/cookies/";
 
+  /** Default location where the IdP filter implementations can find their config files */
+  public static final String DEFAULT_FILTERS_CONFIG_DIR = "/WEB-INF/guanxi_idp/config/filters/";
+
   /** Default Attribute Release Policy (ARP) file. Attributors should put their policies in here */
   public static final String DEFAULT_ARP_FILE = DEFAULT_SHARED_CONFIG_DIR + "arp.xml";
 
@@ -164,6 +170,9 @@ public class Guanxi {
   public static final String CONTEXT_ATTR_GUARD_CONFIG = "CONTEXT_ATTR_GUARD_CONFIG";
   /** The servlet context attribute that holds the IdP's config object */
   public static final String CONTEXT_ATTR_IDP_CONFIG = "CONTEXT_ATTR_IDP_CONFIG";
+  /** The servlet context attribute that holds the filters config object */
+  public static final String CONTEXT_ATTR_FILTERS_CONFIG = "CONTEXT_ATTR_FILTERS_CONFIG";
+
 
   /** The servlet context attribute that holds the Guard's cookie prefix */
   public static final String CONTEXT_ATTR_GUARD_COOKIE_PREFIX = "CONTEXT_ATTR_GUARD_COOKIE_PREFIX";
