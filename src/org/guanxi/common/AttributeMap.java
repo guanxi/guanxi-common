@@ -17,6 +17,9 @@
 /* CVS Header
    $Id$
    $Log$
+   Revision 1.8  2007/05/24 11:12:56  alistairskye
+   Updated to allow paths relative to WEB-INF to be used for ARPs
+
    Revision 1.7  2007/01/25 11:16:34  alistairskye
    Now based on provderId groupings of mapping rules
 
@@ -47,6 +50,8 @@ import org.guanxi.xal.idp.AttributeMapDocument;
 import org.guanxi.xal.idp.Map;
 import org.guanxi.xal.idp.MapProvider;
 import org.apache.xmlbeans.XmlException;
+
+import javax.servlet.ServletContext;
 import java.io.File;
 import java.io.IOException;
 import java.util.regex.Pattern;
@@ -64,7 +69,8 @@ public class AttributeMap {
   /** Our provider groupings and mapping rules */
   private Vector maps = null;
   private Vector providers = null;
-
+  /** Servlet context for resolving relative paths */
+  private ServletContext context = null;
   /** The new name of the attribute passed to map() */
   private String mappedName = null;
   /** The new value of the attribute passed to map() */
@@ -74,9 +80,11 @@ public class AttributeMap {
    * Default constructor
    *
    * @param mapXMLFile Full path and name of the map file to use
+   * @param context ServletContext
    * @throws GuanxiException if an error occurred parsing the map file
    */
-  public AttributeMap(String mapXMLFile) throws GuanxiException {
+  public AttributeMap(String mapXMLFile, ServletContext context) throws GuanxiException {
+    this.context = context;
     maps = new Vector();
     providers = new Vector();
     loadMaps(mapXMLFile);
@@ -191,9 +199,18 @@ public class AttributeMap {
    * @throws GuanxiException if an error occurs
    */
   private void loadMaps(String mapXMLFile) throws GuanxiException {
+    // Sort out the path to the ARP file
+    String mapFile = null;
+    if ((mapXMLFile.startsWith("WEB-INF")) ||
+        (mapXMLFile.startsWith("/WEB-INF"))) {
+      mapFile = context.getRealPath(mapXMLFile);
+    }
+    else
+      mapFile = mapXMLFile;
+
     try {
       // Load up the root map file
-      AttributeMapDocument attrMapDoc = AttributeMapDocument.Factory.parse(new File(mapXMLFile));
+      AttributeMapDocument attrMapDoc = AttributeMapDocument.Factory.parse(new File(mapFile));
 
       // Cache all the maps...
       for (int c = 0; c < attrMapDoc.getAttributeMap().getMapArray().length; c++ ) {
