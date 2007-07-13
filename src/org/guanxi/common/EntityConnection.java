@@ -17,6 +17,9 @@
 /* CVS Header
    $Id$
    $Log$
+   Revision 1.7  2007/07/13 11:27:06  alistairskye
+   Updated getContentAsString as some Guard services were not returning content length.
+
    Revision 1.6  2006/11/22 14:53:47  alistairskye
    PROBING_ON and PROBING_OFF moved from Engine
    Added:
@@ -55,6 +58,7 @@ import java.net.HttpURLConnection;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.ByteArrayInputStream;
+import java.io.BufferedInputStream;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 import java.security.cert.CertificateFactory;
@@ -350,26 +354,18 @@ public class EntityConnection {
    * @return String containing the content from the connection
    */
   public String getContentAsString() {
-    InputStream in = null;
-    int contentLength;
+    BufferedInputStream bin = null;
 
     try {
       if (secure) {
-        in = httpsURL.getInputStream();
-        contentLength = httpsURL.getContentLength();
+        bin = new BufferedInputStream(httpsURL.getInputStream());
       }
       else {
-        in = httpURL.getInputStream();
-        contentLength = httpURL.getContentLength();
+        bin = new BufferedInputStream(httpURL.getInputStream());
       }
 
-      byte[] bytes = new byte[contentLength];
-      int bytesRead = 0;
-      while (bytesRead < contentLength) {
-        bytesRead += in.read(bytes, bytesRead, contentLength - bytesRead);
-      }
-      
-      in.close();
+      byte[] bytes = new byte[bin.available()];
+      bin.read(bytes);
       
       return new String(bytes);
     }
