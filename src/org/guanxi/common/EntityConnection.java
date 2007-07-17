@@ -17,6 +17,9 @@
 /* CVS Header
    $Id$
    $Log$
+   Revision 1.8  2007/07/17 10:59:08  alistairskye
+   getContentAsString() now closes resources
+
    Revision 1.7  2007/07/13 11:27:06  alistairskye
    Updated getContentAsString as some Guard services were not returning content length.
 
@@ -366,6 +369,7 @@ public class EntityConnection {
 
       byte[] bytes = new byte[bin.available()];
       bin.read(bytes);
+      bin.close();
       
       return new String(bytes);
     }
