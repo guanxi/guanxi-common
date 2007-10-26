@@ -17,6 +17,9 @@
 /* CVS Header
    $Id$
    $Log$
+   Revision 1.6  2007/10/26 08:05:25  alistairskye
+   Added TARGET_FORM_PARAM
+
    Revision 1.5  2007/01/24 09:23:06  alistairskye
    Updated SAMLP_SUCCESS
 
@@ -48,6 +51,7 @@ public class Shibboleth {
   // Initial GET request parameters
   public static final String SHIRE = "shire";
   public static final String TARGET = "target";
+  public static final String TARGET_FORM_PARAM = "TARGET";
   public static final String TIME = "time";
   public static final String PROVIDER_ID = "providerId";
 
