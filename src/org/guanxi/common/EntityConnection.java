@@ -17,6 +17,9 @@
 /* CVS Header
    $Id$
    $Log$
+   Revision 1.9  2007/11/27 12:28:28  alistairskye
+   Added setAuthentication()
+
    Revision 1.8  2007/07/17 10:59:08  alistairskye
    getContentAsString() now closes resources
 
@@ -375,6 +378,23 @@ public class EntityConnection {
     }
     catch(Exception e) {
       return null;
+    }
+  }
+
+  /**
+   * Adds authentication information to the request.
+   *
+   * @param username Username
+   * @param password Password
+   */
+  public void setAuthentication(String username, String password) {
+    String authentication = (new sun.misc.BASE64Encoder()).encode((username + ":" + password).getBytes());
+    
+    if (secure) {
+      httpsURL.setRequestProperty("Authorization", "Basic " + authentication);
+    }
+    else {
+      httpURL.setRequestProperty("Authorization", "Basic " + authentication);
     }
   }
 }
