@@ -17,6 +17,9 @@
 /* CVS Header
    $Id$
    $Log$
+   Revision 1.27  2008/01/18 15:53:15  alistairskye
+   Added CONTEXT_ATTR_X509_CHAIN
+
    Revision 1.26  2007/05/16 08:06:49  alistairskye
    Added DEFAULT_FILTERS_CONFIG_DIR
 
@@ -172,6 +175,8 @@ public class Guanxi {
   public static final String CONTEXT_ATTR_IDP_CONFIG = "CONTEXT_ATTR_IDP_CONFIG";
   /** The servlet context attribute that holds the filters config object */
   public static final String CONTEXT_ATTR_FILTERS_CONFIG = "CONTEXT_ATTR_FILTERS_CONFIG";
+
+  public static final String CONTEXT_ATTR_X509_CHAIN = "CONTEXT_ATTR_X509_CHAIN";
 
 
   /** The servlet context attribute that holds the Guard's cookie prefix */
