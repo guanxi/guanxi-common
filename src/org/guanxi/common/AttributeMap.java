@@ -17,6 +17,9 @@
 /* CVS Header
    $Id$
    $Log$
+   Revision 1.9  2008/01/18 15:48:50  alistairskye
+   Updated to support mapping a single attribute multiple times
+
    Revision 1.8  2007/05/24 11:12:56  alistairskye
    Updated to allow paths relative to WEB-INF to be used for ARPs
 
@@ -71,10 +74,10 @@ public class AttributeMap {
   private Vector providers = null;
   /** Servlet context for resolving relative paths */
   private ServletContext context = null;
-  /** The new name of the attribute passed to map() */
-  private String mappedName = null;
-  /** The new value of the attribute passed to map() */
-  private String mappedValue = null;
+  /** The new names of the attribute passed to map() */
+  private Vector mappedNames = null;
+  /** The new values of the attribute passed to map() */
+  private Vector mappedValues = null;
 
   /**
    * Default constructor
@@ -87,6 +90,8 @@ public class AttributeMap {
     this.context = context;
     maps = new Vector();
     providers = new Vector();
+    mappedNames = new Vector();
+    mappedValues = new Vector();
     loadMaps(mapXMLFile);
   }
 
@@ -111,8 +116,13 @@ public class AttributeMap {
    * @return true if the attribute was mapped otherwise false
    */
   public boolean map(String spProviderId, String attrName, String attrValue) {
+    int index = -1;
+    boolean mapped = false;
     Pattern pattern = null;
     Matcher matcher = null;
+
+    mappedNames.clear();
+    mappedValues.clear();
 
     // Look for provider groups that are either specific to this providerId or wildcard
     for (int providersCount = 0; providersCount < providers.size(); providersCount++) {
@@ -132,35 +142,37 @@ public class AttributeMap {
 
                 // Match the value of the attribute before mapping
                 if (matcher.find()) {
+                  index++;
+                  mapped = true;
+                  
                   // Rename the attribute...
                   if (map.getMappedName() != null)
-                    mappedName = map.getMappedName();
+                    mappedNames.add(map.getMappedName());
                   else
-                    mappedName = attrName;
+                    mappedNames.add(attrName);
 
                   // Attribute value is what it says in the map...
                   if (map.getMappedValue() != null)
-                    mappedValue = map.getMappedValue();
+                    mappedValues.add(map.getMappedValue());
                   // ...or just use the original attribute value
                   else
-                    mappedValue = attrValue;
+                    mappedValues.add(attrValue);
 
                   // ...and transform the value if required
                   if (map.getMappedRule() != null) {
-
                     // Encrypt the attribute value
                     if (map.getMappedRule().equals("encrypt"))
-                      mappedValue = SecUtils.getInstance().encrypt(mappedValue);
+                      mappedValues.set(index, SecUtils.getInstance().encrypt((String)mappedValues.get(index)));
 
                     /* Append the domain to the attribute value by signalling to the
                      * attributor that it needs to add the domain.
                      */
                     if (map.getMappedRule().equals("append_domain"))
-                        mappedValue = mappedValue + "@";
+                      mappedValues.set(index, mappedValues.get(index) + "@");
                   }
 
-                  return true;
-                }
+                  //return true;
+                } // if (matcher.find()) {
               } // if (attrName.equals(map.getAttrName()))
             } // if (map.getName().equals(provider.getMapRefArray(mapRefsCount)))
           } // for (int mapsCount = 0; mapsCount < maps.size(); mapsCount++)
@@ -169,7 +181,7 @@ public class AttributeMap {
     } // for (int providersCount = 0; providersCount < providers.size(); providersCount++)
 
     // No mappings found for the attribute
-    return false;
+    return mapped;
   }
 
   /**
@@ -178,8 +190,8 @@ public class AttributeMap {
    * @return the new name of the attribute passed to the map method
    * or null if map has not been called or no mappings were found.
    */
-  public String getMappedName() {
-    return mappedName;
+  public String[] getMappedNames() {
+    return (String[])mappedNames.toArray(new String[mappedNames.size()]);
   }
 
   /**
@@ -188,8 +200,8 @@ public class AttributeMap {
    * @return the new value of the attribute passed to the map method
    * or null if map has not been called or no mappings were found.
    */
-  public String getMappedValue() {
-    return mappedValue;
+  public String[] getMappedValues() {
+    return (String[])mappedValues.toArray(new String[mappedValues.size()]);
   }
 
   /**
