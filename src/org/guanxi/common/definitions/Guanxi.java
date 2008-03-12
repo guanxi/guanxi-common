@@ -17,6 +17,9 @@
 /* CVS Header
    $Id$
    $Log$
+   Revision 1.28  2008/03/12 16:50:20  alistairskye
+   Added IdP config definitions
+
    Revision 1.27  2008/01/18 15:53:15  alistairskye
    Added CONTEXT_ATTR_X509_CHAIN
 
@@ -173,6 +176,8 @@ public class Guanxi {
   public static final String CONTEXT_ATTR_GUARD_CONFIG = "CONTEXT_ATTR_GUARD_CONFIG";
   /** The servlet context attribute that holds the IdP's config object */
   public static final String CONTEXT_ATTR_IDP_CONFIG = "CONTEXT_ATTR_IDP_CONFIG";
+  /** The servlet context attribute that holds the IdP's config document object */
+  public static final String CONTEXT_ATTR_IDP_CONFIG_DOC = "CONTEXT_ATTR_IDP_CONFIG_DOC";
   /** The servlet context attribute that holds the filters config object */
   public static final String CONTEXT_ATTR_FILTERS_CONFIG = "CONTEXT_ATTR_FILTERS_CONFIG";
 
@@ -192,4 +197,15 @@ public class Guanxi {
   public static final String CONTEXT_ATTR_IDP_ID = "CONTEXT_ATTR_IDP_ID";
   /** The servlet context attribute that holds the full cookie name of the IdP */
   public static final String CONTEXT_ATTR_IDP_COOKIE_NAME = "CONTEXT_ATTR_IDP_COOKIE_NAME";
+  /** The servlet context attribute that holds the cookie domain of the IdP */
+  public static final String CONTEXT_ATTR_IDP_COOKIE_DOMAIN = "CONTEXT_ATTR_IDP_COOKIE_DOMAIN";
+  /** The servlet context attribute that holds the cookie age of the IdP */
+  public static final String CONTEXT_ATTR_IDP_COOKIE_AGE = "CONTEXT_ATTR_IDP_COOKIE_AGE";
+  /** The request attribute that holds the Guanxi principal for the IdP */
+  public static final String REQUEST_ATTR_IDP_PRINCIPAL = "REQUEST_ATTR_IDP_PRINCIPAL";
+  /** The request attribute that determines whether the application in which the IdP is embedded has
+    *  authenticated the user via a cookie */
+  public static final String REQUEST_ATTR_IDP_COOKIE_AUTHENTICATED = "REQUEST_ATTR_IDP_COOKIE_AUTHENTICATED";
+  /** The name of the default authenticator page for the IdP */
+  public static final String DEFAULT_AUTH_PAGE_MARKER = "__DEFAULT__";
 }
