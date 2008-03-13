@@ -5,7 +5,7 @@
   <parent>
     <artifactId>guanxi-base</artifactId>
     <groupId>org.guanxi</groupId>
-    <version>1.0</version>
+    <version>2.0</version>
     <relativePath>../Core/pom.xml</relativePath>
   </parent>
 
