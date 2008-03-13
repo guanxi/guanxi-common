@@ -10,26 +10,9 @@
 //:
 //: The Original Code is Guanxi (http://www.guanxi.uhi.ac.uk).
 //:
-//: The Initial Developer of the Original Code is Alistair Young alistair@smo.uhi.ac.uk.
-//: Portions created by SMO WWW Development Group are Copyright (C) 2005 SMO WWW Development Group.
+//: The Initial Developer of the Original Code is Alistair Young alistair@codebrane.com
 //: All Rights Reserved.
 //:
-/* CVS Header
-   $Id$
-   $Log$
-   Revision 1.4  2006/11/22 14:48:22  alistairskye
-   Added GUARD_CERT_PROBE_FAILED and MISSING_PARAM
-
-   Revision 1.3  2005/08/16 14:57:51  alistairskye
-   Added license
-
-   Revision 1.2  2005/08/16 14:56:57  alistairskye
-   Added isError()
-
-   Revision 1.1  2005/08/16 12:36:53  alistairskye
-   Errors class
-
-*/
 
 package org.guanxi.common;
 

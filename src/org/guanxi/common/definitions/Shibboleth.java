@@ -10,35 +10,9 @@
 //:
 //: The Original Code is Guanxi (http://www.guanxi.uhi.ac.uk).
 //:
-//: The Initial Developer of the Original Code is Alistair Young alistair@smo.uhi.ac.uk.
-//: Portions created by SMO WWW Development Group are Copyright (C) 2005 SMO WWW Development Group.
+//: The Initial Developer of the Original Code is Alistair Young alistair@codebrane.com
 //: All Rights Reserved.
 //:
-/* CVS Header
-   $Id$
-   $Log$
-   Revision 1.6  2007/10/26 08:05:25  alistairskye
-   Added TARGET_FORM_PARAM
-
-   Revision 1.5  2007/01/24 09:23:06  alistairskye
-   Updated SAMLP_SUCCESS
-
-   Revision 1.4  2007/01/17 13:09:28  alistairskye
-   Updated SAMLP_SUCCESS to solve namespace problems in IdP.
-
-   Revision 1.3  2006/11/24 11:41:30  alistairskye
-   Added more namespace and prefix definitions
-
-   Revision 1.2  2005/07/11 10:51:34  alistairskye
-   Package restructure
-
-   Revision 1.1  2005/05/04 13:28:14  alistairskye
-   Moved here from org.Guanxi.SAMUEL.Definitions
-
-   Revision 1.2  2005/04/15 11:58:35  alistairskye
-   no message
-
-*/
 
 package org.guanxi.common.definitions;
 

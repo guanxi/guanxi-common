@@ -10,47 +10,9 @@
 //:
 //: The Original Code is Guanxi (http://www.guanxi.uhi.ac.uk).
 //:
-//: The Initial Developer of the Original Code is Alistair Young alistair@smo.uhi.ac.uk.
-//: Portions created by SMO WWW Development Group are Copyright (C) 2005 SMO WWW Development Group.
+//: The Initial Developer of the Original Code is Alistair Young alistair@codebrane.com
 //: All Rights Reserved.
 //:
-/* CVS Header
-   $Id$
-   $Log$
-   Revision 1.9  2007/11/27 12:28:28  alistairskye
-   Added setAuthentication()
-
-   Revision 1.8  2007/07/17 10:59:08  alistairskye
-   getContentAsString() now closes resources
-
-   Revision 1.7  2007/07/13 11:27:06  alistairskye
-   Updated getContentAsString as some Guard services were not returning content length.
-
-   Revision 1.6  2006/11/22 14:53:47  alistairskye
-   PROBING_ON and PROBING_OFF moved from Engine
-   Added:
-   getServerCertChain()
-   getServerCertificate()
-   getContentLength()
-   getContentAsString()
-
-   Revision 1.5  2006/11/20 09:29:24  alistairskye
-   Updated javadoc on constructor
-
-   Revision 1.4  2006/07/26 09:16:20  alistairskye
-   Added getServerCertificates(), disconnect() and javadocs.
-   Added new boolean parameter to the constructor to allow for probing servers for their certificates. This tells EntityConnection to use a special Guanxi TrustManager that allows HTTPS connections in order to inspect the certificate
-
-   Revision 1.3  2006/05/16 09:04:58  alistairskye
-   Added setRequestProperty(String, String)
-
-   Revision 1.2  2006/05/04 15:24:37  alistairskye
-   Added new constructor arguments. Keystore path/name is now passed in instead of path to keystore directory. Trust store and password also now passed in.
-
-   Revision 1.1  2006/04/06 11:06:05  alistairskye
-   Class to wrap Http(s)URLConnection objects and use the custom SSL management if required
-
-*/
 
 package org.guanxi.common;
 

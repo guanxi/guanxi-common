@@ -10,33 +10,9 @@
 //:
 //: The Original Code is Guanxi (http://www.guanxi.uhi.ac.uk).
 //:
-//: The Initial Developer of the Original Code is Alistair Young alistair@smo.uhi.ac.uk.
-//: Portions created by SMO WWW Development Group are Copyright (C) 2005 SMO WWW Development Group.
+//: The Initial Developer of the Original Code is Alistair Young alistair@codebrane.com
 //: All Rights Reserved.
 //:
-/* CVS Header
-   $Id$
-   $Log$
-   Revision 1.6  2007/01/04 13:41:18  alistairskye
-   Updated javadoc
-
-   Revision 1.5  2007/01/04 13:38:25  alistairskye
-   Rewritten to remove SAX parsing of raw SOAP message from Engine.
-   Now stores original SAML Response as a String.
-
-   Revision 1.4  2006/01/23 12:53:50  alistairskye
-   Updated to use SAMUEL parser properties
-
-   Revision 1.3  2005/08/12 12:48:31  alistairskye
-   Added license
-
-   Revision 1.2  2005/08/12 09:03:14  alistairskye
-   Added SAML attribute gathering
-
-   Revision 1.1  2005/08/11 14:18:52  alistairskye
-   SAML attribute parser and container
-
-*/
 
 package org.guanxi.common;
 

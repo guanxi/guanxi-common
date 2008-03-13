@@ -10,23 +10,9 @@
 //:
 //: The Original Code is Guanxi (http://www.guanxi.uhi.ac.uk).
 //:
-//: The Initial Developer of the Original Code is Alistair Young alistair@smo.uhi.ac.uk.
-//: Portions created by SMO WWW Development Group are Copyright (C) 2005 SMO WWW Development Group.
+//: The Initial Developer of the Original Code is Alistair Young alistair@codebrane.com
 //: All Rights Reserved.
 //:
-/* CVS Header
-   $Id$
-   $Log$
-   Revision 1.4  2007/02/09 10:59:57  alistairskye
-   Added support for storing ServletContext for logout functionality
-
-   Revision 1.3  2005/07/11 10:52:24  alistairskye
-   Package restructure
-
-   Revision 1.2  2005/04/15 10:00:56  alistairskye
-   License updated
-
-*/
 
 package org.guanxi.common;
 

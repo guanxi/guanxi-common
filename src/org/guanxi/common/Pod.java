@@ -10,40 +10,9 @@
 //:
 //: The Original Code is Guanxi (http://www.guanxi.uhi.ac.uk).
 //:
-//: The Initial Developer of the Original Code is Alistair Young alistair@smo.uhi.ac.uk.
-//: Portions created by SMO WWW Development Group are Copyright (C) 2005 SMO WWW Development Group.
+//: The Initial Developer of the Original Code is Alistair Young alistair@codebrane.com
 //: All Rights Reserved.
 //:
-/* CVS Header
-   $Id$
-   $Log$
-   Revision 1.8  2007/01/17 17:36:32  alistairskye
-   Added ServletContext storing
-
-   Revision 1.7  2007/01/04 13:30:51  alistairskye
-   Changed get/setAttributes() to get/setBag().
-   Updated javadoc.
-
-   Revision 1.6  2006/11/23 14:31:22  alistairskye
-   Added support for request scheme and hostname to fix HTTPS bug when Guard comms are using HTTPS
-
-   Revision 1.5  2006/11/17 14:55:23  alistairskye
-   Updated setRequestParameters() to fix bug when adding extra request parameters for non spring applications
-
-   Revision 1.4  2006/05/18 13:30:51  alistairskye
-   Removed original request.
-   Now only stores parameters from original request
-
-   Revision 1.3  2006/05/18 09:24:23  alistairskye
-   Now stores original request
-
-   Revision 1.2  2005/08/12 12:48:31  alistairskye
-   Added license
-
-   Revision 1.1  2005/08/11 14:17:47  alistairskye
-   Class for holding session specific information
-
-*/
 
 package org.guanxi.common;
 

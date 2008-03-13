@@ -10,53 +10,9 @@
 //:
 //: The Original Code is Guanxi (http://www.guanxi.uhi.ac.uk).
 //:
-//: The Initial Developer of the Original Code is Alistair Young alistair@smo.uhi.ac.uk.
-//: Portions created by SMO WWW Development Group are Copyright (C) 2005 SMO WWW Development Group.
+//: The Initial Developer of the Original Code is Alistair Young alistair@codebrane.com
 //: All Rights Reserved.
 //:
-/* CVS Header
-   $Id$
-   $Log$
-   Revision 1.14  2007/03/30 08:18:06  alistairskye
-   Updated to add SLASH and LINE_ENDING constants
-
-   Revision 1.13  2007/01/16 08:44:18  alistairskye
-   Tidied up imports
-
-   Revision 1.12  2006/11/24 10:50:44  alistairskye
-   Added createNCNameID()
-
-   Revision 1.11  2006/04/05 12:18:27  alistairskye
-   Added zipDirectory()
-
-   Revision 1.10  2005/11/07 09:38:23  alistairskye
-   initLogger takes log filename instead of ServletConfig now, to allow plugins to use it
-
-   Revision 1.9  2005/11/03 16:34:00  alistairskye
-   Added initLogger()
-
-   Revision 1.8  2005/08/10 13:05:42  alistairskye
-   Added dumpXML()
-
-   Revision 1.7  2005/07/22 10:42:17  alistairskye
-   Added getConfigOption()
-
-   Revision 1.6  2005/07/11 10:52:22  alistairskye
-   Package restructure
-
-   Revision 1.5  2005/06/21 09:26:01  alistairskye
-   Modified decodeBase64() to return a String
-
-   Revision 1.4  2005/06/21 09:14:40  alistairskye
-   Added decodeBase64()
-
-   Revision 1.3  2005/05/04 13:33:55  alistairskye
-   base64() moved here from org.Guanxi.SAMUEL.Utils.Utils
-
-   Revision 1.2  2005/04/15 10:02:41  alistairskye
-   License updated
-
-*/
 
 package org.guanxi.common;
 

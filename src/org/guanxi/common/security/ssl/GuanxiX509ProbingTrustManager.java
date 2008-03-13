@@ -10,20 +10,9 @@
 //:
 //: The Original Code is Guanxi (http://www.guanxi.uhi.ac.uk).
 //:
-//: The Initial Developer of the Original Code is Alistair Young alistair@smo.uhi.ac.uk.
-//: Portions created by SMO WWW Development Group are Copyright (C) 2005 SMO WWW Development Group.
+//: The Initial Developer of the Original Code is Alistair Young alistair@codebrane.com
 //: All Rights Reserved.
 //:
-/* CVS Header
-   $Id$
-   $Log$
-   Revision 1.2  2006/07/26 09:38:36  alistairskye
-   Added license
-
-   Revision 1.1  2006/07/26 09:37:19  alistairskye
-   X509TrustManager to allow probing for server certs via HTTPS
-
-*/
 
 package org.guanxi.common.security.ssl;
 

@@ -10,23 +10,9 @@
 //:
 //: The Original Code is Guanxi (http://www.guanxi.uhi.ac.uk).
 //:
-//: The Initial Developer of the Original Code is Alistair Young alistair@smo.uhi.ac.uk.
-//: Portions created by SMO WWW Development Group are Copyright (C) 2005 SMO WWW Development Group.
+//: The Initial Developer of the Original Code is Alistair Young alistair@codebrane.com
 //: All Rights Reserved.
 //:
-/* CVS Header
-   $Id$
-   $Log$
-   Revision 1.2  2005/07/11 10:52:05  alistairskye
-   Package restructure
-
-   Revision 1.1  2005/05/04 13:29:14  alistairskye
-   Moved here from org.Guanxi.SAMUEL.Utils
-
-   Revision 1.2  2005/04/15 12:00:44  alistairskye
-   no message
-
-*/
 
 package org.guanxi.common.security;
 

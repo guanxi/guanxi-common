@@ -10,29 +10,9 @@
 //:
 //: The Original Code is Guanxi (http://www.guanxi.uhi.ac.uk).
 //:
-//: The Initial Developer of the Original Code is Alistair Young alistair@smo.uhi.ac.uk.
-//: Portions created by SMO WWW Development Group are Copyright (C) 2005 SMO WWW Development Group.
+//: The Initial Developer of the Original Code is Alistair Young alistair@codebrane.com
 //: All Rights Reserved.
 //:
-/* CVS Header
-   $Id$
-   $Log$
-   Revision 1.5  2006/07/26 09:35:37  alistairskye
-   Updated getTrustManagers to return GuanxiX509ProbingTrustManager instead of GuanxiX509TrustManager if in probing mode
-
-   Revision 1.4  2006/07/26 09:27:24  alistairskye
-   Updated javadocs
-
-   Revision 1.3  2006/07/26 09:17:51  alistairskye
-   Added new boolean parameter to getTrustManagers(). If this is true then the method will return a special Guanxi TrustManager to allow for probing servers for their certificates
-
-   Revision 1.2  2006/05/04 15:25:17  alistairskye
-   Updated getKeyManagers() to work on keystore directly instead of building the name from path and guard id.
-
-   Revision 1.1  2006/04/05 14:36:42  alistairskye
-   Custom SSL layer for identity masquerading in the SP
-
-*/
 
 package org.guanxi.common.security.ssl;
 

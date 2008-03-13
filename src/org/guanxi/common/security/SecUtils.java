@@ -10,62 +10,9 @@
 //:
 //: The Original Code is Guanxi (http://www.guanxi.uhi.ac.uk).
 //:
-//: The Initial Developer of the Original Code is Alistair Young alistair@smo.uhi.ac.uk.
-//: Portions created by SMO WWW Development Group are Copyright (C) 2005 SMO WWW Development Group.
+//: The Initial Developer of the Original Code is Alistair Young alistair@codebrane.com
 //: All Rights Reserved.
 //:
-/* CVS Header
-   $Id$
-   $Log$
-   Revision 1.15  2007/01/24 09:22:26  alistairskye
-   Updated sign() to provide correct c14n
-
-   Revision 1.14  2007/01/22 14:31:06  alistairskye
-   Updated sign() to throw GuanxiException
-
-   Revision 1.13  2007/01/16 10:18:21  alistairskye
-   Updated createSelfSignedKeystore() for latest BouncyCastle
-
-   Revision 1.12  2007/01/12 13:44:32  alistairskye
-   Fixed bug where it synchronising on SOAPUtils
-
-   Revision 1.11  2006/11/27 10:40:35  alistairskye
-   Added createTrustStore()
-
-   Revision 1.10  2006/11/24 13:31:42  alistairskye
-   Modified sign() to use SecUtilsConfig
-
-   Revision 1.9  2006/11/22 14:50:35  alistairskye
-   Removed unused import
-
-   Revision 1.8  2006/11/22 14:49:20  alistairskye
-   Added createSelfSignedKeystore()
-
-   Revision 1.7  2005/10/20 16:06:46  alistairskye
-   Added encrypt()
-
-   Revision 1.6  2005/08/16 10:34:50  alistairskye
-   Changed sign() to use XUtils.getNodeValue(Node, String)
-
-   Revision 1.5  2005/07/19 14:16:41  alistairskye
-   Modified sign() to use new namespace aware org.guanxi.samuel.utils.XUtils
-
-   Revision 1.4  2005/07/18 15:52:01  alistairskye
-   Added urn:guanxi:idp namespace to sign()
-
-   Revision 1.3  2005/07/11 10:52:05  alistairskye
-   Package restructure
-
-   Revision 1.2  2005/05/11 13:11:53  alistairskye
-   Updated sign() to use new keyType in configNode to support DSA/RSA
-
-   Revision 1.1  2005/05/04 13:29:00  alistairskye
-   Moved here from org.Guanxi.SAMUEL.Utils
-
-   Revision 1.1  2005/04/28 13:32:09  alistairskye
-   Security utils for SAMUEL generated SAML messages
-
-*/
 
 package org.guanxi.common.security;
 

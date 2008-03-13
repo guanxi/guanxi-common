@@ -10,41 +10,9 @@
 //:
 //: The Original Code is Guanxi (http://www.guanxi.uhi.ac.uk).
 //:
-//: The Initial Developer of the Original Code is Alistair Young alistair@smo.uhi.ac.uk.
-//: Portions created by SMO WWW Development Group are Copyright (C) 2005 SMO WWW Development Group.
+//: The Initial Developer of the Original Code is Alistair Young alistair@codebrane.com
 //: All Rights Reserved.
 //:
-/* CVS Header
-   $Id$
-   $Log$
-   Revision 1.9  2008/01/18 15:48:50  alistairskye
-   Updated to support mapping a single attribute multiple times
-
-   Revision 1.8  2007/05/24 11:12:56  alistairskye
-   Updated to allow paths relative to WEB-INF to be used for ARPs
-
-   Revision 1.7  2007/01/25 11:16:34  alistairskye
-   Now based on provderId groupings of mapping rules
-
-   Revision 1.6  2007/01/25 08:58:21  alistairskye
-   Added support for chaining map files
-
-   Revision 1.5  2007/01/16 09:26:19  alistairskye
-   Updated to use XMLBeans
-
-   Revision 1.4  2006/08/30 12:27:45  alistairskye
-   Updated to provide mapping to support eduPersonPrincipalName
-
-   Revision 1.3  2006/04/05 12:27:53  alistairskye
-   Updated to allow passthrough of mapped attribute's original value if no value rules are specified.
-
-   Revision 1.2  2005/10/20 16:09:23  alistairskye
-   Added support for mapping attributes to rules
-
-   Revision 1.1  2005/09/19 12:09:28  alistairskye
-   Class for mapping attributes from one form/value to another
-
-*/
 
 package org.guanxi.common;
 
