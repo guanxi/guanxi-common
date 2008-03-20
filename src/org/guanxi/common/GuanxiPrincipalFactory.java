@@ -17,4 +17,6 @@ public interface GuanxiPrincipalFactory {
    * @return GuanxiPrincipal configured for a particular profile
    */
   public GuanxiPrincipal createNewGuanxiPrincipal(HttpServletRequest request);
+
+  public String getCookieName();
 }
