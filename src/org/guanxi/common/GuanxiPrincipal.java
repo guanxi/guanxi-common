@@ -16,22 +16,28 @@
 
 package org.guanxi.common;
 
-import javax.servlet.ServletContext;
 import java.security.Principal;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
- * <font size=5><b></b></font>
+ * <font size=5><b>Represents a user within a particular profile session</b></font>
  *
- * @author Alistair Young alistair@smo.uhi.ac.uk
+ * @author Alistair Young alistair@codebrane.com
  */
 public class GuanxiPrincipal implements Principal {
+  /** The username from the authentication event */
   private String name = null;
-  private String id = null;
-  private String providerID = null;
-  private Object userData = null;
-  private ServletContext context = null;
+  /** A unique ID that identifies this principal */
+  private String uniqueId = null;
+  /** The ID of the relying party with which this principal is associated */
+  private String relyingPartyID = null;
+  /** Private storage area for profile specific information */
+  private Map<String, Object> privateProfileData = null;
 
-  public GuanxiPrincipal() {}
+  public GuanxiPrincipal() {
+    privateProfileData = new HashMap<String, Object>();
+  }
 
   public void setName(String inName) {
     name = inName;
@@ -41,35 +47,31 @@ public class GuanxiPrincipal implements Principal {
     return name;
   }
 
-  public void setID(String inID) {
-    id = inID;
+  public void setUniqueId(String uniqueId) {
+    this.uniqueId = uniqueId;
   }
 
-  public String getID() {
-    return id;
+  public String getUniqueId() {
+    return uniqueId;
   }
 
-  public void setProviderID(String inProviderID) {
-    providerID = inProviderID;
+  public void addPrivateProfileDataEntry(String key, Object value) {
+    privateProfileData.put(key, value);
   }
 
-  public String getProviderID() {
-    return providerID;
+  public Object getPrivateProfileDataEntry(String key) {
+    return privateProfileData.get(key);
   }
 
-  public void setUserData(String inUserData) {
-    userData = inUserData;
+  public Map getPrivateProfileData() {
+    return privateProfileData;
   }
 
-  public Object getUserData() {
-    return userData;
+  public String getRelyingPartyID() {
+    return relyingPartyID;
   }
 
-  public void setServletContext(ServletContext context) {
-    this.context = context;
-  }
-
-  public ServletContext getServletContext() {
-    return context;
+  public void setRelyingPartyID(String relyingPartyID) {
+    this.relyingPartyID = relyingPartyID;
   }
 }
