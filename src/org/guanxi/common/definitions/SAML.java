@@ -23,4 +23,7 @@ public class SAML {
 
   // Namespaces
   public static final String NS_SAML_ASSERTION = "urn:oasis:names:tc:SAML:1.0:assertion";
+
+  // Bindings
+  public static final String BROWSER_POST_BINDING = "urn:oasis:names:tc:SAML:1.0:profiles:browser-post";
 }
