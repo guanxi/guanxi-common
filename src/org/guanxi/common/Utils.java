@@ -27,6 +27,8 @@ import org.apache.log4j.RollingFileAppender;
 import org.apache.log4j.xml.DOMConfigurator;
 import org.guanxi.common.definitions.Guanxi;
 import org.guanxi.common.definitions.Logging;
+import org.guanxi.xal.saml_2_0.metadata.EntitiesDescriptorDocument;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.ServletContext;
 import javax.xml.transform.dom.DOMSource;
@@ -39,10 +41,9 @@ import java.util.Enumeration;
 import java.util.zip.ZipOutputStream;
 import java.util.zip.ZipEntry;
 import java.rmi.server.UID;
-import java.io.StringWriter;
-import java.io.IOException;
-import java.io.File;
-import java.io.FileInputStream;
+import java.io.*;
+import java.net.HttpURLConnection;
+import java.net.URL;
 
 /**
  * <font size=5><b></b></font>
@@ -236,5 +237,31 @@ public class Utils {
     id = id.replaceAll(":", "-");
     id = "GUANXI-" + id;
     return id;
+  }
+
+  /**
+   * Parses a SAML2 Metadata document
+   *
+   * @param metadataURL The url of the metadata
+   * @return EntitiesDescriptorDocument for the metadata
+   * @throws GuanxiException if an error occurs
+   */
+  public static EntitiesDescriptorDocument parseSAML2Metadata(String metadataURL) throws GuanxiException {
+    try {
+      HttpURLConnection httpURL = (HttpURLConnection)new URL(metadataURL).openConnection();
+      InputStream in = httpURL.getInputStream();
+      BufferedReader buffer = new BufferedReader(new InputStreamReader(in));
+      StringBuffer stringBuffer = new StringBuffer();
+      String line = null;
+      while ((line = buffer.readLine()) != null) {
+        stringBuffer.append(line);
+      }
+      in.close();
+
+      return EntitiesDescriptorDocument.Factory.parse(stringBuffer.toString());
+    }
+    catch(Exception e) {
+      throw new GuanxiException(e);
+    }
   }
 }
