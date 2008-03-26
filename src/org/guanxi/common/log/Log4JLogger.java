@@ -46,7 +46,7 @@ public class Log4JLogger {
   public Logger initLogger(Log4JLoggerConfig config) throws GuanxiException {
     Logger log = Logger.getLogger(config.getClazz());
 
-    PatternLayout defaultLayout = new PatternLayout(logLayout);
+    PatternLayout defaultLayout = new PatternLayout(config.getLogLayout());
 
     RollingFileAppender rollingFileAppender = new RollingFileAppender();
     rollingFileAppender.setName(config.getClazz().getName());
@@ -56,8 +56,8 @@ public class Log4JLogger {
     catch(Exception e) {
       throw new GuanxiException(e);
     }
-    rollingFileAppender.setMaxFileSize(logMaxFileSize);
-    rollingFileAppender.setMaxBackupIndex(logMaxBackupIndex);
+    rollingFileAppender.setMaxFileSize(config.getLogMaxFileSize());
+    rollingFileAppender.setMaxBackupIndex(Integer.parseInt(config.getLogMaxBackupIndex()));
     rollingFileAppender.setLayout(defaultLayout);
 
     log.removeAllAppenders();
