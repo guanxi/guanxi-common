@@ -14,6 +14,9 @@ import org.guanxi.common.log.Log4JLogger;
  * Those that require specific settings should override SimpleGuanxiJobConfig
  */
 public interface GuanxiJobConfig {
+  /** The key in a job's data map where the job's config is stored */
+  public static final String JOB_KEY_JOB_CONFIG = "JOB_KEY_JOB_CONFIG";
+  
   public void setKey(String key);
   public String getKey();
   public void setCronLine(String cronLine);
