@@ -244,11 +244,13 @@ public class Utils {
    *
    * @param metadataURL The url of the metadata
    * @return EntitiesDescriptorDocument for the metadata
+   * @param who The value of the User-Agent header to set
    * @throws GuanxiException if an error occurs
    */
-  public static EntitiesDescriptorDocument parseSAML2Metadata(String metadataURL) throws GuanxiException {
+  public static EntitiesDescriptorDocument parseSAML2Metadata(String metadataURL, String who) throws GuanxiException {
     try {
       HttpURLConnection httpURL = (HttpURLConnection)new URL(metadataURL).openConnection();
+      httpURL.setRequestProperty("User-Agent", who);
       InputStream in = httpURL.getInputStream();
       BufferedReader buffer = new BufferedReader(new InputStreamReader(in));
       StringBuffer stringBuffer = new StringBuffer();
