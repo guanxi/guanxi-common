@@ -19,15 +19,18 @@ package org.guanxi.common;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.w3c.dom.NamedNodeMap;
 import org.apache.xml.security.utils.Base64;
 import org.apache.xml.security.exceptions.Base64DecodingException;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PatternLayout;
 import org.apache.log4j.RollingFileAppender;
 import org.apache.log4j.xml.DOMConfigurator;
+import org.apache.xmlbeans.XmlObject;
 import org.guanxi.common.definitions.Guanxi;
 import org.guanxi.common.definitions.Logging;
 import org.guanxi.xal.saml_2_0.metadata.EntitiesDescriptorDocument;
+import org.guanxi.xal.saml_1_0.assertion.ConditionsType;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.ServletContext;
@@ -36,14 +39,14 @@ import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
-import java.util.Hashtable;
-import java.util.Enumeration;
+import java.util.*;
 import java.util.zip.ZipOutputStream;
 import java.util.zip.ZipEntry;
 import java.rmi.server.UID;
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.text.SimpleDateFormat;
 
 /**
  * <font size=5><b></b></font>
@@ -266,4 +269,33 @@ public class Utils {
       throw new GuanxiException(e);
     }
   }
+
+  /**
+   * Converts a local time to UTC Zulu format:
+   * 2005-06-21T11:13:29Z
+   *
+   * @param obj The XmlObject that contains the local time in an attribute
+   * @param interval the interval in minutes to add to any other time attrbutes
+   */
+  public static void zuluXmlObject(XmlObject obj, int interval) {
+    SimpleDateFormat zulu = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+    Calendar calNow = new GregorianCalendar(TimeZone.getDefault());
+    Calendar calAfter = new GregorianCalendar(TimeZone.getDefault());
+    calAfter.add(Calendar.MINUTE, interval);
+
+    NamedNodeMap attrs = obj.getDomNode().getAttributes();
+    for (int cc=0; cc < attrs.getLength(); cc++) {
+      Node attr = attrs.item(cc);
+      if (attr.getNodeName().equals("NotBefore")) {
+        attr.setNodeValue(zulu.format(calNow.getTime()));
+      }
+      if (attr.getNodeName().equals("NotOnOrAfter")) {
+        attr.setNodeValue(zulu.format(calAfter.getTime()));
+      }
+      if (attr.getNodeName().equals("IssueInstant")) {
+        attr.setNodeValue(zulu.format(calNow.getTime()));
+      }
+    }
+  }
+
 }
