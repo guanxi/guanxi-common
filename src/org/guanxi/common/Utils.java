@@ -30,7 +30,6 @@ import org.apache.xmlbeans.XmlObject;
 import org.guanxi.common.definitions.Guanxi;
 import org.guanxi.common.definitions.Logging;
 import org.guanxi.xal.saml_2_0.metadata.EntitiesDescriptorDocument;
-import org.guanxi.xal.saml_1_0.assertion.ConditionsType;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.ServletContext;
@@ -279,8 +278,9 @@ public class Utils {
    */
   public static void zuluXmlObject(XmlObject obj, int interval) {
     SimpleDateFormat zulu = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
-    Calendar calNow = new GregorianCalendar(TimeZone.getDefault());
-    Calendar calAfter = new GregorianCalendar(TimeZone.getDefault());
+    zulu.setTimeZone(TimeZone.getTimeZone("GMT"));
+    Calendar calNow = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
+    Calendar calAfter = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
     calAfter.add(Calendar.MINUTE, interval);
 
     NamedNodeMap attrs = obj.getDomNode().getAttributes();
@@ -293,6 +293,9 @@ public class Utils {
         attr.setNodeValue(zulu.format(calAfter.getTime()));
       }
       if (attr.getNodeName().equals("IssueInstant")) {
+        attr.setNodeValue(zulu.format(calNow.getTime()));
+      }
+      if (attr.getNodeName().equals("AuthenticationInstant")) {
         attr.setNodeValue(zulu.format(calNow.getTime()));
       }
     }
