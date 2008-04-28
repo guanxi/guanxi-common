@@ -42,7 +42,7 @@ public class EduPerson {
    */
   public static final String EDUPERSON_SCOPED_AFFILIATION = EDUPERSON_URN + "eduPersonScopedAffiliation";
   public static final String EDUPERSON_SCOPED_AFFILIATION_DELIMITER = "@";
-  public static final String EDUPERSON_SCOPED_AFFILIATION_SCOPE_ATTRIBUTE = "Scope";
+  public static final String EDUPERSON_SCOPE_ATTRIBUTE = "Scope";
 
   /**
    * Specifies the person's relationship(s) to the institution in broad categories.
