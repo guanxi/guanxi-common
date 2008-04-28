@@ -16,6 +16,8 @@
 
 package org.guanxi.common;
 
+import org.guanxi.xal.idp.Creds;
+
 import java.security.Principal;
 import java.util.HashMap;
 import java.util.Map;
@@ -34,6 +36,8 @@ public class GuanxiPrincipal implements Principal {
   private String relyingPartyID = null;
   /** Private storage area for profile specific information */
   private Map<String, Object> privateProfileData = null;
+  /** The credentials to use when signing SAML on behalf of this principal */
+  Creds credsConfig = null;
 
   public GuanxiPrincipal() {
     privateProfileData = new HashMap<String, Object>();
@@ -73,5 +77,13 @@ public class GuanxiPrincipal implements Principal {
 
   public void setRelyingPartyID(String relyingPartyID) {
     this.relyingPartyID = relyingPartyID;
+  }
+
+  public void setCredsConfig(Creds credsConfig) {
+    this.credsConfig = credsConfig;
+  }
+
+  public Creds getCredsConfig() {
+    return credsConfig;
   }
 }
