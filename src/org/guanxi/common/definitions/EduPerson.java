@@ -41,7 +41,7 @@ public class EduPerson {
    * The values to the right of the "@" sign should indicate a security domain.
    */
   public static final String EDUPERSON_SCOPED_AFFILIATION = EDUPERSON_URN + "eduPersonScopedAffiliation";
-  public static final String EDUPERSON_SCOPED_AFFILIATION_DELIMITER = "@";
+  public static final String EDUPERSON_SCOPED_DELIMITER = "@";
   public static final String EDUPERSON_SCOPE_ATTRIBUTE = "Scope";
 
   /**
