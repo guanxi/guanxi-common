@@ -32,15 +32,77 @@ public class GuanxiPrincipal implements Principal {
   private String name = null;
   /** A unique ID that identifies this principal */
   private String uniqueId = null;
-  /** The ID of the relying party with which this principal is associated */
-  private String relyingPartyID = null;
   /** Private storage area for profile specific information */
   private Map<String, Object> privateProfileData = null;
   /** The credentials to use when signing SAML on behalf of this principal */
-  Creds credsConfig = null;
+  private Map<String, Creds> signingCreds = null;
+  /** The issuer to use when communicating with a service provider on behalf of this principal */
+  private Map<String, String> issuers = null;
 
   public GuanxiPrincipal() {
     privateProfileData = new HashMap<String, Object>();
+    signingCreds = new HashMap<String, Creds>();
+    issuers = new HashMap<String, String>();
+  }
+
+  /**
+   * Checks whether the principal has creds for signing SAML for the particular relying party
+   *
+   * @param relyingParty The relying party ID
+   * @return true if the principal has creds for signing saml for the relying party, otherwise false
+   */
+  public boolean hasCredsFor(String relyingParty) {
+    return signingCreds.containsKey(relyingParty);
+  }
+
+  /**
+   * Stores a set of signing creds for use with the specific relying party
+   *
+   * @param relyingParty The relying party ID
+   * @param creds The signing creds to use for this relying party
+   */
+  public void addSigningCreds(String relyingParty, Creds creds) {
+    signingCreds.put(relyingParty, creds);
+  }
+
+  /**
+   * Retrieves the signing creds for the specific relying party
+   *
+   * @param relyingParty The relying party ID
+   * @return The signing creds to use for this relying party
+   */
+  public Creds getSigningCredsFor(String relyingParty) {
+    return signingCreds.get(relyingParty);
+  }
+
+  /**
+   * Checks whether the principal has an issuer for the particular relying party
+   *
+   * @param relyingParty The relying party ID
+   * @return true if the principal has an issuer for relying party, otherwise false
+   */
+  public boolean hasIssuerFor(String relyingParty) {
+    return issuers.containsKey(relyingParty);
+  }
+
+  /**
+   * Stores an issuer for use with the specific relying party
+   *
+   * @param relyingParty The relying party ID
+   * @param issuer The issuer to use for this relying party
+   */
+  public void addIssuer(String relyingParty, String issuer) {
+    issuers.put(relyingParty, issuer);
+  }
+
+  /**
+   * Retrieves the issuer for the specific relying party
+   *
+   * @param relyingParty The relying party ID
+   * @return The issuer to use for this relying party
+   */
+  public String getIssuerFor(String relyingParty) {
+    return issuers.get(relyingParty);
   }
 
   public void setName(String inName) {
@@ -69,21 +131,5 @@ public class GuanxiPrincipal implements Principal {
 
   public Map getPrivateProfileData() {
     return privateProfileData;
-  }
-
-  public String getRelyingPartyID() {
-    return relyingPartyID;
-  }
-
-  public void setRelyingPartyID(String relyingPartyID) {
-    this.relyingPartyID = relyingPartyID;
-  }
-
-  public void setCredsConfig(Creds credsConfig) {
-    this.credsConfig = credsConfig;
-  }
-
-  public Creds getCredsConfig() {
-    return credsConfig;
   }
 }
