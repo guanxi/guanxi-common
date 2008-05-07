@@ -21,10 +21,15 @@ public class SAML2MetadataParserConfig extends SimpleGuanxiJobConfig {
   private String metadataURL = null;
   /** The value of User-Agent to set */
   private String who = null;
+  /** Whether to start the job straight away */
+  private boolean startImmediately;
 
   public void setMetadataURL(String metadataURL) { this.metadataURL = metadataURL; }
   public String getMetadataURL() { return metadataURL; }
 
   public void setWho(String who) { this.who = who; }
   public String getWho() { return who; }
+
+  public void setStartImmediately(boolean startImmediately) { this.startImmediately = startImmediately; }
+  public boolean isStartImmediately() { return startImmediately; }
 }
