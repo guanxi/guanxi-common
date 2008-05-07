@@ -35,4 +35,7 @@ public interface GuanxiJobConfig {
 
   public void setPrivateData(Object privateData);
   public Object getPrivateData();
+
+  public void setStartImmediately(boolean startImmediately);
+  public boolean isStartImmediately();
 }
