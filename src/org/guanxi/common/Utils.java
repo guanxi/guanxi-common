@@ -301,4 +301,16 @@ public class Utils {
     }
   }
 
+  /**
+   * Generates local time in UTC Zulu format:
+   * 2005-06-21T11:13:29Z
+   *
+   * @return The time now in Zulu format
+   */
+  public static String zuluNow() {
+    SimpleDateFormat zulu = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+    zulu.setTimeZone(TimeZone.getTimeZone("GMT"));
+    Calendar calNow = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
+    return zulu.format(calNow.getTime());
+  }
 }
