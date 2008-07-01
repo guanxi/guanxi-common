@@ -37,7 +37,7 @@ public abstract class SimpleGuanxiJobConfig implements GuanxiJobConfig, ServletC
 
   public void init() {
     try {
-      loggerConfig.setClazz(this.getClass());
+      loggerConfig.setClazz(Class.forName(jobClass));
 
       // Sort out the file paths for logging
       loggerConfig.setLogConfigFile(servletContext.getRealPath(loggerConfig.getLogConfigFile()));
@@ -46,7 +46,11 @@ public abstract class SimpleGuanxiJobConfig implements GuanxiJobConfig, ServletC
       // Get our logger
       log = logger.initLogger(loggerConfig);
     }
+    catch(ClassNotFoundException cnfe) {
+      System.err.println("Error loading Job class : " + cnfe);
+    }
     catch(GuanxiException ge) {
+      System.err.println("Error initialising Job logging : " + ge);
     }
   }
 
