@@ -21,6 +21,7 @@ import org.apache.log4j.PatternLayout;
 import org.apache.log4j.RollingFileAppender;
 import org.apache.log4j.Logger;
 import org.guanxi.common.GuanxiException;
+import org.guanxi.common.Utils;
 
 /**
  * Class that encapsulates logging using log4j
@@ -44,7 +45,8 @@ public class Log4JLogger {
    * @throws GuanxiException if an error occurs
    */
   public Logger initLogger(Log4JLoggerConfig config) throws GuanxiException {
-    Logger log = Logger.getLogger(config.getClazz());
+    // Setup a unique logger in case the different instances of the same class want to use different log files
+    Logger log = Logger.getLogger(config.getClazz().getName() + Utils.getUniqueID());
 
     PatternLayout defaultLayout = new PatternLayout(config.getLogLayout());
 
