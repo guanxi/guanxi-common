@@ -89,7 +89,8 @@ public class Utils {
     for (char current : entityID.toCharArray()) {
       if (escapeCharacters.contains(current)) {
         buffer.append('%').append((int) current).append('%');
-      } else {
+      } 
+      else {
         buffer.append(current);
       }
     }
@@ -130,7 +131,8 @@ public class Utils {
         } while (toProcess[i] != '%'); // remember that this will be skipped by the i++ of the for loop
 
         buffer.append((char) current);
-      } else {
+      } 
+      else {
         buffer.append(toProcess[i]);
       }
     }
