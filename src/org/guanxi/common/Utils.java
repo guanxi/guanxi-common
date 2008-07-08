@@ -53,8 +53,6 @@ import java.text.SimpleDateFormat;
  * @author Alistair Young alistair@smo.uhi.ac.uk
  */
 public class Utils {
-  /** OS dependent path separator, e.g. / */
-  public static final String SLASH = System.getProperty("file.separator");
   /** OS dependent line engine, e.g. \n */
   public static final String LINE_ENDING = System.getProperty("line.separator");
 
@@ -243,11 +241,11 @@ public class Utils {
     // Get the logfile path and name from web.xml...
     String logDir = context.getInitParameter(Guanxi.LOGDIR_PARAMETER);
     // ...work out if it's relative to the webapp root...
-    if ((logDir.startsWith("WEB-INF")) || (logDir.startsWith(SLASH + "WEB-INF")))
+    if ((logDir.startsWith("WEB-INF")) || (logDir.startsWith(File.separator + "WEB-INF")))
       logDir = context.getRealPath(logDir);
     // ...tidy it up...
-    if (!logDir.endsWith(SLASH))
-      logDir += SLASH;
+    if (!logDir.endsWith(File.separator))
+      logDir += File.separator;
     // ...and add the name of the log file
     String logFile = logDir + logFilename;
 
