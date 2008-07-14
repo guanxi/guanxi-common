@@ -84,6 +84,9 @@ public class Guanxi {
   /** The servlet context attribute that holds the filters config object */
   public static final String CONTEXT_ATTR_FILTERS_CONFIG = "CONTEXT_ATTR_FILTERS_CONFIG";
 
+  /** The servlet context attribute that holds the shibmeta metadata extensions */
+  public static final String CONTEXT_ATTR_ENGINE_SHIBMETA = "CONTEXT_ATTR_ENGINE_SHIBMETA";
+
   public static final String CONTEXT_ATTR_X509_CHAIN = "CONTEXT_ATTR_X509_CHAIN";
 
 
