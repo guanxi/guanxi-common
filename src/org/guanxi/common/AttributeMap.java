@@ -38,14 +38,14 @@ import java.util.Vector;
  */
 public class AttributeMap {
   /** Our provider groupings and mapping rules */
-  private Vector maps = null;
-  private Vector providers = null;
+  private Vector<Map> maps = null;
+  private Vector<MapProvider> providers = null;
   /** Servlet context for resolving relative paths */
   private ServletContext context = null;
   /** The new names of the attribute passed to map() */
-  private Vector mappedNames = null;
+  private Vector<String> mappedNames = null;
   /** The new values of the attribute passed to map() */
-  private Vector mappedValues = null;
+  private Vector<String> mappedValues = null;
 
   /**
    * Default constructor
@@ -56,10 +56,10 @@ public class AttributeMap {
    */
   public AttributeMap(String mapXMLFile, ServletContext context) throws GuanxiException {
     this.context = context;
-    maps = new Vector();
-    providers = new Vector();
-    mappedNames = new Vector();
-    mappedValues = new Vector();
+    maps = new Vector<Map>();
+    providers = new Vector<MapProvider>();
+    mappedNames = new Vector<String>();
+    mappedValues = new Vector<String>();
     loadMaps(mapXMLFile);
   }
 
