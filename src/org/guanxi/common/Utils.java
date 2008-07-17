@@ -62,9 +62,9 @@ public class Utils {
    * @param request HTTP request object
    * @return Hashtable of parameters and their values
    */
-  public static Hashtable getRequestParameters(HttpServletRequest request) {
-    Hashtable params = new Hashtable();
-    Enumeration e = request.getParameterNames();
+  public static Hashtable<String, String> getRequestParameters(HttpServletRequest request) {
+    Hashtable<String, String> params = new Hashtable<String, String>();
+    Enumeration<?> e = request.getParameterNames();
     String name,value;
 
     while (e.hasMoreElements()) {
