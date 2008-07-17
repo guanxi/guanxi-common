@@ -21,6 +21,7 @@ package org.guanxi.common.log;
  */
 public class Log4JLoggerConfig {
   /** The class that will use the logger. This is the only property not injected. It's set at runtime */
+  @SuppressWarnings("unchecked")
   private Class clazz = null;
   /** Full path/name of the log file to use */
   private String logFile = null;
@@ -34,6 +35,7 @@ public class Log4JLoggerConfig {
   private String logMaxBackupIndex = null;
 
   // Setters
+  @SuppressWarnings("unchecked")
   public void setClazz(Class clazz) { this.clazz = clazz; }
   public void setLogFile(String logFile) { this.logFile = logFile; }
   public void setLogConfigFile(String logConfigFile) { this.logConfigFile = logConfigFile; }
@@ -42,6 +44,7 @@ public class Log4JLoggerConfig {
   public void setLogMaxBackupIndex(String logMaxBackupIndex) { this.logMaxBackupIndex = logMaxBackupIndex; }
 
   // Getters
+  @SuppressWarnings("unchecked")
   public Class getClazz() { return clazz; }
   public String getLogFile() { return logFile; }
   public String getLogConfigFile() { return logConfigFile; }
