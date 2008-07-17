@@ -41,6 +41,7 @@ public class Pod {
   /** The collection of SAML attributes */
   private Bag attributes = null;
   /** The parameters from the original request */
+  @SuppressWarnings("unchecked")
   private HashMap requestParameters = null;
 
   public void setContext(ServletContext context) {
@@ -67,6 +68,7 @@ public class Pod {
     this.attributes = attributes;
   }
 
+  @SuppressWarnings("unchecked")
   public void setRequestParameters(Map requestParameters) {
     if (this.requestParameters == null)
       this.requestParameters = new HashMap();
@@ -79,5 +81,6 @@ public class Pod {
   public String getRequestURL() { return requestURL; }
   public String getSessionID() { return sessionID; }
   public Bag getBag() { return attributes; }
+  @SuppressWarnings("unchecked")
   public HashMap getRequestParameters() { return requestParameters; }
 }
