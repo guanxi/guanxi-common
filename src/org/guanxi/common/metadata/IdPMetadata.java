@@ -13,7 +13,7 @@ package org.guanxi.common.metadata;
  */
 // The comments like this give examples of code that the method call can replace
 // assuming you are using the UKFederationIdPMetadata class.
-public interface IdPMetadata {
+public interface IdPMetadata extends Metadata {
 
   /**
    * This will return the entityID of the IdP.

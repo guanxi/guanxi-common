@@ -3,80 +3,82 @@
  */
 package org.guanxi.common.metadata;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import javax.servlet.ServletContext;
+import org.apache.xmlbeans.XmlException;
 
 /**
- * This is responsible for managing the loaded IdP Metadata.
+ * This is responsible for managing the loaded Metadata.
  * The following operations must be supported:
  * 
  * <ul>
- * 	<li>Adding new IdP Metadata</li>
- *  <li>Retrieving IdP Metadata by entityID</li>
- *  <li>Unloading loaded IdP Metadata</li>
+ * 	<li>Adding new Metadata</li>
+ *  <li>Retrieving Metadata by entityID</li>
+ *  <li>Unloading loaded Metadata</li>
  * </ul>
  * 
- * The IdP Metadata must be associated with the method of loading
+ * The Metadata must be associated with the method of loading
  * the data. This is required because for periodic loading of
- * IdP Metadata the previous data must be unloaded to successfully
- * remove IdP entries that are no longer present in the current
+ * Metadata the previous data must be unloaded to successfully
+ * remove entries that are no longer present in the current
  * Metadata.
  * 
- * A current potential bug is that if the metadata for an IdP is loaded
- * twice then removal of either set will remove the IdP metadata.
+ * A current potential bug is that if the metadata for an is loaded
+ * twice then removal of either set will remove the metadata for both.
  * 
  * @author matthew
  */
-public final class MetadataManager {
+public abstract class MetadataManager<M extends Metadata> {
 	/**
-	 * This is the key used to get the IdP out of the ServletContext.
+	 * This is the map of entityID to Metadata, and this is
+	 * the only place that the Metadata is stored.
 	 */
-	private static final String key = MetadataManager.class.getName();
-	/**
-	 * This is the map of entityID to IdP Metadata, and this is
-	 * the only place that the IdP Metadata is stored.
-	 */
-	private final Map<String, IdPMetadata> metadataByEntityID;
+	protected final Map<String, M> metadataByEntityID;
 	/**
 	 * This is the map of loaded source name and the entityIDs that
 	 * have been loaded from that source.
 	 */
-	private final Map<String, Set<String>> entityIDBySource;
+	protected final Map<String, Set<String>> entityIDBySource;
 	
 	/**
-	 * This will return the IdPManager for this application.
-	 * If there is no current IdPManager then this will create one.
-	 * 
-	 * @param context  This is the ServletContext which holds the IdPManager
-	 * @return         This will return the IdPManager held by the ServletContext
+	 * This creates an empty Metadata Manager.
+	 * It should not be possible to create Metadata Managers directly
+	 * because this can lead to multiple instances which will not
+	 * have their data synchronised.
 	 */
-	public static MetadataManager getManager(ServletContext context) {
-		MetadataManager manager;
-		
-		if ( (manager = (MetadataManager)context.getAttribute(key)) != null ) {
-			return manager;
-		}
-		
-		manager = new MetadataManager();
-		context.setAttribute(key, manager);
-		
-		return manager;
-	}
-	
-	/**
-	 * This creates an empty IdP Manager.
-	 * This is private to ensure that the only way to access this
-	 * class is through the {@link #getManager(ServletContext)} method.
-	 */
-	private MetadataManager() {
-		metadataByEntityID = new TreeMap<String, IdPMetadata>();
+	protected MetadataManager() {
+		metadataByEntityID = new TreeMap<String, M>();
 		entityIDBySource = new TreeMap<String, Set<String>>();
 	}
-
+	
+	/**
+	 * This will write all of the loaded metadata out to the 
+	 * output stream provided. It is recommended that the 
+	 * special template XML bean is used for this purpose.
+	 * 
+	 * @param out          This is the output stream that will receive the serialised metadata.
+	 * @throws IOException This will be thrown if there is a problem writing the metadata to the stream.
+	 */
+	public abstract void write(OutputStream out) throws IOException;
+	/**
+	 * This will read metadata in from the input stream provided.
+	 * This will overwrite any metadata that has been loaded from
+	 * a source that is also found in the metadata loaded from the
+	 * input stream. Existing metadata from a source not found in
+	 * the input stream metadata will not be replaced or removed.
+	 * 
+	 * @param in             This is the input stream which will be used to load the metadata.
+	 * @throws IOException   This will be thrown if there is a problem reading the input stream.
+	 * @throws XmlException  This will be thrown if there is a problem parsing the XML from the input stream.
+	 */
+	public abstract void read(InputStream in) throws IOException, XmlException;
+	
 	/**
 	 * This appends metadata to the list of metadata loaded for this
 	 * particular source. Existing metadata loaded for this source is
@@ -85,7 +87,7 @@ public final class MetadataManager {
 	 * @param source   This is a unique string that represents the source of the metadata.
 	 * @param metadata This is the metadata that has been loaded from the source.
 	 */
-	public void addMetadata(String source, IdPMetadata... metadata) {
+	public void addMetadata(String source, M... metadata) {
 		String entityID;
 		Set<String> entityIDList;
 		
@@ -94,7 +96,7 @@ public final class MetadataManager {
 		}
 		entityIDList = entityIDBySource.get(source);
 		
-		for ( IdPMetadata currentMetadata : metadata ) {
+		for ( M currentMetadata : metadata ) {
 			entityID = currentMetadata.getEntityID();
 			metadataByEntityID.put(entityID, currentMetadata);
 			entityIDList.add(entityID);
@@ -108,7 +110,7 @@ public final class MetadataManager {
 	 * @param entityID   This is the entityID for the IdP whos metadata is being requested.
 	 * @return           This will return the IdPMetadata for the IdP or null if there is no metadata for the IdP.
 	 */
-	public IdPMetadata getMetadata(String entityID) {
+	public M getMetadata(String entityID) {
 		return metadataByEntityID.get(entityID);
 	}
 	
@@ -135,7 +137,7 @@ public final class MetadataManager {
 	 * @param source   This is a unique string that represents the source of the metadata.
 	 * @param metadata This is the metadata that has been loaded from the source.
 	 */
-	public void setMetadata(String source, IdPMetadata... metadata) {
+	public void setMetadata(String source, M... metadata) {
 		String entityID;
 		Set<String> entityIDList;
 
@@ -143,7 +145,7 @@ public final class MetadataManager {
 		
 		entityIDBySource.put(source, entityIDList = new TreeSet<String>());
 		
-		for ( IdPMetadata currentMetadata : metadata ) {
+		for ( M currentMetadata : metadata ) {
 			entityID = currentMetadata.getEntityID();
 			metadataByEntityID.put(entityID, currentMetadata);
 			entityIDList.add(entityID);
