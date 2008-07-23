@@ -129,7 +129,7 @@ public class GuanxiPrincipal implements Principal {
     return privateProfileData.get(key);
   }
 
-  public Map getPrivateProfileData() {
+  public Map<String, Object> getPrivateProfileData() {
     return privateProfileData;
   }
 }

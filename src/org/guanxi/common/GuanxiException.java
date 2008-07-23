@@ -21,6 +21,7 @@ package org.guanxi.common;
  *
  * @author Alistair Young alistair@smo.uhi.ac.uk
  */
+@SuppressWarnings("serial")
 public class GuanxiException extends Exception {
   private int errorCode;
 

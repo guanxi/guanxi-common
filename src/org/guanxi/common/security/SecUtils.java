@@ -22,6 +22,7 @@ import org.apache.xml.security.c14n.Canonicalizer;
 import org.apache.xml.security.transforms.Transforms;
 import org.apache.xml.security.transforms.params.InclusiveNamespaces;
 import org.guanxi.common.GuanxiException;
+import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.x509.X509Name;
 import org.bouncycastle.x509.X509V3CertificateGenerator;
 import java.security.*;
@@ -175,8 +176,8 @@ public class SecUtils {
       /* Set the attributes of the X509 Certificate that will contain the public key.
        * This is a self signed certificate so the issuer and subject will be the same.
        */
-      Hashtable attrs = new Hashtable();
-      Vector ordering = new Vector();
+      Hashtable<DERObjectIdentifier, String> attrs = new Hashtable<DERObjectIdentifier, String>();
+      Vector<DERObjectIdentifier> ordering = new Vector<DERObjectIdentifier>();
       ordering.add(X509Name.CN);
 
       attrs.put(X509Name.CN, cn);

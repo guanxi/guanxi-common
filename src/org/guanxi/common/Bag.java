@@ -36,13 +36,13 @@ public class Bag {
   /** String representing the raw SAML Response */
   private String samlResponse = null;
   /** The attributes as Strings */
-  private Hashtable attributes = null;
+  private Hashtable<String, String> attributes = null;
 
   /**
    * Default constructor
    */
   public Bag() {
-    attributes = new Hashtable();
+    attributes = new Hashtable<String, String>();
   }
 
   /**
@@ -90,7 +90,7 @@ public class Bag {
    *
    * @return Enumeration listing all stored attribute names.
    */
-  public Enumeration getAttributeNames() {
+  public Enumeration<String> getAttributeNames() {
     return attributes.keys();
   }
 

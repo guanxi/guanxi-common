@@ -28,8 +28,8 @@ import java.util.Map;
 import java.util.HashMap;
 
 public class OfflineResolver extends ResourceResolverSpi {
-  static Map _uriMap = null;
-  static Map _mimeMap = null;
+  static Map<String, String> _uriMap = null;
+  static Map<String, String> _mimeMap = null;
 
   public XMLSignatureInput engineResolve(Attr uri, String BaseURI) throws ResourceResolverException {
     try {
@@ -82,8 +82,8 @@ public class OfflineResolver extends ResourceResolverSpi {
   static {
     org.apache.xml.security.Init.init();
 
-    OfflineResolver._uriMap = new HashMap();
-    OfflineResolver._mimeMap = new HashMap();
+    OfflineResolver._uriMap = new HashMap<String, String>();
+    OfflineResolver._mimeMap = new HashMap<String, String>();
 
     OfflineResolver.register("http://www.w3.org/TR/xml-stylesheet",
                              "data/org/w3c/www/TR/xml-stylesheet.html",
