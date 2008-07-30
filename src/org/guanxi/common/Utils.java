@@ -23,16 +23,10 @@ import org.w3c.dom.NamedNodeMap;
 import org.apache.xml.security.utils.Base64;
 import org.apache.xml.security.exceptions.Base64DecodingException;
 import org.apache.log4j.Logger;
-import org.apache.log4j.PatternLayout;
-import org.apache.log4j.RollingFileAppender;
-import org.apache.log4j.xml.DOMConfigurator;
 import org.apache.xmlbeans.XmlObject;
-import org.guanxi.common.definitions.Guanxi;
-import org.guanxi.common.definitions.Logging;
 import org.guanxi.xal.saml_2_0.metadata.EntitiesDescriptorDocument;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.ServletContext;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.TransformerFactory;
@@ -143,49 +137,6 @@ public class Utils {
     }
 
     return "-1";
-  }
-
-  public static void dumpXML(Logger log, String xml, String message) {
-    log.debug("=======================================================" +
-              LINE_ENDING + LINE_ENDING +
-              message +
-              LINE_ENDING + LINE_ENDING +
-              xml +
-              LINE_ENDING + LINE_ENDING +
-              "=======================================================");
-  }
-
-  public static void initLogger(ServletContext context, String logFilename, Logger log, String name) throws GuanxiException {
-    // Get the logfile path and name from web.xml...
-    String logDir = context.getInitParameter(Guanxi.LOGDIR_PARAMETER);
-    // ...work out if it's relative to the webapp root...
-    if ((logDir.startsWith("WEB-INF")) || (logDir.startsWith(File.separator + "WEB-INF")))
-      logDir = context.getRealPath(logDir);
-    // ...tidy it up...
-    if (!logDir.endsWith(File.separator))
-      logDir += File.separator;
-    // ...and add the name of the log file
-    String logFile = logDir + logFilename;
-
-    DOMConfigurator.configure(context.getRealPath(Logging.DEFAULT_IDP_CONFIG_FILE));
-
-    PatternLayout defaultLayout = new PatternLayout(Logging.DEFAULT_LAYOUT);
-
-    RollingFileAppender rollingFileAppender = new RollingFileAppender();
-    rollingFileAppender.setName(name);
-    try {
-      rollingFileAppender.setFile(logFile, true, false, 0);
-    }
-    catch(IOException ioe) {
-      throw new GuanxiException(ioe.getMessage());
-    }
-    rollingFileAppender.setMaxFileSize("1MB");
-    rollingFileAppender.setMaxBackupIndex(5);
-    rollingFileAppender.setLayout(defaultLayout);
-
-    log.removeAllAppenders();
-    log.addAppender(rollingFileAppender);
-    log.setAdditivity(false);
   }
 
   public static void zipDirectory(String dir, ZipOutputStream zipStream) {
