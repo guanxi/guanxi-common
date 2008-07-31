@@ -48,24 +48,8 @@ public class Log4JLogger {
     // Setup a unique logger in case the different instances of the same class want to use different log files
     Logger log = Logger.getLogger(config.getClazz().getName() + Utils.getUniqueID());
 
-    PatternLayout defaultLayout = new PatternLayout(config.getLogLayout());
-
-    RollingFileAppender rollingFileAppender = new RollingFileAppender();
-    rollingFileAppender.setName(config.getClazz().getName());
-    try {
-      rollingFileAppender.setFile(config.getLogFile(), true, false, 0);
-    }
-    catch(Exception e) {
-      throw new GuanxiException(e);
-    }
-    rollingFileAppender.setMaxFileSize(config.getLogMaxFileSize());
-    rollingFileAppender.setMaxBackupIndex(Integer.parseInt(config.getLogMaxBackupIndex()));
-    rollingFileAppender.setLayout(defaultLayout);
-
-    log.removeAllAppenders();
-    log.addAppender(rollingFileAppender);
-    log.setAdditivity(false);
-
+    // this needs to configure the logger using the config but that system also needs to be revamped. should just load properties from a file
+    
     return log;
   }
 
