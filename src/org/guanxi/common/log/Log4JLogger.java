@@ -16,10 +16,8 @@
 
 package org.guanxi.common.log;
 
-import org.apache.log4j.xml.DOMConfigurator;
-import org.apache.log4j.PatternLayout;
-import org.apache.log4j.RollingFileAppender;
 import org.apache.log4j.Logger;
+import org.apache.log4j.xml.DOMConfigurator;
 import org.guanxi.common.GuanxiException;
 import org.guanxi.common.Utils;
 
