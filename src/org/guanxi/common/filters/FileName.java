@@ -118,7 +118,7 @@ public class FileName {
 			escapeCharacters = new TreeMap<Character, String>();
 			
 			for ( char character : new char[]{ ':', ';', '\\', '/' } ) {
-				escapeCharacters.put(character, String.format("\\%02X", (int)character) );
+				escapeCharacters.put(character, String.format("%%%02X", (int)character) );
 			}
 		}
 		
@@ -141,7 +141,7 @@ public class FileName {
 				return String.format("%%%02X", c);
 			}
 			
-			return '%' + escapeCharacters.get(c);
+			return escapeCharacters.get(c);
 		}
 
 		/**
