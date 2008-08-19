@@ -20,7 +20,7 @@ import java.util.TreeMap;
  * 	 <ul>
  * 	  <li>A space or # character at the start of the string</li>
  *    <li>A space at the end of the string</li>
- *    <li>One of the characters: ',' '+' '"' '\' '<' '>' ';' ' '
+ *    <li>One of the characters: ',' '+' '"' '\' '<' '>' ';' ' '</li>
  * 	 </ul>
  *  </li>
  *  <li>The encoding is done by converting the character into
