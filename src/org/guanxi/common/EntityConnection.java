@@ -16,21 +16,25 @@
 
 package org.guanxi.common;
 
-import org.guanxi.common.security.ssl.GuanxiHostVerifier;
-import org.guanxi.common.security.ssl.SSL;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLPeerUnverifiedException;
-import java.net.URL;
-import java.net.HttpURLConnection;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.ByteArrayInputStream;
-import java.io.BufferedInputStream;
+import java.net.HttpURLConnection;
+import java.net.ProtocolException;
+import java.net.URL;
 import java.security.cert.Certificate;
-import java.security.cert.X509Certificate;
-import java.security.cert.CertificateFactory;
 import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLPeerUnverifiedException;
+
+import org.guanxi.common.security.ssl.GuanxiHostVerifier;
+import org.guanxi.common.security.ssl.SSL;
 
 /**
  * Wraps either an HttpsURLConnection or HttpsURLConnection. The HttpsURLConnection
@@ -39,52 +43,110 @@ import java.security.cert.CertificateException;
  * @author Alistair Young alistair@smo.uhi.ac.uk
  */
 public class EntityConnection {
-  /** For passing to EntityConnection when we want to probe a remote entity for it's X509 Certificate */
+  /** 
+   * For passing to EntityConnection when we want to probe a remote entity for it's X509 Certificate 
+   */
   public static final boolean PROBING_ON = true;
-  /** For passing to EntityConnection when we want full HTTPS functionality */
+  /** 
+   * For passing to EntityConnection when we want full HTTPS functionality 
+   */
   public static final boolean PROBING_OFF = false;
-  
-  boolean secure = false;
-  boolean probing = false;
-  HttpsURLConnection httpsURL = null;
-  HttpURLConnection httpURL = null;
+  /**
+   * This indicates if the server certificate is being retrieved using this connection
+   * (or if the connection is checking to ensure that the certificate is valid).
+   */
+  private boolean probing = false;
+  /**
+   * This is the HTTP(S) connection that has been made.
+   * To determine if this is a secure connection call
+   * connection instanceof HttpsURLConnection.
+   */
+  private HttpURLConnection connection = null;
 
   /**
    * Sets up a connection object with custom SSL management if required.
    *
-   * @param endpoint Address of the entity to connect to. If this starts with https
-   * the custom SSL management will be used.
-   * @param localEntityID The ID of the local entity which will be represented by the
-   * custom SSL layer. If the connection is not secure, this parameter can be null.
-   * @param entityKeystore The full path of the entity's keystore
+   * @param endpoint               Address of the entity to connect to. If this starts with https
+   *                               the custom SSL management will be used.
+   * @param localEntityID          The ID of the local entity which will be represented by the
+   *                               custom SSL layer. If the connection is not secure, this parameter can be null.
+   * @param entityKeystore         The full path of the entity's keystore
    * @param entityKeystorePassword Password for the entity's keystore
-   * @param trustStore The full path to the Engine's truststore
-   * @param trustStorePassword The password for the Engine's truststore
-   * @param probeForServerCert true if the connection is only going to be used to obtain an entity's SSL certificate
-   * @throws GuanxiException if an error occurred
+   * @param trustStore             The full path to the Engine's truststore
+   * @param trustStorePassword     The password for the Engine's truststore
+   * @param probeForServerCert     TRUE if the connection is only going to be used to obtain an entity's SSL certificate
+   * @throws GuanxiException       If an error occurred
    */
   public EntityConnection(String endpoint, String localEntityID, String entityKeystore, String entityKeystorePassword,
                           String trustStore, String trustStorePassword, boolean probeForServerCert) throws GuanxiException {
+    URL url;
+    
     try {
-      SSLContext context = SSLContext.getInstance("SSL");
-      context.init(SSL.getKeyManagers(localEntityID, entityKeystore, entityKeystorePassword),
-                   SSL.getTrustManagers(trustStore, trustStorePassword, probeForServerCert), null);
-
-      URL url = new URL(endpoint);
-
-      probing = probeForServerCert;
-
-      if (endpoint.toLowerCase().startsWith("https")) {
-        secure = true;
-        httpsURL = (HttpsURLConnection)url.openConnection();
-        httpsURL.setSSLSocketFactory(context.getSocketFactory());
-        httpsURL.setHostnameVerifier(new GuanxiHostVerifier());
+      url = new URL(endpoint);
+      
+      if ( url.getProtocol().equals("https") ) { // getProtocol always returns the lower case protocol name
+        HttpsURLConnection connection;
+        SSLContext context;
+        
+        context = SSLContext.getInstance("SSL");
+        context.init(SSL.getKeyManagers(localEntityID, entityKeystore, entityKeystorePassword),
+                     SSL.getTrustManagers(trustStore, trustStorePassword, probeForServerCert),
+                     null);
+        connection = (HttpsURLConnection)url.openConnection();
+        connection.setSSLSocketFactory(context.getSocketFactory());
+        connection.setHostnameVerifier(new GuanxiHostVerifier());
+        
+        this.connection = connection;
       }
       else {
-        httpURL = (HttpURLConnection)url.openConnection();
+        connection = (HttpURLConnection)url.openConnection();
       }
     }
-    catch(Exception e) {
+    catch ( Exception e ) {
+      throw new GuanxiException(e);
+    }
+  }
+  
+  /**
+   * Sets up a connection object with custom SSL management if required. This connection blocks
+   * the passing of the client certificate. This should be viewed as an exceptional situation.
+   *
+   * @param endpoint               Address of the entity to connect to. If this starts with https
+   *                               the custom SSL management will be used.
+   * @param localEntityID          The ID of the local entity which will be represented by the
+   *                               custom SSL layer. If the connection is not secure, this parameter can be null.
+   * @param entityKeystore         The full path of the entity's keystore
+   * @param entityKeystorePassword Password for the entity's keystore
+   * @param trustStore             The full path to the Engine's truststore
+   * @param trustStorePassword     The password for the Engine's truststore
+   * @param probeForServerCert     TRUE if the connection is only going to be used to obtain an entity's SSL certificate
+   * @throws GuanxiException       If an error occurred
+   */
+  public EntityConnection(String endpoint, String trustStore, String trustStorePassword, boolean probeForServerCert) throws GuanxiException {
+    URL url;
+    
+    try {
+      url = new URL(endpoint);
+      
+      if ( url.getProtocol().equals("https") ) {
+        HttpsURLConnection connection;
+        SSLContext context;
+        
+        context = SSLContext.getInstance("SSL");
+        context.init(null,
+                     SSL.getTrustManagers(trustStore, trustStorePassword, probeForServerCert),
+                     null);
+        connection = (HttpsURLConnection)url.openConnection();
+        connection.setSSLSocketFactory(context.getSocketFactory());
+        connection.setHostnameVerifier(new GuanxiHostVerifier());
+        
+        this.connection = connection;
+      }
+      else {
+        connection = (HttpURLConnection)url.openConnection();
+      }
+    }
+    catch ( Exception e ) {
       throw new GuanxiException(e);
     }
   }
@@ -100,17 +162,14 @@ public class EntityConnection {
    * TRACE
    * are legal, subject to protocol restrictions. The default method is GET
    *
-   * @param requestMethod The HTTP method
-   * @throws GuanxiException if an error occurred
+   * @param requestMethod    The HTTP method
+   * @throws GuanxiException If the connection has already been opened then this exception will be thrown.
    */
   public void setRequestMethod(String requestMethod) throws GuanxiException {
     try {
-      if (secure)
-        httpsURL.setRequestMethod(requestMethod);
-      else
-        httpURL.setRequestMethod(requestMethod);
+      connection.setRequestMethod(requestMethod);
     }
-    catch(Exception e) {
+    catch (ProtocolException e) {
       throw new GuanxiException(e);
     }
   }
@@ -120,17 +179,14 @@ public class EntityConnection {
    * A URL connection can be used for input and/or output. Set the DoOutput flag to true
    * if you intend to use the EntityConnection for output, false if not. The default is false.
    *
-   * @param doIt The new value
-   * @throws GuanxiException if an error occurred
+   * @param doIt             The new value
+   * @throws GuanxiException If the connection has already been opened then this exception will be thrown.
    */
   public void setDoOutput(boolean doIt) throws GuanxiException {
     try {
-      if (secure)
-        httpsURL.setDoOutput(doIt);
-      else
-        httpURL.setDoOutput(doIt);
+      connection.setDoOutput(doIt);
     }
-    catch(Exception e) {
+    catch ( IllegalStateException e ) { // already connected
       throw new GuanxiException(e);
     }
   }
@@ -146,16 +202,13 @@ public class EntityConnection {
    * Operations that depend on being connected, like getContentLength, will implicitly perform the connection,
    * if necessary
    *
-   * @throws GuanxiException if an error occurred
+   * @throws GuanxiException If the connection times out before being established, or if an IO issue occurs.
    */
   public void connect() throws GuanxiException {
     try {
-      if (secure)
-        httpsURL.connect();
-      else
-        httpURL.connect();
+      connection.connect();
     }
-    catch(Exception e) {
+    catch ( IOException e ) { // SocketTimeoutException is a subclass of IOException
       throw new GuanxiException(e);
     }
   }
@@ -165,17 +218,15 @@ public class EntityConnection {
    * thrown when reading from the returned input stream if the read timeout expires before data is
    * available for read
    *
-   * @return An input stream that reads from this open connection
-   * @throws GuanxiException if an error occurred
+   * @return                 An input stream that reads from this open connection
+   * @throws GuanxiException If an IO issue occurs when creating the input stream 
+   *                         (or if the protocol does not support input, which should not happen).
    */
   public InputStream getInputStream() throws GuanxiException {
     try {
-      if (secure)
-        return httpsURL.getInputStream();
-      else
-        return httpURL.getInputStream();
+      return connection.getInputStream();
     }
-    catch(Exception e) {
+    catch ( IOException e ) {
       throw new GuanxiException(e);
     }
   }
@@ -183,17 +234,15 @@ public class EntityConnection {
   /**
    * Returns an output stream that writes to this connection
    *
-   * @return An output stream that writes to this connection
-   * @throws GuanxiException if an error occurred
+   * @return                 An output stream that writes to this connection
+   * @throws GuanxiException If an IO issue occurs when creating the output stream
+   *                         (or if the protocol does not support output, which should not happen)
    */
   public OutputStream getOutputStream() throws GuanxiException {
     try {
-      if (secure)
-        return httpsURL.getOutputStream();
-      else
-        return httpURL.getOutputStream();
+      return connection.getOutputStream();
     }
-    catch(Exception e) {
+    catch ( IOException e ) {
       throw new GuanxiException(e);
     }
   }
@@ -202,17 +251,22 @@ public class EntityConnection {
    * Sets the general request property. If a property with the key already exists, overwrite its
    * value with the new value.
    * NOTE: HTTP requires all request properties which can legally have multiple instances with the
-   * same key to use a comma-seperated list syntax which enables multiple properties to be appended
-   * into a single property
+   * same key to use a comma-separated list syntax which enables multiple properties to be appended
+   * into a single property. While this means that multiple values can be added, this will not append
+   * values when repeatedly called with the same key.
    *
-   * @param key The keyword by which the request is known (e.g., "accept").
+   * @param key   The keyword by which the request is known (e.g., "accept").
    * @param value The value associated with it
    */
-  public void setRequestProperty(String key, String value) {
-    if (secure)
-      httpsURL.setRequestProperty(key, value);
-    else
-      httpURL.setRequestProperty(key, value);
+  public void setRequestProperty(String key, String value) throws GuanxiException {
+    try {
+      connection.setRequestProperty(key, value);
+    }
+    catch ( Exception e ) {
+      // IllegalStateException = already connected
+      // NullPointerException  = key is null
+      throw new GuanxiException(e);
+    }
   }
 
   /**
@@ -222,18 +276,23 @@ public class EntityConnection {
    *
    * @return An ordered array of server certificates, with the peer's own certificate first followed
    * by any certificate authorities. If an error occurred it will return null.
+   * @throws GuanxiException 
    */
-  public Certificate[] getServerCertificates() {
-    if (secure) {
+  public Certificate[] getServerCertificates() throws GuanxiException {
+    if ( connection instanceof HttpsURLConnection ) {
       try {
-        return httpsURL.getServerCertificates();
+        return ((HttpsURLConnection)connection).getServerCertificates();
       }
-      catch(SSLPeerUnverifiedException spue) {
+      catch ( SSLPeerUnverifiedException e ) {
+        // SSLPeerUnverifiedException = peer not verified
         return null;
       }
+      catch ( IllegalStateException e ) {
+        // IllegalStateException      = called before the connection is made
+        throw new GuanxiException(e);
+      }
     }
-    else
-      return null;
+    return null;
   }
 
   /**
@@ -242,49 +301,46 @@ public class EntityConnection {
    * can be reused for other requests
    */
   public void disconnect() {
-    if (secure)
-      httpsURL.disconnect();
-    else
-      httpURL.disconnect();
+    connection.disconnect();
   }
 
   /**
    * When in probing mode, connects to the remote entity and extracts it's certificate chain
    *
-   * @return array of X509Certificate representing the remote entity's certificate chain
-   * @throws GuanxiException if an error occurred. Will be thrown if the EntityConnection is
-   * not in probing mode.
+   * @return                 An array of X509Certificate representing the remote entity's certificate chain
+   * @throws GuanxiException If an error occurred. Will be thrown if the EntityConnection is
+   *                         not in probing mode.
    */
   public X509Certificate[] getServerCertChain() throws GuanxiException {
-    // We can only do this in probing mode
-    if (!probing)
-      throw new GuanxiException("EntityConnection not in probing mode");
+    Certificate[] certificateChain;
+    ArrayList<X509Certificate> convertedChain;
+    CertificateFactory factory;
     
-    // Connect to the server
-    connect();
-
+    // We can only do this in probing mode
+    if (!probing) {
+      throw new GuanxiException("EntityConnection not in probing mode");
+    }
+    
     // Get the certificate or chain the server is using...
-    Certificate[] certChain = getServerCertificates();
-
-    // Disconnect from the server
+    connect();
+    certificateChain = getServerCertificates();
     disconnect();
 
     // Did we get any certificates?
-    if (certChain.length == 0)
+    if (certificateChain.length == 0) {
       throw new GuanxiException("No server certificates available");
+    }
 
     try {
-      // Get ready for X509 processing
-      CertificateFactory certFactory = CertificateFactory.getInstance("X509");
-      X509Certificate[] x509CertChain = new X509Certificate[certChain.length];
+      factory        = CertificateFactory.getInstance("X509");
+      convertedChain = new ArrayList<X509Certificate>();
 
       // Cycle through the server's certificate chain, converting to X509 format
-      for (int c=0; c < certChain.length; c++) {
-        x509CertChain[c] = (X509Certificate)certFactory.generateCertificate(new ByteArrayInputStream(certChain[c].getEncoded()));
+      for ( Certificate current : certificateChain ) {
+        convertedChain.add((X509Certificate)factory.generateCertificate(new ByteArrayInputStream(current.getEncoded())));
       }
-
-      // Return the server's X509 chain
-      return x509CertChain;
+      
+      return convertedChain.toArray(new X509Certificate[convertedChain.size()]);
     }
     catch(CertificateException ce) {
       throw new GuanxiException(ce);
@@ -310,10 +366,7 @@ public class EntityConnection {
    * @return length of content available in bytes
    */
   public int getContentLength() {
-    if (secure)
-      return httpsURL.getContentLength();
-    else
-      return httpURL.getContentLength();
+    return connection.getContentLength();
   }
 
   /**
@@ -321,26 +374,8 @@ public class EntityConnection {
    *
    * @return String containing the content from the connection
    */
-  public String getContentAsString() {
-    BufferedInputStream bin = null;
-
-    try {
-      if (secure) {
-        bin = new BufferedInputStream(httpsURL.getInputStream());
-      }
-      else {
-        bin = new BufferedInputStream(httpURL.getInputStream());
-      }
-
-      byte[] bytes = new byte[bin.available()];
-      bin.read(bytes);
-      bin.close();
-      
-      return new String(bytes);
-    }
-    catch(Exception e) {
-      return null;
-    }
+  public String getContentAsString() throws IOException {
+    return new String(Utils.read(connection.getInputStream()));
   }
 
   /**
@@ -350,13 +385,9 @@ public class EntityConnection {
    * @param password Password
    */
   public void setAuthentication(String username, String password) {
-    String authentication = (new sun.misc.BASE64Encoder()).encode((username + ":" + password).getBytes());
+    String authentication;
     
-    if (secure) {
-      httpsURL.setRequestProperty("Authorization", "Basic " + authentication);
-    }
-    else {
-      httpURL.setRequestProperty("Authorization", "Basic " + authentication);
-    }
+    authentication = (new sun.misc.BASE64Encoder()).encode((username + ":" + password).getBytes());
+    connection.setRequestProperty("Authorization", "Basic " + authentication);
   }
 }
