@@ -200,18 +200,24 @@ public class Utils {
    */
   public static EntitiesDescriptorDocument parseSAML2Metadata(String metadataURL, String who) throws GuanxiException {
     try {
-      HttpURLConnection httpURL = (HttpURLConnection)new URL(metadataURL).openConnection();
-      httpURL.setRequestProperty("User-Agent", who);
-      InputStream in = httpURL.getInputStream();
-      BufferedReader buffer = new BufferedReader(new InputStreamReader(in));
-      StringBuffer stringBuffer = new StringBuffer();
-      String line = null;
-      while ((line = buffer.readLine()) != null) {
-        stringBuffer.append(line);
+      URL url = new URL(metadataURL);
+      if (url.getProtocol().equals("file")) {
+        return EntitiesDescriptorDocument.Factory.parse(url);
       }
-      in.close();
+      else {
+        HttpURLConnection httpURL = (HttpURLConnection)new URL(metadataURL).openConnection();
+        httpURL.setRequestProperty("User-Agent", who);
+        InputStream in = httpURL.getInputStream();
+        BufferedReader buffer = new BufferedReader(new InputStreamReader(in));
+        StringBuffer stringBuffer = new StringBuffer();
+        String line = null;
+        while ((line = buffer.readLine()) != null) {
+          stringBuffer.append(line);
+        }
+        in.close();
 
-      return EntitiesDescriptorDocument.Factory.parse(stringBuffer.toString());
+        return EntitiesDescriptorDocument.Factory.parse(stringBuffer.toString());
+      }
     }
     catch(Exception e) {
       throw new GuanxiException(e);
