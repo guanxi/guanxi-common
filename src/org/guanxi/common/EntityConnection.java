@@ -101,6 +101,7 @@ public class EntityConnection {
       else {
         connection = (HttpURLConnection)url.openConnection();
       }
+      probing = probeForServerCert;
     }
     catch ( Exception e ) {
       throw new GuanxiException(e);
@@ -145,6 +146,7 @@ public class EntityConnection {
       else {
         connection = (HttpURLConnection)url.openConnection();
       }
+      probing = probeForServerCert;
     }
     catch ( Exception e ) {
       throw new GuanxiException(e);
