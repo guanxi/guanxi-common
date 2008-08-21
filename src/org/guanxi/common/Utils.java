@@ -22,7 +22,6 @@ import org.w3c.dom.NodeList;
 import org.w3c.dom.NamedNodeMap;
 import org.apache.xml.security.utils.Base64;
 import org.apache.xml.security.exceptions.Base64DecodingException;
-import org.apache.log4j.Logger;
 import org.apache.xmlbeans.XmlObject;
 import org.guanxi.xal.saml_2_0.metadata.EntitiesDescriptorDocument;
 
@@ -261,5 +260,33 @@ public class Utils {
     zulu.setTimeZone(TimeZone.getTimeZone("GMT"));
     Calendar calNow = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
     return zulu.format(calNow.getTime());
+  }
+  
+  /**
+   * This reads the input stream completely, returning the result. The input stream is
+   * always in a closed state after calling this, even if an error has occurred.
+   * 
+   * @param in
+   * @return
+   * @throws IOException
+   */
+  public static byte[] read(InputStream in) throws IOException {
+    ByteArrayOutputStream out;
+    byte[] buffer;
+    int read;
+    
+    out = new ByteArrayOutputStream();
+    buffer = new byte[1024];
+    
+    try {
+      while ( (read = in.read(buffer)) != -1 ) {
+        out.write(buffer, 0, read);
+      }
+      
+      return out.toByteArray(); // ByteArrayInputStream.close() has no effect - see the JavaDoc!
+    }
+    finally {
+      in.close();
+    }
   }
 }
