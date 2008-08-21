@@ -283,7 +283,7 @@ public class Utils {
         out.write(buffer, 0, read);
       }
       
-      return out.toByteArray(); // ByteArrayInputStream.close() has no effect - see the JavaDoc!
+      return out.toByteArray(); // ByteArrayOutputStream.close() has no effect - see the JavaDoc!
     }
     finally {
       in.close();
