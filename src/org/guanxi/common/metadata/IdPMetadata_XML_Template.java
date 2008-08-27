@@ -11,7 +11,7 @@ import org.guanxi.xal.metadata.IdPDescriptor;
  * 
  * @author matthew
  */
-public class IdPTemplateMetadata implements IdPMetadata {
+public class IdPMetadata_XML_Template implements IdPMetadata {
   
   /**
    * This is the metadata that this class provides a wrapper around.
@@ -27,7 +27,7 @@ public class IdPTemplateMetadata implements IdPMetadata {
    * 
    * @param metadata
    */
-  public IdPTemplateMetadata(IdPDescriptor metadata) {
+  public IdPMetadata_XML_Template(IdPDescriptor metadata) {
     this.metadata = metadata;
   }
   

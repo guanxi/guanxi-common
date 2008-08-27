@@ -5,74 +5,144 @@
 
 package org.guanxi.common.job;
 
-import org.apache.log4j.Logger;
-import org.guanxi.common.log.Log4JLoggerConfig;
-import org.guanxi.common.log.Log4JLogger;
-import org.guanxi.common.GuanxiException;
-import org.springframework.web.context.ServletContextAware;
-
 import javax.servlet.ServletContext;
+
+import org.apache.log4j.Logger;
+import org.apache.log4j.PropertyConfigurator;
+import org.apache.log4j.xml.DOMConfigurator;
+import org.springframework.web.context.ServletContextAware;
 
 /**
  * Implementation of core configuration information passed to jobs. All jobs get this information.
  * Those that require specific settings should override this class
  */
 public abstract class SimpleGuanxiJobConfig implements GuanxiJobConfig, ServletContextAware {
-  /** The servlet context */
-  protected ServletContext servletContext = null;
-  /** Our logger */
-  protected Logger log = null;
-  /** The logger config */
-  protected Log4JLoggerConfig loggerConfig = null;
-  /** The Logging setup to use */
-  protected Log4JLogger logger = null;
-  /** The key under which the job will be stored in the scheduler */
-  protected String key = null;
-  /** The running schedule for the job */
-  protected String cronLine = null;
-  /** The job class to use. A new one is created by Quartz on every invocation */
+  /** 
+   * The servlet context 
+   */
+  private ServletContext servletContext = null;
+  /** 
+   * The key under which the job will be stored in the scheduler 
+   */
+  private String key = null;
+  /** 
+   * The running schedule for the job 
+   */
+  private String cronLine = null;
+  /** 
+   * The job class to use. A new one is created by Quartz on every invocation 
+   */
   public String jobClass = null;
-  /** Custom data for a job */
-  protected Object privateData = null;
-
-  public void init() {
-    try {
-      loggerConfig.setClazz(Class.forName(jobClass));
-
-      // Sort out the file paths for logging
-      loggerConfig.setLogConfigFile(servletContext.getRealPath(loggerConfig.getLogConfigFile()));
-      loggerConfig.setLogFile(servletContext.getRealPath(loggerConfig.getLogFile()));
-
-      // Get our logger
-      log = logger.initLogger(loggerConfig);
+  /** 
+   * Custom data for a job 
+   */
+  private Object privateData = null;
+  /**
+   * This is the configuration file to use for the logging for this job.
+   */
+  private String loggerConfigurationFile = null;
+  
+  /**
+   * This will create a logger that is configured using the file provided.
+   * This makes the following assumptions based on the file name:
+   * 1) A file name ending in .xml is an XML file (case insensitive)
+   * 2) Anything else is a properties file
+   * @param configurationFile The file to use to configure the logger.
+   * @return
+   */
+  public static Logger createLogger(String configurationFile, String name) {
+    
+    if ( configurationFile.toLowerCase().endsWith(".xml") ) {
+      DOMConfigurator.configure(configurationFile);
     }
-    catch(ClassNotFoundException cnfe) {
-      System.err.println("Error loading Job class : " + cnfe);
+    else {
+      PropertyConfigurator.configure(configurationFile);
     }
-    catch(GuanxiException ge) {
-      System.err.println("Error initialising Job logging : " + ge);
-    }
+    
+    return Logger.getLogger(name);
   }
 
-  public void setKey(String key) { this.key = key; }
-  public void setCronLine(String cronLine) { this.cronLine = cronLine; }
-  public String getKey() { return key; }
-  public String getCronLine() { return cronLine; }
-  public void setJobClass(String jobClass) { this.jobClass = jobClass; }
-  public String getJobClass() { return jobClass; }
+  /**
+   * @return the servletContext
+   */
+  public ServletContext getServletContext() {
+    return servletContext;
+  }
 
-  public void setLog(Logger log) { this.log = log; }
-  public Logger getLog() { return log; }
+  /**
+   * @param servletContext the servletContext to set
+   */
+  public void setServletContext(ServletContext servletContext) {
+    this.servletContext = servletContext;
+  }
 
-  public void setLoggerConfig(Log4JLoggerConfig loggerConfig) { this.loggerConfig = loggerConfig; }
-  public Log4JLoggerConfig getLoggerConfig() { return loggerConfig; }
+  /**
+   * @return the key
+   */
+  public String getKey() {
+    return key;
+  }
 
-  public void setLogger(Log4JLogger logger) { this.logger = logger; }
-  public Log4JLogger getLogger() { return logger; }
+  /**
+   * @param key the key to set
+   */
+  public void setKey(String key) {
+    this.key = key;
+  }
 
-  public void setPrivateData(Object privateData) { this.privateData = privateData; }
-  public Object getPrivateData() { return privateData; }
+  /**
+   * @return the cronLine
+   */
+  public String getCronLine() {
+    return cronLine;
+  }
 
-  public void setServletContext(ServletContext servletContext) { this.servletContext = servletContext; }
-  public ServletContext getServletContext() { return servletContext; }
+  /**
+   * @param cronLine the cronLine to set
+   */
+  public void setCronLine(String cronLine) {
+    this.cronLine = cronLine;
+  }
+
+  /**
+   * @return the jobClass
+   */
+  public String getJobClass() {
+    return jobClass;
+  }
+
+  /**
+   * @param jobClass the jobClass to set
+   */
+  public void setJobClass(String jobClass) {
+    this.jobClass = jobClass;
+  }
+
+  /**
+   * @return the privateData
+   */
+  public Object getPrivateData() {
+    return privateData;
+  }
+
+  /**
+   * @param privateData the privateData to set
+   */
+  public void setPrivateData(Object privateData) {
+    this.privateData = privateData;
+  }
+
+  /**
+   * @return the loggerConfigurationFile
+   */
+  public String getLoggerConfigurationFile() {
+    return loggerConfigurationFile;
+  }
+
+  /**
+   * @param loggerConfigurationFile the loggerConfigurationFile to set
+   */
+  public void setLoggerConfigurationFile(String loggerConfigurationFile) {
+    this.loggerConfigurationFile = loggerConfigurationFile;
+  }
 }

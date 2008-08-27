@@ -138,17 +138,7 @@ public abstract class MetadataManager<M extends Metadata> {
 	 * @param metadata This is the metadata that has been loaded from the source.
 	 */
 	public void setMetadata(String source, M... metadata) {
-		String entityID;
-		Set<String> entityIDList;
-
 		removeMetadata(source);
-		
-		entityIDBySource.put(source, entityIDList = new TreeSet<String>());
-		
-		for ( M currentMetadata : metadata ) {
-			entityID = currentMetadata.getEntityID();
-			metadataByEntityID.put(entityID, currentMetadata);
-			entityIDList.add(entityID);
-		}
+		addMetadata(source, metadata);
 	}
 }

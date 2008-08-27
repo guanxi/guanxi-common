@@ -11,8 +11,6 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import javax.servlet.ServletContext;
-
 import org.apache.xmlbeans.XmlException;
 import org.guanxi.xal.metadata.IdPDescriptor;
 import org.guanxi.xal.metadata.IdPDescriptors;
@@ -41,28 +39,24 @@ import org.guanxi.xal.metadata.IdPDescriptorsDocument;
  */
 public class IdPMetadataManager extends MetadataManager<IdPMetadata> {
   /**
-   * This is the key used to get the IdP out of the ServletContext.
+   * Storing the IdPMetadataManager as a singleton makes it much easier to access.
    */
-  private static final String key = IdPMetadataManager.class.getName();
+  private static IdPMetadataManager singleton;
   
   /**
    * This will return the IdPManager for this application.
    * If there is no current IdPManager then this will create one.
    * 
-   * @param context  This is the ServletContext which holds the IdPManager
-   * @return         This will return the IdPManager held by the ServletContext
+   * @return         This will return the IdPManager singleton
    */
-  public static IdPMetadataManager getManager(ServletContext context) {
-    IdPMetadataManager manager;
-    
-    if ( (manager = (IdPMetadataManager)context.getAttribute(key)) != null ) {
-      return manager;
+  public static IdPMetadataManager getManager() {
+    if ( singleton != null ) {
+      return singleton;
     }
     
-    manager = new IdPMetadataManager();
-    context.setAttribute(key, manager);
+    singleton = new IdPMetadataManager();
     
-    return manager;
+    return singleton;
   }
 
   /**
@@ -80,28 +74,28 @@ public class IdPMetadataManager extends MetadataManager<IdPMetadata> {
   public void read(InputStream in) throws IOException, XmlException {
     IdPDescriptorsDocument document;
     IdPDescriptors base;
-    Map<String, Set<IdPTemplateMetadata>> idpMetadataBySource;
+    Map<String, Set<IdPMetadata_XML_Template>> idpMetadataBySource;
     
     document = IdPDescriptorsDocument.Factory.parse(in);
     base = document.getIdPDescriptors();
-    idpMetadataBySource = new TreeMap<String, Set<IdPTemplateMetadata>>();
+    idpMetadataBySource = new TreeMap<String, Set<IdPMetadata_XML_Template>>();
     
     // This loads all of the metadata and associates it with the source
     for ( IdPDescriptor idpMetadata : base.getIdPDescriptorArray() ) {
-      Set<IdPTemplateMetadata> sourceMetadata;
+      Set<IdPMetadata_XML_Template> sourceMetadata;
       
       sourceMetadata = idpMetadataBySource.get(idpMetadata.getSource());
       if ( sourceMetadata == null ) {
-        sourceMetadata = new TreeSet<IdPTemplateMetadata>(new Metadata.MetadataComparator<IdPTemplateMetadata>());
+        sourceMetadata = new TreeSet<IdPMetadata_XML_Template>(new Metadata.MetadataComparator<IdPMetadata_XML_Template>());
         idpMetadataBySource.put(idpMetadata.getSource(), sourceMetadata);
       }
       
-      sourceMetadata.add(new IdPTemplateMetadata(idpMetadata));
+      sourceMetadata.add(new IdPMetadata_XML_Template(idpMetadata));
     }
     
     // This then overwrites the existing metadata that has been loaded for that source
     for ( String source : idpMetadataBySource.keySet() ) {
-      setMetadata(source, idpMetadataBySource.get(source).toArray(new IdPTemplateMetadata[idpMetadataBySource.size()]));
+      setMetadata(source, idpMetadataBySource.get(source).toArray(new IdPMetadata_XML_Template[idpMetadataBySource.size()]));
     }
   }
 
