@@ -22,7 +22,7 @@ import org.guanxi.common.entity.EntityManager;
 import java.util.Map;
 
 /**
- * Guanxi implementation of a MetadataFarm
+ * Guanxi implementation of an EntityFarm
  *
  * @author alistair
  */
