@@ -41,4 +41,7 @@ public class Shibboleth {
   public static final String SAMLP_SUCCESS = "samlp:Success";
   /** SAML Status value for success */
   public static final String SAMLP_ERROR = "samlp:Error";
+
+  /** The Shibboleth Browser-POST SAML profile binding used in metadata */
+  public static final String BROWSER_POST_BINDING = "urn:oasis:names:tc:SAML:1.0:profiles:browser-post";
 }
