@@ -1,17 +1,25 @@
-/* CVS Header
-   $
-   $
-*/
+//: "The contents of this file are subject to the Mozilla Public License
+//: Version 1.1 (the "License"); you may not use this file except in
+//: compliance with the License. You may obtain a copy of the License at
+//: http://www.mozilla.org/MPL/
+//:
+//: Software distributed under the License is distributed on an "AS IS"
+//: basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
+//: License for the specific language governing rights and limitations
+//: under the License.
+//:
+//: The Original Code is Guanxi (http://www.guanxi.uhi.ac.uk).
+//:
+//: The Initial Developer of the Original Code is Alistair Young alistair@codebrane.com
+//: All Rights Reserved.
+//:
 
 package org.guanxi.common.job;
 
-import org.apache.log4j.Logger;
-import org.guanxi.common.log.Log4JLoggerConfig;
-import org.guanxi.common.log.Log4JLogger;
-import org.guanxi.common.GuanxiException;
 import org.springframework.web.context.ServletContextAware;
 
 import javax.servlet.ServletContext;
+import java.io.File;
 
 /**
  * Implementation of core configuration information passed to jobs. All jobs get this information.
@@ -20,12 +28,6 @@ import javax.servlet.ServletContext;
 public abstract class SimpleGuanxiJobConfig implements GuanxiJobConfig, ServletContextAware {
   /** The servlet context */
   protected ServletContext servletContext = null;
-  /** Our logger */
-  protected Logger log = null;
-  /** The logger config */
-  protected Log4JLoggerConfig loggerConfig = null;
-  /** The Logging setup to use */
-  protected Log4JLogger logger = null;
   /** The key under which the job will be stored in the scheduler */
   protected String key = null;
   /** The running schedule for the job */
@@ -36,21 +38,24 @@ public abstract class SimpleGuanxiJobConfig implements GuanxiJobConfig, ServletC
   protected Object privateData = null;
 
   public void init() {
-    try {
-      loggerConfig.setClazz(Class.forName(jobClass));
+  }
 
-      // Sort out the file paths for logging
-      loggerConfig.setLogConfigFile(servletContext.getRealPath(loggerConfig.getLogConfigFile()));
-      loggerConfig.setLogFile(servletContext.getRealPath(loggerConfig.getLogFile()));
-
-      // Get our logger
-      log = logger.initLogger(loggerConfig);
+  /**
+   * Works out whether to use a relative or absolute path for a file.
+   * If path starts with /WEB-INF or WEB-INF, then it uses the path
+   * relative to the web application root, otherwise it just returns
+   * the path as-is.
+   *
+   * @param path The relative or absolute path
+   * @return Either the path relative to the webapp root or as-is
+   */
+  protected String sanitisePath(String path) {
+    if ((path.startsWith("WEB-INF")) ||
+        (path.startsWith(File.separator + "WEB-INF"))) {
+      return servletContext.getRealPath(path);
     }
-    catch(ClassNotFoundException cnfe) {
-      System.err.println("Error loading Job class : " + cnfe);
-    }
-    catch(GuanxiException ge) {
-      System.err.println("Error initialising Job logging : " + ge);
+    else {
+      return path;
     }
   }
 
@@ -60,15 +65,6 @@ public abstract class SimpleGuanxiJobConfig implements GuanxiJobConfig, ServletC
   public String getCronLine() { return cronLine; }
   public void setJobClass(String jobClass) { this.jobClass = jobClass; }
   public String getJobClass() { return jobClass; }
-
-  public void setLog(Logger log) { this.log = log; }
-  public Logger getLog() { return log; }
-
-  public void setLoggerConfig(Log4JLoggerConfig loggerConfig) { this.loggerConfig = loggerConfig; }
-  public Log4JLoggerConfig getLoggerConfig() { return loggerConfig; }
-
-  public void setLogger(Log4JLogger logger) { this.logger = logger; }
-  public Log4JLogger getLogger() { return logger; }
 
   public void setPrivateData(Object privateData) { this.privateData = privateData; }
   public Object getPrivateData() { return privateData; }
