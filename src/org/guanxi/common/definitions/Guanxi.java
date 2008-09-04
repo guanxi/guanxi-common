@@ -114,4 +114,8 @@ public class Guanxi {
   public static final String REQUEST_ATTR_IDP_COOKIE_AUTHENTICATED = "REQUEST_ATTR_IDP_COOKIE_AUTHENTICATED";
   /** The name of the default authenticator page for the IdP */
   public static final String DEFAULT_AUTH_PAGE_MARKER = "__DEFAULT__";
+  /** The servlet context attribute that holds the EntityFarm implementation for the IdP */
+  public static final String CONTEXT_ATTR_IDP_ENTITY_FARM = "CONTEXT_ATTR_IDP_ENTITY_FARM";
+  /** The servlet context attribute that holds the EntityFarm implementation for the Engine */
+  public static final String CONTEXT_ATTR_ENGINE_ENTITY_FARM = "CONTEXT_ATTR_ENGINE_ENTITY_FARM";
 }
