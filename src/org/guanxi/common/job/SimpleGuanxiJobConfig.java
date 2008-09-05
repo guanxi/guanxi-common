@@ -19,7 +19,6 @@ package org.guanxi.common.job;
 import org.springframework.web.context.ServletContextAware;
 
 import javax.servlet.ServletContext;
-import java.io.File;
 
 /**
  * Implementation of core configuration information passed to jobs. All jobs get this information.
@@ -51,7 +50,7 @@ public abstract class SimpleGuanxiJobConfig implements GuanxiJobConfig, ServletC
    */
   protected String sanitisePath(String path) {
     if ((path.startsWith("WEB-INF")) ||
-        (path.startsWith(File.separator + "WEB-INF"))) {
+        (path.startsWith("/WEB-INF"))) {
       return servletContext.getRealPath(path);
     }
     else {
