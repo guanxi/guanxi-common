@@ -22,14 +22,19 @@ public class IdPMetadataImpl implements IdPMetadata {
   /**
    * This is the X509 Certificate used to sign SAML assertions from the IdP.
    */
-  private byte[] x509Certificate;
+  private byte[] signingCertificate;
+  /**
+   * This is the X509 Certificate used to identify the server for the AA URL.
+   */
+  private byte[] aaCertificate;
   
   public IdPMetadataImpl() {}
   
-  public IdPMetadataImpl(String entityID, String attributeAuthorityURL, byte[] x509Certificate) {
+  public IdPMetadataImpl(String entityID, String attributeAuthorityURL, byte[] signingCertificate, byte[] aaCertificate) {
     setEntityID(entityID);
     setAttributeAuthorityURL(attributeAuthorityURL);
-    setX509Certificate(x509Certificate);
+    setSigningCertificate(signingCertificate);
+    setAACertificate(aaCertificate);
   }
 
   /**
@@ -63,15 +68,29 @@ public class IdPMetadataImpl implements IdPMetadata {
   /**
    * @return the x509Certificate
    */
-  public byte[] getX509Certificate() {
-    return x509Certificate;
+  public byte[] getSigningCertificate() {
+    return signingCertificate;
   }
 
   /**
    * @param certificate the x509Certificate to set
    */
-  public void setX509Certificate(byte[] certificate) {
-    x509Certificate = certificate;
+  public void setSigningCertificate(byte[] certificate) {
+    signingCertificate = certificate;
+  }
+
+  /**
+   * @return the aaCertificate
+   */
+  public byte[] getAACertificate() {
+    return aaCertificate;
+  }
+
+  /**
+   * @param aaCertificate the aaCertificate to set
+   */
+  public void setAACertificate(byte[] aaCertificate) {
+    this.aaCertificate = aaCertificate;
   }
 
 }

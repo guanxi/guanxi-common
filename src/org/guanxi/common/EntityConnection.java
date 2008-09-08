@@ -23,16 +23,21 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.ProtocolException;
 import java.net.URL;
+import java.security.KeyStore;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.Enumeration;
 
 import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.KeyManager;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLPeerUnverifiedException;
+import javax.net.ssl.TrustManager;
 
+import org.apache.log4j.Logger;
 import org.guanxi.common.security.ssl.GuanxiHostVerifier;
 import org.guanxi.common.security.ssl.SSL;
 
@@ -77,8 +82,8 @@ public class EntityConnection {
    * @param probeForServerCert     TRUE if the connection is only going to be used to obtain an entity's SSL certificate
    * @throws GuanxiException       If an error occurred
    */
-  public EntityConnection(String endpoint, String localEntityID, String entityKeystore, String entityKeystorePassword,
-                          String trustStore, String trustStorePassword, boolean probeForServerCert) throws GuanxiException {
+  public EntityConnection(String endpoint, String localEntityID, KeyManager[] keyManagers, 
+                          TrustManager[] trustManagers, boolean probeForServerCert) throws GuanxiException {
     URL url;
     
     try {
@@ -89,8 +94,8 @@ public class EntityConnection {
         SSLContext context;
         
         context = SSLContext.getInstance("SSL");
-        context.init(SSL.getKeyManagers(localEntityID, entityKeystore, entityKeystorePassword),
-                     SSL.getTrustManagers(trustStore, trustStorePassword, probeForServerCert),
+        context.init(keyManagers,
+                     trustManagers,
                      null);
         connection = (HttpsURLConnection)url.openConnection();
         connection.setSSLSocketFactory(context.getSocketFactory());
@@ -123,7 +128,7 @@ public class EntityConnection {
    * @param probeForServerCert     TRUE if the connection is only going to be used to obtain an entity's SSL certificate
    * @throws GuanxiException       If an error occurred
    */
-  public EntityConnection(String endpoint, String trustStore, String trustStorePassword, boolean probeForServerCert) throws GuanxiException {
+  public EntityConnection(String endpoint, TrustManager[] trustManagers, boolean probeForServerCert) throws GuanxiException {
     URL url;
     
     try {
@@ -135,7 +140,7 @@ public class EntityConnection {
         
         context = SSLContext.getInstance("SSL");
         context.init(null,
-                     SSL.getTrustManagers(trustStore, trustStorePassword, probeForServerCert),
+                     trustManagers,
                      null);
         connection = (HttpsURLConnection)url.openConnection();
         connection.setSSLSocketFactory(context.getSocketFactory());

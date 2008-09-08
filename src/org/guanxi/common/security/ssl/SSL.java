@@ -17,8 +17,12 @@
 package org.guanxi.common.security.ssl;
 
 import javax.net.ssl.*;
+
+import org.guanxi.common.GuanxiException;
+
 import java.security.KeyStore;
 import java.io.FileInputStream;
+import java.io.InputStream;
 
 /**
  * Defines trust and keystore managers for HTTPS connections.
@@ -38,32 +42,77 @@ public class SSL {
    * be returned. This is to allow probing servers to extract their certificates.
    * @return An array of TrustManage objects that can be used by the JVM to verify an HTTPS connection
    *  or null if an error occurred.
+   * @throws GuanxiException 
    */
-  public static TrustManager[] getTrustManagers(String trustStore, String password, boolean probeForServerCert) {
+  public static TrustManager[] getTrustManagers(String trustStore, String password, boolean probeForServerCert) throws GuanxiException {
+    String algorithm;
+    TrustManagerFactory trustManagerFactory;
+    KeyStore keystore;
+    InputStream in;
+    
     try {
       // If we're just after the server's certificate, delegate trust checking to Guanxi
-      if (probeForServerCert)
+      if (probeForServerCert) {
         return new TrustManager[]{new GuanxiX509ProbingTrustManager()};
+      }
 
       // First, get the default TrustManagerFactory.
-      String alg = TrustManagerFactory.getDefaultAlgorithm();
-      TrustManagerFactory tmFact = TrustManagerFactory.getInstance(alg);
+      algorithm           = TrustManagerFactory.getDefaultAlgorithm();
+      trustManagerFactory = TrustManagerFactory.getInstance(algorithm);
 
       // Next, set up the TrustStore to use. We need to load the file into
       // a KeyStore instance.
-      FileInputStream fis = new FileInputStream(trustStore);
-      KeyStore ks = KeyStore.getInstance("jks");
-      ks.load(fis, password.toCharArray());
-      fis.close();
+      in = new FileInputStream(trustStore);
+      try {
+        keystore = KeyStore.getInstance("jks");
+        keystore.load(in, password.toCharArray());
+      }
+      finally {
+        in.close();
+      }
 
       // Now we initialise the TrustManagerFactory with this KeyStore
-      tmFact.init(ks);
+      trustManagerFactory.init(keystore);
 
       // And now get the TrustManagers
-      return tmFact.getTrustManagers();
+      return trustManagerFactory.getTrustManagers();
     }
     catch(Exception e) {
-      return null;
+      throw new GuanxiException(e); // don't eat exceptions
+    }
+  }
+  
+  /**
+   * This creates a list of TrustManagers from a given truststore object. This allows in memory
+   * management of the truststore, which works well with the in memory management of the metadata.
+   * 
+   * @param truststore
+   * @param probeForServerCert
+   * @return
+   * @throws GuanxiException
+   */
+  public static TrustManager[] getTrustManagers(KeyStore truststore, boolean probeForServerCert) throws GuanxiException {
+    String algorithm;
+    TrustManagerFactory trustManagerFactory;
+    
+    try {
+      // If we're just after the server's certificate, delegate trust checking to Guanxi
+      if (probeForServerCert) {
+        return new TrustManager[]{new GuanxiX509ProbingTrustManager()};
+      }
+
+      // First, get the default TrustManagerFactory.
+      algorithm           = TrustManagerFactory.getDefaultAlgorithm();
+      trustManagerFactory = TrustManagerFactory.getInstance(algorithm);
+
+      // Now we initialise the TrustManagerFactory with this KeyStore
+      trustManagerFactory.init(truststore);
+
+      // And now get the TrustManagers
+      return trustManagerFactory.getTrustManagers();
+    }
+    catch(Exception e) {
+      throw new GuanxiException(e); // don't eat exceptions
     }
   }
 
@@ -75,23 +124,34 @@ public class SSL {
    *
    * @param guardID The ID of the Guard who's keystore must be loaded. This is also the alias within the keystore
    * under which the Guard's certificate is stored. It's this certificate that's added to the HTTPS connection.
-   * @param keystore The full path and name of the keystore to load.
+   * @param keystoreFile The full path and name of the keystore to load.
    * @param password The password for the keystore.
    * @return An array of GuanxiX509KeyManager objects or null if an error occurred.
+   * @throws GuanxiException 
    */
-  public static KeyManager[] getKeyManagers(String guardID, String keystore, String password) {
+  public static KeyManager[] getKeyManagers(String guardID, String keystoreFile, String password) throws GuanxiException {
+    String algorithm;
+    KeyManagerFactory keyManagerFactory;
+    InputStream in;
+    KeyStore keystore;
+    KeyManager[] keyManagers;
+    
     try {
-      String alg = KeyManagerFactory.getDefaultAlgorithm();
-      KeyManagerFactory kmFact = KeyManagerFactory.getInstance(alg);
+      algorithm = KeyManagerFactory.getDefaultAlgorithm();
+      keyManagerFactory = KeyManagerFactory.getInstance(algorithm);
 
-      FileInputStream fis = new FileInputStream(keystore);
-      KeyStore ks = KeyStore.getInstance("jks");
-      ks.load(fis, password.toCharArray());
-      fis.close();
+      in = new FileInputStream(keystoreFile);
+      try {
+        keystore = KeyStore.getInstance("jks");
+        keystore.load(in, password.toCharArray());
+      }
+      finally {
+        in.close();
+      }
 
-      kmFact.init(ks, password.toCharArray());
+      keyManagerFactory.init(keystore, password.toCharArray());
 
-      KeyManager[] keyManagers = kmFact.getKeyManagers();
+      keyManagers = keyManagerFactory.getKeyManagers();
 
       for (int c=0; c < keyManagers.length; c++) {
         if (keyManagers[c] instanceof X509KeyManager) {
@@ -102,7 +162,7 @@ public class SSL {
       return keyManagers;
     }
     catch(Exception e) {
-      return null;
+      throw new GuanxiException(e); // don't eat exceptions
     }
   }
 }

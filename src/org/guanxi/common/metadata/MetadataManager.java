@@ -3,15 +3,12 @@
  */
 package org.guanxi.common.metadata;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
-
-import org.apache.xmlbeans.XmlException;
 
 /**
  * This is responsible for managing the loaded Metadata.
@@ -32,6 +29,10 @@ import org.apache.xmlbeans.XmlException;
  * A current potential bug is that if the metadata for an is loaded
  * twice then removal of either set will remove the metadata for both.
  * 
+ * This also now supports the dirty flag, which can be used to indicate
+ * that the stored metadata has changed. This allows information based
+ * on the metadata to be cached and recalculated when required.
+ * 
  * @author matthew
  */
 public abstract class MetadataManager<M extends Metadata> {
@@ -39,12 +40,25 @@ public abstract class MetadataManager<M extends Metadata> {
 	 * This is the map of entityID to Metadata, and this is
 	 * the only place that the Metadata is stored.
 	 */
-	protected final Map<String, M> metadataByEntityID;
+	private final Map<String, M> metadataByEntityID;
 	/**
 	 * This is the map of loaded source name and the entityIDs that
 	 * have been loaded from that source.
 	 */
-	protected final Map<String, Set<String>> entityIDBySource;
+	private final Map<String, Set<String>> entityIDBySource;
+	/**
+	 * This is set when metadata is added, removed, or updated.
+	 * Anything that uses this is responsible for clearing it once
+	 * the appropriate actions have been taken.
+	 * 
+	 * If there is a problem with multiple tasks which must occur
+	 * at different times and which also rely on this for caching
+	 * then this will be replaced with an integer that will be
+	 * incremented by one each time the metadata is changed. Then
+	 * checking the value against the value at caching time will
+	 * indicate changes without requiring that the flag is cleared.
+	 */
+	private boolean dirty;
 	
 	/**
 	 * This creates an empty Metadata Manager.
@@ -56,28 +70,6 @@ public abstract class MetadataManager<M extends Metadata> {
 		metadataByEntityID = new TreeMap<String, M>();
 		entityIDBySource = new TreeMap<String, Set<String>>();
 	}
-	
-	/**
-	 * This will write all of the loaded metadata out to the 
-	 * output stream provided. It is recommended that the 
-	 * special template XML bean is used for this purpose.
-	 * 
-	 * @param out          This is the output stream that will receive the serialised metadata.
-	 * @throws IOException This will be thrown if there is a problem writing the metadata to the stream.
-	 */
-	public abstract void write(OutputStream out) throws IOException;
-	/**
-	 * This will read metadata in from the input stream provided.
-	 * This will overwrite any metadata that has been loaded from
-	 * a source that is also found in the metadata loaded from the
-	 * input stream. Existing metadata from a source not found in
-	 * the input stream metadata will not be replaced or removed.
-	 * 
-	 * @param in             This is the input stream which will be used to load the metadata.
-	 * @throws IOException   This will be thrown if there is a problem reading the input stream.
-	 * @throws XmlException  This will be thrown if there is a problem parsing the XML from the input stream.
-	 */
-	public abstract void read(InputStream in) throws IOException, XmlException;
 	
 	/**
 	 * This appends metadata to the list of metadata loaded for this
@@ -101,6 +93,16 @@ public abstract class MetadataManager<M extends Metadata> {
 			metadataByEntityID.put(entityID, currentMetadata);
 			entityIDList.add(entityID);
 		}
+		setDirty(true);
+	}
+	
+	/**
+	 * This returns all metadata held by this manager.
+	 * 
+	 * @return This will return an unsorted list of all metadata held by this manager.
+	 */
+	public Collection<M> getMetadata() {
+	  return metadataByEntityID.values();
 	}
 	
 	/**
@@ -112,6 +114,29 @@ public abstract class MetadataManager<M extends Metadata> {
 	 */
 	public M getMetadata(String entityID) {
 		return metadataByEntityID.get(entityID);
+	}
+	
+	/**
+	 * This gets all the metadata that has been loaded from a specific source.
+	 * If no metadata has been loaded from that source then the result will be
+	 * null.
+	 * 
+	 * @param source This is the source of the metadata that has been loaded.
+	 * @return       The complete collection of metadata from the source.
+	 */
+	public Collection<M> getMetadataBySource(String source) {
+	  Collection<M> result;
+	  
+	  if ( ! entityIDBySource.containsKey(source) ) {
+	    return null;
+	  }
+	  
+	  result = new ArrayList<M>();
+	  for ( String entityID : entityIDBySource.get(source) ) {
+	    result.add(metadataByEntityID.get(entityID));
+	  }
+	  
+	  return result;
 	}
 	
 	/**
@@ -128,6 +153,7 @@ public abstract class MetadataManager<M extends Metadata> {
 			}
 			entityIDBySource.remove(source);
 		}
+		setDirty(true);
 	}
 	
 	/**
@@ -140,5 +166,35 @@ public abstract class MetadataManager<M extends Metadata> {
 	public void setMetadata(String source, M... metadata) {
 		removeMetadata(source);
 		addMetadata(source, metadata);
+		setDirty(true);
+	}
+	
+	/**
+	 * This gets a list of all of the different sources of metadata.
+	 * 
+	 * @return A set containing the tags of all of the sources of metadata that have been loaded.
+	 */
+	public Set<String> getSources() {
+	  return entityIDBySource.keySet();
+	}
+	
+	/**
+	 * This gets the state of the dirty flag. The dirty flag is used to indicate when
+	 * caches of data based on the metadata need to be refreshed.
+	 * 
+	 * @return
+	 */
+	public boolean isDirty() {
+	  return dirty;
+	}
+	
+	/**
+	 * This sets the dirty flag. The dirty flag is used to indicate when
+	 * caches of data based on the metadata need to be refreshed.
+	 * 
+	 * @param dirty
+	 */
+	public void setDirty(boolean dirty) {
+	  this.dirty = dirty;
 	}
 }

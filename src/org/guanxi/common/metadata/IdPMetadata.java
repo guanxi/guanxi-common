@@ -44,5 +44,13 @@ public interface IdPMetadata extends Metadata {
   // KeyInfoType keyInfo = entityDescriptor.getAttributeAuthorityDescriptorArray()[0].getKeyDescriptorArray()[0].getKeyInfo();
   // X509DataType x509Data = keyInfo.getX509DataArray()[0];
   // byte[] bytes = x509Data.getX509CertificateArray()[0];
-  public byte[] getX509Certificate();
+  public byte[] getSigningCertificate();
+  
+  /**
+   * This gets the binary data of the AA URL Server certificate. If the AA
+   * URL is unsecured then this will return null.
+   * 
+   * @return This returns the binary representation of the X509 Server Certificate for the AA URL.
+   */
+  public byte[] getAACertificate();
 }

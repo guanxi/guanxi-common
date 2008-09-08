@@ -3,18 +3,15 @@
  */
 package org.guanxi.common.metadata;
 
+import java.io.ByteArrayInputStream;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
-import java.util.TreeSet;
-
-import org.apache.xmlbeans.XmlException;
-import org.guanxi.xal.metadata.IdPDescriptor;
-import org.guanxi.xal.metadata.IdPDescriptors;
-import org.guanxi.xal.metadata.IdPDescriptorsDocument;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
 
 /**
  * This is responsible for managing the loaded IdP Metadata.
@@ -42,6 +39,17 @@ public class IdPMetadataManager extends MetadataManager<IdPMetadata> {
    * Storing the IdPMetadataManager as a singleton makes it much easier to access.
    */
   private static IdPMetadataManager singleton;
+  /**
+   * This is used to convert the binary data into certificates in order to add
+   * them to the in-memory truststore.
+   */
+  private static CertificateFactory certFactory;
+  /**
+   * This is the cached truststore which is used
+   * to hold the complete set of trusted server
+   * certificates.
+   */
+  private KeyStore truststore;
   
   /**
    * This will return the IdPManager for this application.
@@ -53,81 +61,76 @@ public class IdPMetadataManager extends MetadataManager<IdPMetadata> {
     if ( singleton != null ) {
       return singleton;
     }
-    
+
     singleton = new IdPMetadataManager();
     
     return singleton;
   }
-
+  
   /**
-   * This will initialise the metadata manager
-   * with data loaded from the input stream
-   * provided. Any data source specified in the
-   * input stream will completely replace any
-   * existing metadata loaded from that source.
+   * This returns the truststore object that contains all of the AA URL certificates
+   * found in the metadata as well as the certificates that have been explicitly added
+   * to the truststore file.
    * 
-   * @param in            This is the input stream that will provide the data to load.
-   * @throws IOException  If there is a problem reading from the stream.
-   * @throws XmlException If there is a problem parsing the content of the stream.
+   * @param truststoreFile
+   * @param truststorePassword
+   * @return
+   * @throws KeyStoreException 
+   * @throws IOException 
+   * @throws CertificateException 
+   * @throws NoSuchAlgorithmException 
    */
-  @Override
-  public void read(InputStream in) throws IOException, XmlException {
-    IdPDescriptorsDocument document;
-    IdPDescriptors base;
-    Map<String, Set<IdPMetadata_XML_Template>> idpMetadataBySource;
-    
-    document = IdPDescriptorsDocument.Factory.parse(in);
-    base = document.getIdPDescriptors();
-    idpMetadataBySource = new TreeMap<String, Set<IdPMetadata_XML_Template>>();
-    
-    // This loads all of the metadata and associates it with the source
-    for ( IdPDescriptor idpMetadata : base.getIdPDescriptorArray() ) {
-      Set<IdPMetadata_XML_Template> sourceMetadata;
-      
-      sourceMetadata = idpMetadataBySource.get(idpMetadata.getSource());
-      if ( sourceMetadata == null ) {
-        sourceMetadata = new TreeSet<IdPMetadata_XML_Template>(new Metadata.MetadataComparator<IdPMetadata_XML_Template>());
-        idpMetadataBySource.put(idpMetadata.getSource(), sourceMetadata);
-      }
-      
-      sourceMetadata.add(new IdPMetadata_XML_Template(idpMetadata));
+  public KeyStore loadTrustStore(String truststoreFile, String truststorePassword) throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException {
+    if ( truststore == null || isDirty() ) {
+      truststore = generateTrustStore(truststoreFile, truststorePassword);
+      setDirty(false);
     }
-    
-    // This then overwrites the existing metadata that has been loaded for that source
-    for ( String source : idpMetadataBySource.keySet() ) {
-      setMetadata(source, idpMetadataBySource.get(source).toArray(new IdPMetadata_XML_Template[idpMetadataBySource.size()]));
-    }
+    return truststore;
   }
-
+  
   /**
-   * This will write all loaded metadata to the
-   * output stream provided.
+   * This loads the truststore from the file and then adds all of the certificates stored
+   * in the loaded metadata. This allows the on disk truststore to be used to initialise
+   * the data and then the loaded metadata can provide additional information.
    * 
-   * @param out           This is the output stream that will receive the XML representation of the metadata.
-   * @throws IOException  If there is a problem writing to the stream.
+   * @param truststoreFile
+   * @param truststorePassword
+   * @return
+   * @throws KeyStoreException 
+   * @throws IOException 
+   * @throws CertificateException 
+   * @throws NoSuchAlgorithmException 
    */
-  @Override
-  public void write(OutputStream out) throws IOException {
-    IdPDescriptorsDocument document;
-    IdPDescriptors base;
-    IdPDescriptor instance;
-    IdPMetadata metadata;
+  private KeyStore generateTrustStore(String truststoreFile, String truststorePassword) throws CertificateException, KeyStoreException, IOException, NoSuchAlgorithmException {
+    InputStream in;
+    KeyStore    truststore;
+    byte[]      certificate;
     
-    document = IdPDescriptorsDocument.Factory.newInstance();
-    base = document.addNewIdPDescriptors();
+    if ( certFactory == null ) {
+      certFactory = CertificateFactory.getInstance("x.509");
+    }
     
-    for ( String source : entityIDBySource.keySet() ) {
-      for ( String entityID : entityIDBySource.get(source) ) {
-        metadata = metadataByEntityID.get(entityID);
-        
-        instance = base.addNewIdPDescriptor();
-        instance.setSource(source);
-        instance.setEntityID(entityID);
-        instance.setAttributeAuthorityURL(metadata.getAttributeAuthorityURL());
-        instance.setSigningCertificate(metadata.getX509Certificate());
+    // load the truststore
+    truststore = KeyStore.getInstance("jks");
+    in         = new FileInputStream(truststoreFile);
+    try {
+      truststore.load(in, truststorePassword.toCharArray());
+    }
+    finally {
+      in.close();
+    }
+    
+    for ( IdPMetadata current : getMetadata() ) {
+      certificate = current.getAACertificate();
+      
+      if ( certificate != null ) {
+        if ( truststore.containsAlias(current.getEntityID()) ) {
+          truststore.deleteEntry(current.getEntityID());
+        }
+        truststore.setCertificateEntry(current.getEntityID(), certFactory.generateCertificate(new ByteArrayInputStream(certificate)));
       }
     }
     
-    document.save(out);
+    return truststore;
   }
 }

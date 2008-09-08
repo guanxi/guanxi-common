@@ -20,7 +20,7 @@ public class IdPMetadata_XML_EntityDescriptorType implements IdPMetadata {
    * This stores the loaded IdP Metadata, and this class wraps around the data
    * that this contains.
    */
-  private EntityDescriptorType idpMetadata;
+  private final EntityDescriptorType idpMetadata;
 
   /**
    * This creates a new wrapper class for the metadata provided.
@@ -75,15 +75,43 @@ public class IdPMetadata_XML_EntityDescriptorType implements IdPMetadata {
   // KeyInfoType keyInfo = entityDescriptor.getAttributeAuthorityDescriptorArray()[0].getKeyDescriptorArray()[0].getKeyInfo();
   // X509DataType x509Data = keyInfo.getX509DataArray()[0];
   // byte[] bytes = x509Data.getX509CertificateArray()[0];
-  public byte[] getX509Certificate() {
-    for (KeyDescriptorType currentKey : idpMetadata.getAttributeAuthorityDescriptorArray()[0].getKeyDescriptorArray()) {
-      if (currentKey.getUse() == KeyTypes.SIGNING) {
-        return currentKey.getKeyInfo().getX509DataArray()[0].getX509CertificateArray()[0];
+  public byte[] getSigningCertificate() {
+    try {
+      for ( KeyDescriptorType currentKey : idpMetadata.getAttributeAuthorityDescriptorArray()[0].getKeyDescriptorArray() ) {
+        if (currentKey.getUse() == KeyTypes.SIGNING) {
+          return currentKey.getKeyInfo().getX509DataArray()[0].getX509CertificateArray()[0];
+        }
       }
+  
+      // this is currently left here because this is the old code and is the best
+      // guess when no signing key can be found
+      return idpMetadata.getAttributeAuthorityDescriptorArray()[0].getKeyDescriptorArray()[0].getKeyInfo().getX509DataArray()[0].getX509CertificateArray()[0];
     }
+    catch ( ArrayIndexOutOfBoundsException e ) {
+      // thrown if the key does not exist as binary data - for example just the key name could be given
+      return null;
+    }
+  }
 
-    // this is currently left here because this is the old code and is the best
-    // guess when no signing key can be found
-    return idpMetadata.getAttributeAuthorityDescriptorArray()[0].getKeyDescriptorArray()[0].getKeyInfo().getX509DataArray()[0].getX509CertificateArray()[0];
+  /**
+   * This will return the server certificate for the AA URL if it can be reliably determined.
+   * This will almost certainly return null even for secured AA URLs because the format of
+   * the metadata in this respect is not well known by myself (matthew).
+   * TODO: Verify and correct the collection of the AA certificate.
+   * 
+   * @return This returns the binary representation of the Server certificate for the AA URL.
+   */
+  public byte[] getAACertificate() {
+    try {
+    	for (KeyDescriptorType currentKey : idpMetadata.getAttributeAuthorityDescriptorArray()[0].getKeyDescriptorArray()) {
+      	if (currentKey.getUse() == KeyTypes.ENCRYPTION) {
+        	return currentKey.getKeyInfo().getX509DataArray()[0].getX509CertificateArray()[0];
+      	}
+    	}
+    	return null;
+    }
+    catch ( ArrayIndexOutOfBoundsException e ) {
+    	return null;
+    }
   }
 }

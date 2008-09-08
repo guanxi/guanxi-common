@@ -46,10 +46,16 @@ public class IdPMetadata_XML_Template implements IdPMetadata {
   }
 
   /**
-   * @see org.guanxi.common.metadata.IdPMetadata#getX509Certificate()
+   * @see org.guanxi.common.metadata.IdPMetadata#getSigningCertificate()
    */
-  public byte[] getX509Certificate() {
+  public byte[] getSigningCertificate() {
     return metadata.getSigningCertificate();
   }
 
+  /**
+   * @see org.guanxi.common.metadata.IdPMetadata#getAACertificate()
+   */
+  public byte[] getAACertificate() {
+    return metadata.getAttributeAuthorityCertificate();
+  }
 }
