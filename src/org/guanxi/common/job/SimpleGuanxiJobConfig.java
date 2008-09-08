@@ -5,8 +5,12 @@
 
 package org.guanxi.common.job;
 
+import java.util.Map;
+import java.util.TreeMap;
+
 import javax.servlet.ServletContext;
 
+import org.apache.log4j.Hierarchy;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 import org.apache.log4j.xml.DOMConfigurator;
@@ -17,6 +21,13 @@ import org.springframework.web.context.ServletContextAware;
  * Those that require specific settings should override this class
  */
 public abstract class SimpleGuanxiJobConfig implements GuanxiJobConfig, ServletContextAware {
+  /**
+   * This is a map of all of the separate logger repositories that exist.
+   * These can be used to configure job based loggers separately from the
+   * main application loggers.
+   */
+  private static final Map<String, Hierarchy> loggerRepositories = new TreeMap<String, Hierarchy>();
+  
   /** 
    * The servlet context 
    */
@@ -47,19 +58,44 @@ public abstract class SimpleGuanxiJobConfig implements GuanxiJobConfig, ServletC
    * This makes the following assumptions based on the file name:
    * 1) A file name ending in .xml is an XML file (case insensitive)
    * 2) Anything else is a properties file
-   * @param configurationFile The file to use to configure the logger.
+   * 
+   * @param configurationFile The file to use to configure the logger. This should be the complete path to the file.
+   * @param loggerName        This is the name of the logger to return.
+   * @param repositoryName    This is the name of the repository to use. If this is null then no special handling is performed. 
+   *                          Otherwise a Logger Hierarchy is created or retrieved for the given name and used to hold the logging 
+   *                          configuration.
    * @return
    */
-  public static Logger createLogger(String configurationFile, String name) {
+  public static Logger createLogger(String configurationFile, String loggerName, String repositoryName) {
+    Hierarchy hierarchy;
+    Logger    logger;
     
+    if ( repositoryName == null ) {
+      if ( configurationFile.toLowerCase().endsWith(".xml") ) {
+        DOMConfigurator.configure(configurationFile);
+      }
+      else {
+        PropertyConfigurator.configure(configurationFile);
+      }
+      
+      return Logger.getLogger(loggerName);
+    }
+    else if ( ! loggerRepositories.containsKey(repositoryName) ) {
+      logger    = new Logger(null){};
+      hierarchy = new Hierarchy(logger);
+      
+      loggerRepositories.put(repositoryName, hierarchy);
+    }
+    
+    hierarchy = loggerRepositories.get(repositoryName);
     if ( configurationFile.toLowerCase().endsWith(".xml") ) {
-      DOMConfigurator.configure(configurationFile);
+      new DOMConfigurator().doConfigure(configurationFile, hierarchy);
     }
     else {
-      PropertyConfigurator.configure(configurationFile);
+      new PropertyConfigurator().doConfigure(configurationFile, hierarchy);
     }
     
-    return Logger.getLogger(name);
+    return hierarchy.getLogger(loggerName);
   }
 
   /**
