@@ -16,29 +16,39 @@
 
 package org.guanxi.common;
 
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.w3c.dom.NamedNodeMap;
-import org.apache.xml.security.utils.Base64;
-import org.apache.xml.security.exceptions.Base64DecodingException;
-import org.apache.xmlbeans.XmlObject;
-import org.guanxi.xal.saml_2_0.metadata.EntitiesDescriptorDocument;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerException;
-import java.util.*;
-import java.util.zip.ZipOutputStream;
-import java.util.zip.ZipEntry;
-import java.rmi.server.UID;
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.StringWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.rmi.server.UID;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.TimeZone;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+
+import org.apache.axis.encoding.Base64;
+import org.apache.xmlbeans.XmlObject;
+import org.guanxi.xal.saml_2_0.metadata.EntitiesDescriptorDocument;
+import org.w3c.dom.Document;
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 /**
  * <font size=5><b></b></font>
@@ -90,12 +100,7 @@ public class Utils {
   }
 
   public static String decodeBase64(String b64Data) {
-    try {
-      return new String(Base64.decode(b64Data));
-    }
-    catch(Base64DecodingException bde) {
-      return null;
-    }
+    return new String(Base64.decode(b64Data));
   }
 
   /**

@@ -23,13 +23,11 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.ProtocolException;
 import java.net.URL;
-import java.security.KeyStore;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
-import java.util.Enumeration;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.KeyManager;
@@ -37,10 +35,8 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLPeerUnverifiedException;
 import javax.net.ssl.TrustManager;
 
-import org.apache.log4j.Logger;
+import org.apache.axis.encoding.Base64;
 import org.guanxi.common.security.ssl.GuanxiHostVerifier;
-import org.guanxi.common.security.ssl.SSL;
-
 /**
  * Wraps either an HttpsURLConnection or HttpsURLConnection. The HttpsURLConnection
  * uses the org.guanxi.common.security.ssl.SSL defined custom SSL layer.
@@ -394,7 +390,7 @@ public class EntityConnection {
   public void setAuthentication(String username, String password) {
     String authentication;
     
-    authentication = (new sun.misc.BASE64Encoder()).encode((username + ":" + password).getBytes());
+    authentication = Base64.encode((username + ':' + password).getBytes());//(new sun.misc.BASE64Encoder()).encode((username + ":" + password).getBytes());
     connection.setRequestProperty("Authorization", "Basic " + authentication);
   }
 }
