@@ -17,6 +17,7 @@
 package org.guanxi.common.trust;
 
 import org.guanxi.common.metadata.Metadata;
+import org.guanxi.common.GuanxiException;
 
 /**
  * Encapsulation of basic trust
@@ -31,7 +32,8 @@ public interface TrustEngine {
    *
    * @param entityMetadata the Metadata for the entity
    * @param entityData entity specific data, such as a SAML AuthenticationStatement
+   * @throws GuanxiException if an error occurs
    * @return true if the entity is trusted, otherwise false
    */
-  public boolean trustEntity(Metadata entityMetadata, Object entityData);
+  public boolean trustEntity(Metadata entityMetadata, Object entityData) throws GuanxiException;
 }
