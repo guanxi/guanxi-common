@@ -19,9 +19,27 @@ package org.guanxi.common.trust.impl;
 import org.guanxi.common.trust.TrustEngine;
 import org.guanxi.common.trust.PKIXPathValidator;
 import org.guanxi.common.metadata.Metadata;
+import org.guanxi.common.GuanxiException;
+import org.guanxi.xal.saml_2_0.metadata.EntityDescriptorType;
+import org.guanxi.xal.saml_2_0.metadata.IDPSSODescriptorType;
+import org.guanxi.xal.saml_2_0.metadata.KeyDescriptorType;
+import org.guanxi.xal.w3.xmldsig.X509DataType;
+import org.guanxi.xal.w3.xmldsig.SignatureType;
+import org.guanxi.xal.w3.xmldsig.KeyInfoType;
+import org.guanxi.xal.saml_1_0.protocol.ResponseDocument;
+import org.apache.xml.security.signature.XMLSignature;
+import org.apache.xml.security.exceptions.XMLSecurityException;
+import org.apache.xml.security.keys.KeyInfo;
+import org.apache.xml.security.Init;
+import org.apache.log4j.Logger;
+import org.w3c.dom.Element;
 
-import javax.security.cert.X509Certificate;
 import java.util.Vector;
+import java.security.cert.X509Certificate;
+import java.security.cert.CertificateFactory;
+import java.security.cert.CertificateException;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 
 /**
  * TrustEngine implementation that implements the rules of a Shibboleth federation such
@@ -30,10 +48,13 @@ import java.util.Vector;
  * @author alistair
  */
 public class ShibbolethTrustEngineImpl implements TrustEngine, PKIXPathValidator {
+  /** Our logger */
+  private static final Logger logger = Logger.getLogger(ShibbolethTrustEngineImpl.class.getName());
   private Vector<X509Certificate> caCerts = null;
 
   public ShibbolethTrustEngineImpl() {
     caCerts = new Vector<X509Certificate>();
+    Init.init();
   }
 
   /**
@@ -45,19 +66,158 @@ public class ShibbolethTrustEngineImpl implements TrustEngine, PKIXPathValidator
    * Also, just about anything can be in the subject so the safest method is to find the cert in the
    * SAML Reponse and match it against one that's in the certificate store.
    *
-   * @see org.guanxi.common.trust.PKIXPathValidator#addCert(javax.security.cert.X509Certificate) */
+   * @see org.guanxi.common.trust.PKIXPathValidator#addCert(java.security.cert.X509Certificate) */
   public void addCert(X509Certificate x509Cert) {
     caCerts.add(x509Cert);
   }
 
-  /** @see org.guanxi.common.trust.TrustEngine#trustEntity(org.guanxi.common.metadata.Metadata, Object) */
-  public boolean trustEntity(Metadata entityMetadata, Object entityData) {
-    //@todo default implementation - change
+  /** @see org.guanxi.common.trust.TrustEngine#trustEntity(org.guanxi.common.metadata.Metadata, Object)
+   *  @link http://www.guanxi.uhi.ac.uk/index.php/Metadata_and_trust_in_the_UK_Access_Management_Federation
+   * */
+  public boolean trustEntity(Metadata entityMetadata, Object entityData) throws GuanxiException {
+    // Handler private data is raw SAML2 metadata
+    EntityDescriptorType saml = (EntityDescriptorType)entityMetadata.getPrivateData();
+
+    // entity data is the SAML Response from the IdP
+    ResponseDocument samlResponse = (ResponseDocument)entityData;
+
+    // First thing is check to see if the signature verifies
+    if (!verifySignature(samlResponse)) {
+      logger.error("IdP signature failed validation");
+      return false;
+    }
+
+    // Load up the IdP's metadata
+    if (saml.getIDPSSODescriptorArray() != null) {
+      IDPSSODescriptorType[] idpInfos = saml.getIDPSSODescriptorArray();
+
+      /* Direct signature validation via X509/X509Certificate
+       * In this case we compare the X509 in the metadata with the X509
+       * in the signature. If they are equal then we can trust the IdP.
+       */
+      for (IDPSSODescriptorType idpInfo : idpInfos) {
+        KeyDescriptorType[] keys = idpInfo.getKeyDescriptorArray();
+
+        // IDPSSODescriptor/KeyDescriptor
+        for (KeyDescriptorType key : keys) {
+          if (key.getKeyInfo() != null) {
+            // IDPSSODescriptor/KeyDescriptor/KeyInfo
+            if (key.getKeyInfo().getX509DataArray() != null) {
+              X509DataType[] x509s = key.getKeyInfo().getX509DataArray();
+
+              // IDPSSODescriptor/KeyDescriptor/KeyInfo/X509Data
+              for (X509DataType x509 : x509s) {
+                if (x509.getX509CertificateArray() != null) {
+                  byte[][] x509bytesArray = x509.getX509CertificateArray();
+                  
+                  // IDPSSODescriptor/KeyDescriptor/KeyInfo/X509Data/X509Certificate
+                  try {
+                    CertificateFactory certFactory = CertificateFactory.getInstance("x.509");
+
+                    for (byte[] x509bytes : x509bytesArray) {
+                      ByteArrayInputStream certByteStream = new ByteArrayInputStream(x509bytes);
+                      X509Certificate x509CertFromMetadata = (X509Certificate)certFactory.generateCertificate(certByteStream);
+                      certByteStream.close();
+
+                      X509Certificate x509CertFromSig = getX509CertFromSignature(samlResponse);
+                      
+                      /* Compare the X509 in the metadata to the X509 in the signature.
+                       * If they match then we can stop verifying and trust the IdP.
+                       */
+                      if (x509CertFromSig.equals(x509CertFromMetadata)) {
+                        return true;
+                      }
+                    } // for (byte[] x509bytes : x509bytesArray)
+                  }
+                  catch(CertificateException ce) {
+                    logger.error("Error obtaining certificate factory", ce);
+                    throw new GuanxiException(ce);
+                  }
+                  catch(IOException ioe) {
+                    logger.error("Error closing certificate byte stream", ioe);
+                    throw new GuanxiException(ioe);
+                  }
+                } // if (x509.getX509CertificateArray() != null)
+              }
+            }
+          }
+
+          /* Direct signature validation via RSAKeyValue
+           * @todo implement this
+           */
+        }
+      } // for (IDPSSODescriptorType idpInfo : idpInfos)
+    } // if (saml.getIDPSSODescriptorArray() != null)
+
+    /* PKIX Path Validation
+     * @todo implement this
+     */
+
     return true;
   }
 
   /** @see org.guanxi.common.trust.PKIXPathValidator#reset() */
   public void reset() {
     caCerts.clear();
+  }
+
+  /**
+   * Verifies the digital signature on a SAML Response
+   *
+   * @param samlResponse The SAML Response document containing the signature
+   * @return true if the signature verifies otherwise false
+   * @throws GuanxiException if an error occurs
+   */
+  private boolean verifySignature(ResponseDocument samlResponse) throws GuanxiException {
+    try {
+      // Get the signature on the SAML response...
+      SignatureType sig = samlResponse.getResponse().getSignature();
+      if (sig != null) {
+        // ...and verify it
+        XMLSignature signature = new XMLSignature((Element)sig.getDomNode(),"");
+        KeyInfo keyInfo = signature.getKeyInfo();
+        if (keyInfo != null) {
+          if(keyInfo.containsX509Data()) {
+            X509Certificate cert = signature.getKeyInfo().getX509Certificate();
+            if(cert != null) {
+              return signature.checkSignatureValue(cert);
+            }
+          }
+        }
+      }
+    }
+    catch(XMLSecurityException xse) {
+      logger.error("Error translating signature from DOM to XMLSignature", xse);
+      throw new GuanxiException(xse);
+    }
+
+    return false;
+  }
+
+  /**
+   * Retrieves the X509Certificate from a digital signature
+   *
+   * @param samlResponse The SAML Response containing the signature
+   * @return X509Certificate from the signature
+   * @throws GuanxiException if an error occurs
+   */
+  private X509Certificate getX509CertFromSignature(ResponseDocument samlResponse) throws GuanxiException {
+    try {
+      KeyInfoType keyInfo = samlResponse.getResponse().getSignature().getKeyInfo();
+      byte[] x509CertBytes = keyInfo.getX509DataArray(0).getX509CertificateArray(0);
+      CertificateFactory certFactory = CertificateFactory.getInstance("x.509");
+      ByteArrayInputStream certByteStream = new ByteArrayInputStream(x509CertBytes);
+      X509Certificate cert = (X509Certificate)certFactory.generateCertificate(certByteStream);
+      certByteStream.close();
+      return cert;
+    }
+    catch(CertificateException ce) {
+      logger.error("Error obtaining certificate factory", ce);
+      throw new GuanxiException(ce);
+    }
+    catch(IOException ioe) {
+      logger.error("Error closing certificate byte stream", ioe);
+      throw new GuanxiException(ioe);
+    }
   }
 }
