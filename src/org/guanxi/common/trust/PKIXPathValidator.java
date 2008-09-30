@@ -16,7 +16,7 @@
 
 package org.guanxi.common.trust;
 
-import javax.security.cert.X509Certificate;
+import java.security.cert.X509Certificate;
 
 /**
  * Defines PKIX path validation
