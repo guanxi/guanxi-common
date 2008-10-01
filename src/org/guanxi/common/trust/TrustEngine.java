@@ -19,12 +19,35 @@ package org.guanxi.common.trust;
 import org.guanxi.common.metadata.Metadata;
 import org.guanxi.common.GuanxiException;
 
+import java.security.cert.X509Certificate;
+
 /**
  * Encapsulation of basic trust
  *
  * @author alistair
  */
 public interface TrustEngine {
+  /**
+   * Add a Certificate Authority (CA) X509 certificate to the trust engine.
+   * Each CA X509 represents a trust anchor when verifying the claims
+   * of an entity.
+   *
+   * @param x509CACert X509Certificate of a trusted CA
+   */
+  public void addCACert(X509Certificate x509CACert);
+
+  /**
+   * Retrieves all the CA certs the trust engine is using as trust anchors
+   *
+   * @return Array of X509Certificate objects representing the CA trust anchors
+   */
+  public X509Certificate[] getCACerts();
+
+  /**
+   * Removes all trust information from the engine
+   */
+  public void reset();
+  
   /**
    * Apply the rules of the engine to determine if an entity is to be
    * trusted. If an entity is trusted according to the rules implemented
