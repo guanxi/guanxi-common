@@ -1,6 +1,19 @@
-/**
- * 
- */
+//: "The contents of this file are subject to the Mozilla Public License
+//: Version 1.1 (the "License"); you may not use this file except in
+//: compliance with the License. You may obtain a copy of the License at
+//: http://www.mozilla.org/MPL/
+//:
+//: Software distributed under the License is distributed on an "AS IS"
+//: basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
+//: License for the specific language governing rights and limitations
+//: under the License.
+//:
+//: The Original Code is Guanxi (http://www.guanxi.uhi.ac.uk).
+//:
+//: The Initial Developer of the Original Code is Alistair Young alistair@codebrane.com
+//: All Rights Reserved.
+//:
+
 package org.guanxi.common.metadata;
 
 /**
@@ -8,21 +21,10 @@ package org.guanxi.common.metadata;
  * IdP Metadata that are required by Guanxi. Using this means that different
  * formats of metadata can be supported much more easily.
  * 
- * @author matthew
+ * @author matthew alistair
  * 
  */
-// The comments like this give examples of code that the method call can replace
-// assuming you are using the UKFederationIdPMetadata class.
 public interface IdPMetadata extends Metadata {
-
-  /**
-   * This will return the entityID of the IdP.
-   * 
-   * @return The string representation of the IdP entityID.
-   */
-  // metadata.getEntityID()
-  public String getEntityID();
-
   /**
    * This gets the Attribute Authority URL. Where possible this should get the
    * AAURL that has the urn:oasis:names:tc:SAML:1.0:bindings:SOAP-binding
@@ -31,18 +33,5 @@ public interface IdPMetadata extends Metadata {
    * @return This returns the Attribute Authority URL which can be used for
    *         Attribute transfer with the IdP.
    */
-  // idPMetadata.getAttributeAuthorityDescriptorArray()[0].
-  // getAttributeServiceArray()[0].getLocation();
   public String getAttributeAuthorityURL();
-
-  /**
-   * This gets the binary data of the signing certificate used by the IdP.
-   * 
-   * @return This returns the binary representation of the X509 Signing
-   *         Certificate for the IdP.
-   */
-  // KeyInfoType keyInfo = entityDescriptor.getAttributeAuthorityDescriptorArray()[0].getKeyDescriptorArray()[0].getKeyInfo();
-  // X509DataType x509Data = keyInfo.getX509DataArray()[0];
-  // byte[] bytes = x509Data.getX509CertificateArray()[0];
-  public byte[] getX509Certificate();
 }

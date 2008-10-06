@@ -1,15 +1,26 @@
-/**
- * 
- */
-package org.guanxi.common.metadata;
+//: "The contents of this file are subject to the Mozilla Public License
+//: Version 1.1 (the "License"); you may not use this file except in
+//: compliance with the License. You may obtain a copy of the License at
+//: http://www.mozilla.org/MPL/
+//:
+//: Software distributed under the License is distributed on an "AS IS"
+//: basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
+//: License for the specific language governing rights and limitations
+//: under the License.
+//:
+//: The Original Code is Guanxi (http://www.guanxi.uhi.ac.uk).
+//:
+//: The Initial Developer of the Original Code is Alistair Young alistair@codebrane.com
+//: All Rights Reserved.
+//:
 
-import java.util.Comparator;
+package org.guanxi.common.metadata;
 
 /**
  * This is the super interface that allows a single generic
  * class to accommodate both IdP and SP Metadata.
  * 
- * @author matthew
+ * @author matthew alistair
  *
  */
 public interface Metadata {
@@ -19,26 +30,18 @@ public interface Metadata {
    * @return The string representation of the entityID.
    */
   public String getEntityID();
-  
+
   /**
-   * This MetadataComparator exists to allow Metadata to be used
-   * efficiently in TreeSets and TreeMaps. This assumes that entityIDs
-   * are completely unique.
-   * 
-   * @author matthew
+   * Store any private data required by an implementation
+   *
+   * @param privateData Anything you like!
    */
-  public static class MetadataComparator<A extends Metadata> implements Comparator<A> {
-    /**
-     * This compares the two metatadata objects.
-     * The result is based upon the comparison of the entityID
-     * of the two metadata objects.
-     * 
-     * @param arg0  The first metadata object for comparison
-     * @param arg1  The second metadata object for comparison
-     * @returns int A value indicating if the first metadata object is before (<0), after(>0), or equal(0) to the second metadata object.
-     */
-    public int compare(A arg0, A arg1) {
-      return arg0.getEntityID().compareTo(arg1.getEntityID());
-    }
-  }
+  public void setPrivateData(Object privateData);
+
+  /**
+   * Gets hold of an implementation's private data
+   *
+   * @return Anything you like!
+   */
+  public Object getPrivateData();
 }

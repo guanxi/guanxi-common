@@ -22,9 +22,10 @@ import org.w3c.dom.NodeList;
 import org.w3c.dom.NamedNodeMap;
 import org.apache.xml.security.utils.Base64;
 import org.apache.xml.security.exceptions.Base64DecodingException;
-import org.apache.log4j.Logger;
 import org.apache.xmlbeans.XmlObject;
+import org.apache.xmlbeans.XmlOptions;
 import org.guanxi.xal.saml_2_0.metadata.EntitiesDescriptorDocument;
+import org.guanxi.common.definitions.Shibboleth;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.xml.transform.dom.DOMSource;
@@ -221,6 +222,39 @@ public class Utils {
     }
     catch(Exception e) {
       throw new GuanxiException(e);
+    }
+  }
+
+  /**
+   * Writes a SAML2 metadata document to disk
+   *
+   * @param saml2MetadataDoc The SAML2 metadata document
+   * @param filenameAndPath The full path and name of the file to write
+   * @throws GuanxiException if an error occurs
+   */
+  public static void writeSAML2MetadataToDisk(EntitiesDescriptorDocument saml2MetadataDoc,
+                                              String filenameAndPath) throws GuanxiException {
+    HashMap<String, String> namespaces = new HashMap<String, String>();
+    namespaces.put(Shibboleth.NS_SAML_10_PROTOCOL, Shibboleth.NS_PREFIX_SAML_10_PROTOCOL);
+    namespaces.put(Shibboleth.NS_SAML_10_ASSERTION, Shibboleth.NS_PREFIX_SAML_10_ASSERTION);
+    
+    XmlOptions xmlOptions = new XmlOptions();
+    xmlOptions.setSavePrettyPrint();
+    xmlOptions.setSavePrettyPrintIndent(2);
+    xmlOptions.setUseDefaultNamespace();
+    xmlOptions.setSaveAggressiveNamespaces();
+    xmlOptions.setSaveSuggestedPrefixes(namespaces);
+    xmlOptions.setSaveNamespacesFirst();
+
+    try {
+      BufferedWriter out = new BufferedWriter(new FileWriter(filenameAndPath));
+      StringWriter sw = new StringWriter();
+      saml2MetadataDoc.save(out, xmlOptions);
+      sw.close();
+      out.close();
+    }
+    catch(IOException ioe) {
+      throw new GuanxiException(ioe);
     }
   }
 
