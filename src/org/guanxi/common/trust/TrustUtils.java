@@ -30,14 +30,21 @@ import org.apache.xml.security.signature.XMLSignature;
 import org.apache.xml.security.keys.KeyInfo;
 import org.apache.xml.security.exceptions.XMLSecurityException;
 import org.w3c.dom.Element;
+import org.bouncycastle.openssl.PEMReader;
 
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.security.cert.CertificateException;
+import java.security.cert.CertificateEncodingException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.Vector;
 import java.util.Arrays;
+import java.net.URL;
+import java.net.MalformedURLException;
 
 /**
  * Shibboleth and SAML trust functionality
@@ -424,5 +431,92 @@ public class TrustUtils {
     String[] keyNamesFromMetadata = new String[keyNames.size()];
     keyNames.copyInto(keyNamesFromMetadata);
     return keyNamesFromMetadata;
+  }
+
+  /**
+   * Compares the fingerprints of two X509 certificates.
+   *
+   * @param cert1 X509Certificate
+   * @param cert2 X509Certificate
+   * @return true if the fingerprints are equal, otherwise false
+   * @throws GuanxiException if an error occurred
+   */
+  public static boolean checkCertfingerprints(X509Certificate cert1, X509Certificate cert2) throws GuanxiException {
+    try {
+      MessageDigest md = MessageDigest.getInstance("SHA1");
+
+      md.update(cert1.getEncoded());
+      byte[] cert1Fingerprint = md.digest();
+
+      md.update(cert2.getEncoded());
+      byte[] cert2Fingerprint = md.digest();
+
+      return byteArrayToHexString(cert1Fingerprint).equals(byteArrayToHexString(cert2Fingerprint));
+    }
+    catch(NoSuchAlgorithmException nsae) {
+      throw new GuanxiException(nsae);
+    }
+    catch(CertificateEncodingException cee) {
+      throw new GuanxiException(cee);
+    }
+  }
+
+  /**
+   * Returns the hex representation of a byte array.
+   * 
+   * @param bytes byte array to be converted to hex
+   * @return hex representation of bytes
+   */
+  public static String byteArrayToHexString(byte bytes[]) {
+    byte ch = 0x00;
+    int count = 0;
+
+    if (bytes == null || bytes.length <= 0) return null;
+
+    String pseudo[] = {"0", "1", "2",
+                       "3", "4", "5", "6", "7", "8",
+                       "9", "A", "B", "C", "D", "E",
+                       "F"};
+
+    StringBuffer out = new StringBuffer(bytes.length * 2);
+
+    while (count < bytes.length) {
+      ch = (byte) (bytes[count] & 0xF0);
+      ch = (byte) (ch >>> 4);
+      ch = (byte) (ch & 0x0F);
+      out.append(pseudo[ (int) ch]);
+      ch = (byte) (bytes[count] & 0x0F);
+      out.append(pseudo[ (int) ch]);
+
+      if (count < (bytes.length -1)) {
+        out.append(":");
+      }
+
+      count++;
+    }
+
+    return new String(out);
+  }
+
+  /**
+   * Converts a PEM to an X509Certificate. Requires the Bouncy Castle provider
+   * to be installed.
+   *
+   * @param pemURL URL of the PEM file
+   * @return X509Certificate
+   * @throws GuanxiException if an error occurs
+   */
+  public static X509Certificate pem2x509(String pemURL) throws GuanxiException {
+    try {
+      URL pem = new URL(pemURL);
+      PEMReader pemReader = new PEMReader(new InputStreamReader(pem.openStream()));
+      return (X509Certificate)pemReader.readObject();
+    }
+    catch(MalformedURLException mue) {
+      throw new GuanxiException(mue);
+    }
+    catch(IOException ioe) {
+      throw new GuanxiException(ioe);
+    }
   }
 }
