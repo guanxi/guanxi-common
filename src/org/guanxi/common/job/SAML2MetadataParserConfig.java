@@ -37,6 +37,9 @@ public class SAML2MetadataParserConfig extends SimpleGuanxiJobConfig {
   private String cacheFile = null;
   /** Full path and name of the metadata cache file */
   private String metadataCacheFile = null;
+  /** The location of the federation PEM file. This is used to verify
+   *  the fingerprint of the metadata signing certificate. */
+  private String pemLocation = null;
 
   /**
    * Initialisation
@@ -73,4 +76,7 @@ public class SAML2MetadataParserConfig extends SimpleGuanxiJobConfig {
   public void setCacheFile(String cacheFile) { this.cacheFile = cacheFile; }
 
   public String getMetadataCacheFile() { return metadataCacheFile; }
+
+  public void setPemLocation(String pemLocation) { this.pemLocation = pemLocation; }
+  public String getPemLocation() { return pemLocation; }
 }
