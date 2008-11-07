@@ -38,7 +38,6 @@ import java.util.zip.ZipOutputStream;
 import java.util.zip.ZipEntry;
 import java.rmi.server.UID;
 import java.io.*;
-import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 
@@ -196,29 +195,11 @@ public class Utils {
    *
    * @param metadataURL The url of the metadata
    * @return EntitiesDescriptorDocument for the metadata
-   * @param who The value of the User-Agent header to set
    * @throws GuanxiException if an error occurs
    */
-  public static EntitiesDescriptorDocument parseSAML2Metadata(String metadataURL, String who) throws GuanxiException {
+  public static EntitiesDescriptorDocument parseSAML2Metadata(String metadataURL) throws GuanxiException {
     try {
-      URL url = new URL(metadataURL);
-      if (url.getProtocol().equals("file")) {
-        return EntitiesDescriptorDocument.Factory.parse(url);
-      }
-      else {
-        HttpURLConnection httpURL = (HttpURLConnection)new URL(metadataURL).openConnection();
-        httpURL.setRequestProperty("User-Agent", who);
-        InputStream in = httpURL.getInputStream();
-        BufferedReader buffer = new BufferedReader(new InputStreamReader(in));
-        StringBuffer stringBuffer = new StringBuffer();
-        String line = null;
-        while ((line = buffer.readLine()) != null) {
-          stringBuffer.append(line);
-        }
-        in.close();
-
-        return EntitiesDescriptorDocument.Factory.parse(stringBuffer.toString());
-      }
+      return EntitiesDescriptorDocument.Factory.parse(new URL(metadataURL).openStream());
     }
     catch(Exception e) {
       throw new GuanxiException(e);
