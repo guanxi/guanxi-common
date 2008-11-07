@@ -189,6 +189,8 @@ public abstract class ShibbolethSAML2MetadataParser {
    * @return true if the CA lists was loaded, otherwise false
    */
   protected boolean loadCAListFromMetadata(EntityManager manager) {
+    boolean loaded = false;
+
     try {
       CertificateFactory certFactory = CertificateFactory.getInstance("x.509");
       ExtensionsType extensions = doc.getEntitiesDescriptor().getExtensions();
@@ -218,7 +220,7 @@ public abstract class ShibbolethSAML2MetadataParser {
               ByteArrayInputStream certByteStream = new ByteArrayInputStream(x509CertBytes);
               manager.getTrustEngine().addCACert((X509Certificate)certFactory.generateCertificate(certByteStream));
               certByteStream.close();
-              return true;
+              loaded = true;
             }
           }
         }
@@ -237,7 +239,7 @@ public abstract class ShibbolethSAML2MetadataParser {
       logger.error("Could not load shibboleth extensions from metadata", xe);
     }
 
-    return false;
+    return loaded;
   }
 
   /**
