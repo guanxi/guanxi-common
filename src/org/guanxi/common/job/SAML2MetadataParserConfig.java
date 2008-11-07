@@ -40,6 +40,8 @@ public class SAML2MetadataParserConfig extends SimpleGuanxiJobConfig {
   /** The location of the federation PEM file. This is used to verify
    *  the fingerprint of the metadata signing certificate. */
   private String pemLocation = null;
+  /** Whether the metadata is signed */
+  private boolean signed;
 
   /**
    * Initialisation
@@ -79,4 +81,7 @@ public class SAML2MetadataParserConfig extends SimpleGuanxiJobConfig {
 
   public void setPemLocation(String pemLocation) { this.pemLocation = pemLocation; }
   public String getPemLocation() { return pemLocation; }
+
+  public boolean getSigned() { return signed; }
+  public void setSigned(boolean signed) { this.signed = signed; }
 }
