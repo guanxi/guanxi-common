@@ -68,13 +68,7 @@ public class GuanxiEntityManagerImpl implements EntityManager {
 
   /** @see org.guanxi.common.entity.EntityManager#handlesEntity(String)  */
   public boolean handlesEntity(String entityID) {
-    for (Metadata entity : metadataHandlers.values()) {
-      if (entity.getEntityID().equals(entityID)) {
-        return true;
-      }
-    }
-
-    return false;
+    return metadataHandlers.containsKey(entityID);
   }
 
   /** @see org.guanxi.common.entity.EntityManager#setEntityHandlerClass(String)   */
