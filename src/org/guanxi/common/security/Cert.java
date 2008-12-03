@@ -18,10 +18,7 @@ package org.guanxi.common.security;
 
 import javax.security.cert.X509Certificate;
 import javax.security.cert.CertificateException;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
+import java.io.*;
 
 /**
  * <font size=5><b></b></font>
@@ -48,11 +45,20 @@ public class Cert {
   }
 
   public static X509Certificate getCertificate(InputStream in) {
+    X509Certificate x509 = null;
+    
     try {
-      return X509Certificate.getInstance(in);
+      x509 = X509Certificate.getInstance(in);
+      in.close();
     }
     catch(CertificateException se) {
       return null;
+    }
+    catch(IOException ioe) {
+      // Closing the stream failed. Shouldn't stop us returning the cert though
+    }
+    finally {
+      return x509;
     }
   }
 }
