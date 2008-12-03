@@ -242,9 +242,7 @@ public class Utils {
 
     try {
       BufferedWriter out = new BufferedWriter(new FileWriter(filenameAndPath));
-      StringWriter sw = new StringWriter();
       saml2MetadataDoc.save(out, xmlOptions);
-      sw.close();
       out.close();
     }
     catch(IOException ioe) {
