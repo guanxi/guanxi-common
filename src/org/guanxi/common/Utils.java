@@ -16,35 +16,48 @@
 
 package org.guanxi.common;
 
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.w3c.dom.NamedNodeMap;
-import org.apache.xml.security.utils.Base64;
-import org.apache.xml.security.exceptions.Base64DecodingException;
-import org.apache.xmlbeans.XmlObject;
-import org.apache.xmlbeans.XmlOptions;
-import org.guanxi.xal.saml_2_0.metadata.EntitiesDescriptorDocument;
-import org.guanxi.common.definitions.Shibboleth;
+import java.io.BufferedWriter;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.StringWriter;
+import java.net.URL;
+import java.rmi.server.UID;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Hashtable;
+import java.util.TimeZone;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
-import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
-import java.util.*;
-import java.util.zip.ZipOutputStream;
-import java.util.zip.ZipEntry;
-import java.rmi.server.UID;
-import java.io.*;
-import java.net.URL;
-import java.text.SimpleDateFormat;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+
+import org.apache.xml.security.exceptions.Base64DecodingException;
+import org.apache.xml.security.utils.Base64;
+import org.apache.xmlbeans.XmlObject;
+import org.apache.xmlbeans.XmlOptions;
+import org.guanxi.common.definitions.Shibboleth;
+import org.guanxi.xal.saml_2_0.metadata.EntitiesDescriptorDocument;
+import org.w3c.dom.Document;
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 /**
  * <font size=5><b></b></font>
  *
  * @author Alistair Young alistair@smo.uhi.ac.uk
+ * @author matthew
  */
 public class Utils {
   /** OS dependent line engine, e.g. \n */
@@ -282,5 +295,32 @@ public class Utils {
     zulu.setTimeZone(TimeZone.getTimeZone("GMT"));
     Calendar calNow = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
     return zulu.format(calNow.getTime());
+  }
+  
+  /**
+   * This reads the input stream completely, returning the result. The input stream is
+   * always in a closed state after calling this, even if an error has occurred.
+   * 
+   * @param in stream to read from
+   * @return array of bytes read from the stream
+   * @throws GuanxiException if an error occurs
+   */
+  public static byte[] read(InputStream in) throws GuanxiException {
+    ByteArrayOutputStream out = new ByteArrayOutputStream();
+    byte[] buffer = new byte[1024];
+    int read;
+    
+    try {
+      while ((read = in.read(buffer)) != -1) {
+        out.write(buffer, 0, read);
+      }
+      in.close();
+    }
+    catch(IOException ioe) {
+      // Closing the stream failed. Shouldn't stop us returning the bytes though
+    }
+    finally {
+      return out.toByteArray(); // ByteArrayOutputStream.close() has no effect - see the JavaDoc!
+    }
   }
 }
