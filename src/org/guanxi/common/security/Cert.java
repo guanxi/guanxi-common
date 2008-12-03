@@ -44,21 +44,27 @@ public class Cert {
     }
   }
 
+  /**
+   * Generates an X509 certificate from an input stream. Note that the
+   * stream will be closed when this method returns
+   *
+   * @param in The stream to read from
+   * @return X509 certificate generated from the stream
+   */
   public static X509Certificate getCertificate(InputStream in) {
-    X509Certificate x509 = null;
-    
     try {
-      x509 = X509Certificate.getInstance(in);
-      in.close();
+      return X509Certificate.getInstance(in);
     }
     catch(CertificateException se) {
       return null;
     }
-    catch(IOException ioe) {
-      // Closing the stream failed. Shouldn't stop us returning the cert though
-    }
     finally {
-      return x509;
+      try {
+        in.close();
+      }
+      catch(IOException ioe) {
+        // Closing the stream failed. Shouldn't stop us returning the cert though
+      }
     }
   }
 }
