@@ -16,14 +16,7 @@
 
 package org.guanxi.common;
 
-import java.io.BufferedWriter;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.StringWriter;
+import java.io.*;
 import java.net.URL;
 import java.rmi.server.UID;
 import java.text.SimpleDateFormat;
@@ -229,6 +222,9 @@ public class Utils {
   public static void writeSAML2MetadataToDisk(EntitiesDescriptorDocument saml2MetadataDoc,
                                               String filenameAndPath) throws GuanxiException {
     HashMap<String, String> namespaces = new HashMap<String, String>();
+    ByteArrayOutputStream buffer;
+    OutputStream out;
+
     namespaces.put(Shibboleth.NS_SAML_10_PROTOCOL, Shibboleth.NS_PREFIX_SAML_10_PROTOCOL);
     namespaces.put(Shibboleth.NS_SAML_10_ASSERTION, Shibboleth.NS_PREFIX_SAML_10_ASSERTION);
     
@@ -240,12 +236,18 @@ public class Utils {
     xmlOptions.setSaveSuggestedPrefixes(namespaces);
     xmlOptions.setSaveNamespacesFirst();
 
+    buffer = new ByteArrayOutputStream();
     try {
-      BufferedWriter out = new BufferedWriter(new FileWriter(filenameAndPath));
-      saml2MetadataDoc.save(out, xmlOptions);
-      out.close();
+      saml2MetadataDoc.save(buffer, xmlOptions); // throws IOException, but shouldnt as ByteArrayOutputStream will not
+      out = new FileOutputStream(filenameAndPath);
+      try {
+        out.write(buffer.toByteArray());
+      }
+      finally {
+        out.close();
+      }
     }
-    catch(IOException ioe) {
+    catch (IOException ioe) {
       throw new GuanxiException(ioe);
     }
   }
@@ -307,13 +309,12 @@ public class Utils {
     ByteArrayOutputStream out = new ByteArrayOutputStream();
     byte[] buffer = new byte[1024];
     int read;
-    boolean ok = false;
-    
+
     try {
       while ((read = in.read(buffer)) != -1) {
         out.write(buffer, 0, read);
       }
-      ok = true;
+      return out.toByteArray();
     }
     catch(IOException ioe) {
       // Reading from the stream failed
@@ -325,14 +326,6 @@ public class Utils {
       }
       catch(IOException ioe) {
         // Closing the stream failed. Shouldn't stop us returning the data though
-      }
-
-      // If no read error occurred, return the data
-      if (ok) {
-        return out.toByteArray(); // ByteArrayOutputStream.close() has no effect - see the JavaDoc!
-      }
-      else {
-        return null;
       }
     }
   }
