@@ -307,18 +307,33 @@ public class Utils {
     ByteArrayOutputStream out = new ByteArrayOutputStream();
     byte[] buffer = new byte[1024];
     int read;
+    boolean ok = false;
     
     try {
       while ((read = in.read(buffer)) != -1) {
         out.write(buffer, 0, read);
       }
-      in.close();
+      ok = true;
     }
     catch(IOException ioe) {
-      // Closing the stream failed. Shouldn't stop us returning the bytes though
+      // Reading from the stream failed
+      return null;
     }
     finally {
-      return out.toByteArray(); // ByteArrayOutputStream.close() has no effect - see the JavaDoc!
+      try {
+        in.close();
+      }
+      catch(IOException ioe) {
+        // Closing the stream failed. Shouldn't stop us returning the data though
+      }
+
+      // If no read error occurred, return the data
+      if (ok) {
+        return out.toByteArray(); // ByteArrayOutputStream.close() has no effect - see the JavaDoc!
+      }
+      else {
+        return null;
+      }
     }
   }
 }
