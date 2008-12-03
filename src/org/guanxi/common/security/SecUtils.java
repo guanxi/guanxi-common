@@ -78,6 +78,7 @@ public class SecUtils {
       fis = new FileInputStream(keystoreFile);
 
       ks.load(fis, keystorePass.toCharArray());
+      fis.close();
 
       PrivateKey privateKey = null;
       privateKey = (PrivateKey)ks.getKey(privateKeyAlias, privateKeyPass.toCharArray());
@@ -161,8 +162,11 @@ public class SecUtils {
 
       // Does the keystore exist?
       File keyStore = new File(keystoreFile);
-      if (keyStore.exists())
-        ks.load(new FileInputStream(keystoreFile), keystorePassword.toCharArray());
+      if (keyStore.exists()) {
+        FileInputStream fis = new FileInputStream(keystoreFile);
+        ks.load(fis, keystorePassword.toCharArray());
+        fis.close();
+      }
       else
         ks.load(null, null);
 
@@ -213,7 +217,9 @@ public class SecUtils {
       // ...and the chain...
       ks.setKeyEntry(privateKeyAlias, privkey, privateKeyPassword.toCharArray(), chain);
       // ...and write the keystore to disk
-      ks.store(new FileOutputStream(keystoreFile), keystorePassword.toCharArray());
+      FileOutputStream fos = new FileOutputStream(keystoreFile);
+      ks.store(fos, keystorePassword.toCharArray());
+      fos.close();
     }
     catch(Exception se) {
       /* We'll end up here if a security manager is installed and it refuses us
@@ -235,7 +241,9 @@ public class SecUtils {
       KeyStore trustStore = KeyStore.getInstance("JKS");
       File truststoreFile = new File(trustStoreFile);
       trustStore.load(null, null);
-      trustStore.store(new FileOutputStream(truststoreFile), trustStorePassword.toCharArray());
+      FileOutputStream fos = new FileOutputStream(truststoreFile);
+      trustStore.store(fos, trustStorePassword.toCharArray());
+      fos.close();
     }
     catch(Exception se) {
       throw new GuanxiException(se);
