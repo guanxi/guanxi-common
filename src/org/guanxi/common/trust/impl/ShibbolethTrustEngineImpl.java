@@ -24,6 +24,8 @@ import org.guanxi.xal.saml_1_0.protocol.ResponseDocument;
 import org.apache.xml.security.Init;
 import org.apache.log4j.Logger;
 
+import java.security.cert.X509Certificate;
+
 /**
  * TrustEngine implementation that implements the rules of a Shibboleth federation such
  * as the UK Access Management Federation.
@@ -48,24 +50,36 @@ public class ShibbolethTrustEngineImpl extends SimpleTrustEngine {
     // Handler private data is raw SAML2 metadata
     EntityDescriptorType saml2Metadata = (EntityDescriptorType)entityMetadata.getPrivateData();
 
-    // Entity data is the SAML Response from the IdP
-    ResponseDocument samlResponse = (ResponseDocument)entityData;
+    // PKIX validation based on certs in metadata
+    if (entityData instanceof ResponseDocument) {
+      // Entity data is the SAML Response from the IdP
+      ResponseDocument samlResponse = (ResponseDocument)entityData;
 
-    // First thing is check to see if the signature verifies
-    if (!TrustUtils.verifySignature(samlResponse)) {
-      logger.error("IdP signature failed validation");
-      return false;
+      // First thing is check to see if the signature verifies
+      if (!TrustUtils.verifySignature(samlResponse)) {
+        logger.error("IdP signature failed validation");
+        return false;
+      }
+
+      // Validation via embedded certificates
+      if (TrustUtils.validateWithEmbeddedCert((ResponseDocument)entityData, saml2Metadata)) {
+        return true;
+      }
+
+      // Validation via PKIX
+      if (TrustUtils.validatePKIX((ResponseDocument)entityData, saml2Metadata, caCerts)) {
+        return true;
+      }
     }
 
-    // Validation via embedded certificates
-    if (TrustUtils.validateWithEmbeddedCert((ResponseDocument)entityData, saml2Metadata)) {
-      return true;
+    // PKIX validation based on certs from back channel connection
+    if (entityData instanceof X509Certificate) {
+      // Entity data is the X509 from the connection
+      X509Certificate x509CertFromConnection = (X509Certificate)entityData;
+      
+      return TrustUtils.validatePKIXBC(x509CertFromConnection, saml2Metadata, caCerts);
     }
 
-    // Validation via PKIX
-    if (TrustUtils.validatePKIX((ResponseDocument)entityData, saml2Metadata, caCerts)) {
-      return true;
-    }
 
     return false;
   }
