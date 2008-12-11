@@ -16,10 +16,7 @@
 
 package org.guanxi.common.trust;
 
-import org.guanxi.xal.saml_2_0.metadata.IDPSSODescriptorType;
-import org.guanxi.xal.saml_2_0.metadata.KeyDescriptorType;
-import org.guanxi.xal.saml_2_0.metadata.EntityDescriptorType;
-import org.guanxi.xal.saml_2_0.metadata.SSODescriptorType;
+import org.guanxi.xal.saml_2_0.metadata.*;
 import org.guanxi.xal.w3.xmldsig.X509DataType;
 import org.guanxi.xal.w3.xmldsig.KeyInfoType;
 import org.guanxi.xal.w3.xmldsig.SignatureType;
@@ -116,7 +113,7 @@ public class TrustUtils {
   }
 
   /**
-   * Performs PKIX path validation
+   * Performs PKIX path validation based on certificates from metadata
    *
    * @param samlResponse The SAML Response from an IdP containing an AuthenticationStatement
    * @param saml2Metadata The metadata for the IdP
@@ -144,6 +141,37 @@ public class TrustUtils {
 
     return false;
   }
+
+  /**
+   * Performs PKIX path validation based on certificates from a back channel connection
+   *
+   * @param x509CertFromConnection The certificate from the connection
+   * @param saml2Metadata The metadata for the IdP
+   * @param caCerts The list of CA root certs as trust anchors
+   * @return true if validation succeeds otherwise false
+   * @throws GuanxiException if an error occurs
+   */
+  public static boolean validatePKIXBC(X509Certificate x509CertFromConnection,
+                                       EntityDescriptorType saml2Metadata,
+                                       Vector<X509Certificate> caCerts) throws GuanxiException {
+    /* PKIX Path Validation
+     * quickie summary:
+     * - Match X509 from connection to KeyName in IdP metadata
+     * - Match issuer of X509 from connection to one of the X509s in shibmeta:keyauthority
+     *   in global metadata
+     */
+
+    // First find a match between the X509 from the connection and a KeyName in the metadata...
+    if (matchAACertToKeyName(x509CertFromConnection, saml2Metadata)) {
+      // ...then follow the chain from the X509 in the signature back to a supported CA in the metadata
+      if (validateCertPath(x509CertFromConnection, caCerts)) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
 
   /**
    * Retrieves the X509Certificate from a digital signature
@@ -181,26 +209,61 @@ public class TrustUtils {
    */
   public static boolean matchCertToKeyName(X509Certificate x509, EntityDescriptorType saml2Metadata) {
     IDPSSODescriptorType[] idpSSOs = saml2Metadata.getIDPSSODescriptorArray();
+    AttributeAuthorityDescriptorType a = null;
 
     // EntityDescriptor/IDPSSODescriptor
     for (IDPSSODescriptorType idpSSO : idpSSOs) {
       // EntityDescriptor/IDPSSODescriptor/KeyDescriptor
-      KeyDescriptorType[] keyDescriptors = idpSSO.getKeyDescriptorArray();
+      if (validateX509WithKeyName(x509, idpSSO.getKeyDescriptorArray())) {
+        return true;
+      }
+    }
 
-      for (KeyDescriptorType keyDescriptor : keyDescriptors) {
-        // EntityDescriptor/IDPSSODescriptor/KeyDescriptor/KeyInfo
-        if (keyDescriptor.getKeyInfo() != null) {
-          // EntityDescriptor/IDPSSODescriptor/KeyDescriptor/KeyInfo/KeyName
-          if (keyDescriptor.getKeyInfo().getKeyNameArray() != null) {
-            String[] keyNames = keyDescriptor.getKeyInfo().getKeyNameArray();
+    return false;
+  }
 
-            for (String keyName : keyNames) {
-              String metadataKeyName = new String(keyName.getBytes());
+  /**
+   * Tries to match an X509 certificate subject to a KeyName in metadata
+   *
+   * @param x509 The X509 to match with a KeyName
+   * @param saml2Metadata The metadata which contains the KeyName
+   * @return true if a match was made, otherwise false
+   */
+  public static boolean matchAACertToKeyName(X509Certificate x509, EntityDescriptorType saml2Metadata) {
+    AttributeAuthorityDescriptorType[] aaList = saml2Metadata.getAttributeAuthorityDescriptorArray();
 
-              // Do the hard work of comparison
-              if (compareX509SubjectWithKeyName(x509, metadataKeyName)) {
-                return true;
-              }
+    // EntityDescriptor/AttributeAuthorityDescriptor
+    for (AttributeAuthorityDescriptorType aa : aaList) {
+      // EntityDescriptor/IDPSSODescriptor/KeyDescriptor
+      if (validateX509WithKeyName(x509, aa.getKeyDescriptorArray())) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  /**
+   * Validates an X509 certificate based on key names in metadata
+   *
+   * @param x509 The X509 to match with a KeyName
+   * @param keyDescriptors pointer to the list of key descriptors from the metadata
+   * @return if a match was found
+   */
+  public static boolean validateX509WithKeyName(X509Certificate x509, KeyDescriptorType[] keyDescriptors) {
+    for (KeyDescriptorType keyDescriptor : keyDescriptors) {
+      // EntityDescriptor/IDPSSODescriptor/KeyDescriptor/KeyInfo
+      if (keyDescriptor.getKeyInfo() != null) {
+        // EntityDescriptor/IDPSSODescriptor/KeyDescriptor/KeyInfo/KeyName
+        if (keyDescriptor.getKeyInfo().getKeyNameArray() != null) {
+          String[] keyNames = keyDescriptor.getKeyInfo().getKeyNameArray();
+
+          for (String keyName : keyNames) {
+            String metadataKeyName = new String(keyName.getBytes());
+
+            // Do the hard work of comparison
+            if (compareX509SubjectWithKeyName(x509, metadataKeyName)) {
+              return true;
             }
           }
         }
