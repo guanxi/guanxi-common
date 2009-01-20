@@ -19,16 +19,20 @@ package org.guanxi.common.trust;
 import org.guanxi.xal.saml_2_0.metadata.*;
 import org.guanxi.xal.w3.xmldsig.X509DataType;
 import org.guanxi.xal.w3.xmldsig.KeyInfoType;
-import org.guanxi.xal.w3.xmldsig.SignatureType;
 import org.guanxi.xal.saml_1_0.protocol.ResponseDocument;
 import org.guanxi.common.GuanxiException;
 import org.apache.log4j.Logger;
 import org.apache.xml.security.signature.XMLSignature;
-import org.apache.xml.security.keys.KeyInfo;
 import org.apache.xml.security.exceptions.XMLSecurityException;
-import org.w3c.dom.Element;
+import org.apache.xml.security.utils.Constants;
+import org.w3c.dom.*;
 import org.bouncycastle.openssl.PEMReader;
+import org.xml.sax.SAXException;
 
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.xpath.*;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.security.cert.CertificateException;
@@ -209,7 +213,6 @@ public class TrustUtils {
    */
   public static boolean matchCertToKeyName(X509Certificate x509, EntityDescriptorType saml2Metadata) {
     IDPSSODescriptorType[] idpSSOs = saml2Metadata.getIDPSSODescriptorArray();
-    AttributeAuthorityDescriptorType a = null;
 
     // EntityDescriptor/IDPSSODescriptor
     for (IDPSSODescriptorType idpSSO : idpSSOs) {
@@ -332,28 +335,62 @@ public class TrustUtils {
    */
   public static boolean verifySignature(ResponseDocument samlResponse) throws GuanxiException {
     try {
-      // Get the signature on the SAML response...
-      SignatureType sig = samlResponse.getResponse().getSignature();
-      if (sig != null) {
-        // ...and verify it
-        XMLSignature signature = new XMLSignature((Element)sig.getDomNode(),"");
-        KeyInfo keyInfo = signature.getKeyInfo();
-        if (keyInfo != null) {
-          if(keyInfo.containsX509Data()) {
-            X509Certificate cert = signature.getKeyInfo().getX509Certificate();
-            if(cert != null) {
-              return signature.checkSignatureValue(cert);
+      /* We need to check for ID attributes, which requires DOM Level 3, which XMLBeans
+       * does not support. So we need to jump into DOM land.
+       */
+      DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+      dbf.setNamespaceAware(true);
+      dbf.setAttribute("http://xml.org/sax/features/namespaces", Boolean.TRUE);
+      DocumentBuilder db = dbf.newDocumentBuilder();
+      db.setErrorHandler(new org.apache.xml.security.utils.IgnoreAllErrorHandler());
+      Document doc = db.parse(samlResponse.newInputStream());
+
+      // Look for the Reference node in the Signature...
+      XPathFactory factory = XPathFactory.newInstance();
+      XPath xpath = factory.newXPath();
+      xpath.setNamespaceContext(new SAMLNamespaceContext());
+      XPathExpression expr = xpath.compile("//ds:Signature/ds:SignedInfo/ds:Reference");
+      Object result = expr.evaluate(doc, XPathConstants.NODESET);
+      NodeList sigReference = (NodeList)result;
+      // ...to see if it has a value...
+      if (sigReference.getLength() > 0) {
+        if (sigReference.item(0).getAttributes() != null) {
+          if (sigReference.item(0).getAttributes().getNamedItem("URI") != null) {
+            if (sigReference.item(0).getAttributes().getNamedItem("URI").getTextContent() != "") {
+              // ...and mark the attribute with that value as an ID attribute
+              ((Element)doc.getFirstChild()).setIdAttribute("ResponseID", true);
             }
           }
         }
       }
+
+      NodeList nodes = doc.getElementsByTagNameNS(Constants.SignatureSpecNS,"Signature");
+      Element sigElement = (Element)nodes.item(0);
+      XMLSignature xmlSignature = new XMLSignature(sigElement,"");
+      X509Certificate cert = xmlSignature.getKeyInfo().getX509Certificate();
+
+      return xmlSignature.checkSignatureValue(cert);
+    }
+    catch(ParserConfigurationException pce) {
+      logger.error("Error configuring the parser", pce);
+      throw new GuanxiException(pce);
+    }
+    catch(SAXException se) {
+      logger.error("Error parsing the response", se);
+      throw new GuanxiException(se);
+    }
+    catch(IOException ioe) {
+      logger.error("Error loading the response", ioe);
+      throw new GuanxiException(ioe);
     }
     catch(XMLSecurityException xse) {
-      logger.error("Error translating signature from DOM to XMLSignature", xse);
+      logger.error("Error loading the response", xse);
       throw new GuanxiException(xse);
     }
-
-    return false;
+    catch(XPathExpressionException xee) {
+      logger.error("Error finding the signature reference", xee);
+      throw new GuanxiException(xee);
+    }
   }
 
   /**
