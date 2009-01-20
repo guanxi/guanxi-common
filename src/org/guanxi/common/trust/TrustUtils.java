@@ -51,10 +51,29 @@ import java.net.MalformedURLException;
  * Shibboleth and SAML trust functionality
  *
  * @author alistair
+ * @author matthew
  */
 public class TrustUtils {
   /** Our logger */
   private static final Logger logger = Logger.getLogger(TrustUtils.class.getName());
+  /**
+   * This holds the path to the Reference node of a signed SAML Response.
+   * This is used to validate the signature in the SAML Response.
+   */
+  private static XPathExpression referencePath;
+
+  // Setup the XPath stuff and precompile any expressions
+  static {
+    XPathFactory factory = XPathFactory.newInstance();
+    XPath xPath = factory.newXPath();
+    xPath.setNamespaceContext(new SAMLNamespaceContext());
+    try {
+      referencePath = xPath.compile("//ds:Signature/ds:SignedInfo/ds:Reference");
+    }
+    catch (XPathExpressionException e) {
+      throw new ExceptionInInitializerError(e);
+    }
+  }
 
   /**
    * Performs trust validation via X509 certificates embedded in metadata. The trust is in the context
@@ -345,50 +364,51 @@ public class TrustUtils {
       db.setErrorHandler(new org.apache.xml.security.utils.IgnoreAllErrorHandler());
       Document doc = db.parse(samlResponse.newInputStream());
 
-      // Look for the Reference node in the Signature...
-      XPathFactory factory = XPathFactory.newInstance();
-      XPath xpath = factory.newXPath();
-      xpath.setNamespaceContext(new SAMLNamespaceContext());
-      XPathExpression expr = xpath.compile("//ds:Signature/ds:SignedInfo/ds:Reference");
-      Object result = expr.evaluate(doc, XPathConstants.NODESET);
-      NodeList sigReference = (NodeList)result;
-      // ...to see if it has a value...
-      if (sigReference.getLength() > 0) {
-        if (sigReference.item(0).getAttributes() != null) {
-          if (sigReference.item(0).getAttributes().getNamedItem("URI") != null) {
-            if (sigReference.item(0).getAttributes().getNamedItem("URI").getTextContent() != "") {
-              // ...and mark the attribute with that value as an ID attribute
-              ((Element)doc.getFirstChild()).setIdAttribute("ResponseID", true);
-            }
-          }
-        }
-      }
+      setIdNode(doc);
 
-      NodeList nodes = doc.getElementsByTagNameNS(Constants.SignatureSpecNS,"Signature");
+      NodeList nodes = doc.getElementsByTagNameNS(Constants.SignatureSpecNS, "Signature");
       Element sigElement = (Element)nodes.item(0);
-      XMLSignature xmlSignature = new XMLSignature(sigElement,"");
+      XMLSignature xmlSignature = new XMLSignature(sigElement, "");
       X509Certificate cert = xmlSignature.getKeyInfo().getX509Certificate();
 
       return xmlSignature.checkSignatureValue(cert);
     }
     catch(ParserConfigurationException pce) {
-      logger.error("Error configuring the parser", pce);
       throw new GuanxiException(pce);
     }
     catch(SAXException se) {
-      logger.error("Error parsing the response", se);
       throw new GuanxiException(se);
     }
     catch(IOException ioe) {
-      logger.error("Error loading the response", ioe);
       throw new GuanxiException(ioe);
     }
     catch(XMLSecurityException xse) {
-      logger.error("Error loading the response", xse);
       throw new GuanxiException(xse);
     }
+  }
+  
+  /**
+   * This passes through the nodes of the document looking for the Reference Id and
+   * then assigns that Id to the root node of the document.
+   * 
+   * @param doc SAML Response document
+   * @throws GuanxiException if an error occurs
+   */
+  private static void setIdNode(Document doc) throws GuanxiException {
+    try {
+      // Look for the Reference node in the Signature...
+      NodeList sigReference = (NodeList)referencePath.evaluate(doc, XPathConstants.NODESET);
+
+      // ...to see if it has a value...
+      if (sigReference.getLength() > 0 &&
+          sigReference.item(0).getAttributes() != null &&
+          sigReference.item(0).getAttributes().getNamedItem("URI") != null &&
+          sigReference.item(0).getAttributes().getNamedItem("URI").getTextContent() != "") {
+        // ...and mark the attribute with that value as an ID attribute
+        doc.getDocumentElement().setIdAttribute("ResponseID", true);
+      }
+    }
     catch(XPathExpressionException xee) {
-      logger.error("Error finding the signature reference", xee);
       throw new GuanxiException(xee);
     }
   }
@@ -620,3 +640,4 @@ public class TrustUtils {
     }
   }
 }
+
