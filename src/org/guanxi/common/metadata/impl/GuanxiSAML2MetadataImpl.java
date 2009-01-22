@@ -22,6 +22,8 @@ import org.guanxi.common.definitions.Shibboleth;
 import org.guanxi.xal.saml_2_0.metadata.EntityDescriptorType;
 import org.guanxi.xal.saml_2_0.metadata.EndpointType;
 
+import java.util.ArrayList;
+
 public class GuanxiSAML2MetadataImpl implements IdPMetadata, SPMetadata {
   /** The SAML2 metadata backing this object */
   private EntityDescriptorType saml2Metadata = null;
@@ -44,17 +46,23 @@ public class GuanxiSAML2MetadataImpl implements IdPMetadata, SPMetadata {
     return saml2Metadata.getAttributeAuthorityDescriptorArray()[0].getAttributeServiceArray()[0].getLocation();
   }
 
-  /** @see org.guanxi.common.metadata.SPMetadata#getAssertionConsumerServiceURL() */
-  public String getAssertionConsumerServiceURL() {
+  /** @see org.guanxi.common.metadata.SPMetadata#getAssertionConsumerServiceURLs() */
+  public String[] getAssertionConsumerServiceURLs() {
+    ArrayList<String> urls = new ArrayList<String>();
+    
     for (EndpointType currentEndpoint : saml2Metadata.getSPSSODescriptorArray()[0].getAssertionConsumerServiceArray()) {
       if (currentEndpoint.getBinding().equals(Shibboleth.BROWSER_POST_BINDING)) {
-        return currentEndpoint.getLocation();
+        urls.add(currentEndpoint.getLocation());
       }
     }
 
     // this is currently left here because this is the old code and is the best
     // guess when no URL with the correct binding has been found
-    return saml2Metadata.getAttributeAuthorityDescriptorArray()[0].getAttributeServiceArray()[0].getLocation();
+    if (urls.size() == 0) {
+      urls.add(saml2Metadata.getAttributeAuthorityDescriptorArray()[0].getAttributeServiceArray()[0].getLocation());
+    }
+
+    return (String[])urls.toArray(new String[urls.size ()]);
   }
 
   /** @see org.guanxi.common.metadata.IdPMetadata#setPrivateData(Object)  */
