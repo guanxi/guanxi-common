@@ -31,5 +31,5 @@ public interface SPMetadata extends Metadata {
    *
    * @return This returns the Assertion Consumer Service URL
    */
-  public String getAssertionConsumerServiceURL();
+  public String[] getAssertionConsumerServiceURLs();
 }
