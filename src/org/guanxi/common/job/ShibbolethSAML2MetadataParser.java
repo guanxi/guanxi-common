@@ -252,7 +252,18 @@ public abstract class ShibbolethSAML2MetadataParser {
   protected EntityManager loadEmptyEntityManager(String contextKey) {
     EntityFarm farm = (EntityFarm)config.getServletContext().getAttribute(contextKey);
     EntityManager manager = farm.getEntityManagerForSource(config.getMetadataURL());
-    manager.removeMetadata();
+    manager.removeAllMetadata();
     return manager;
+  }
+
+  /**
+   * Loads the appropriate EntityManager for the current metadata source
+   *
+   * @param contextKey The key in the servlet context under which the manager is hiding
+   * @return EntityManager for the current metadata source
+   */
+  protected EntityManager loadEntityManager(String contextKey) {
+    EntityFarm farm = (EntityFarm)config.getServletContext().getAttribute(contextKey);
+    return farm.getEntityManagerForSource(config.getMetadataURL());
   }
 }
