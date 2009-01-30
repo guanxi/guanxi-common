@@ -66,7 +66,7 @@ public interface EntityManager {
 	 * This will remove all metadata that has been loaded for a particular
 	 * source.
 	 */
-	public void removeMetadata();
+	public void removeAllMetadata();
 
   /**
    * Determines whether a particular MetadataManager knows about the particular entity
@@ -90,4 +90,18 @@ public interface EntityManager {
    * @return the trust engine this entity manager is using.
    */
   public TrustEngine getTrustEngine();
+
+  /**
+   * Returns all the entity IDs handled by this manager
+   *
+   * @return array of entity IDs
+   */
+  public String[] getEntityIDs();
+
+  /**
+   * Removes the metadata associated with the specified entity ID
+   *
+   * @param entityID the entity who's metadata is to be removed
+   */
+  public void removeMetadata(String entityID);
 }
