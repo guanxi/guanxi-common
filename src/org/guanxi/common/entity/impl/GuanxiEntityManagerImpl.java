@@ -61,8 +61,8 @@ public class GuanxiEntityManagerImpl implements EntityManager {
     return metadataHandlers.get(entityID);
   }
 
-  /** @see org.guanxi.common.entity.EntityManager#removeMetadata() */
-  public void removeMetadata() {
+  /** @see org.guanxi.common.entity.EntityManager#removeAllMetadata() */
+  public void removeAllMetadata() {
     metadataHandlers.clear();
   }
 
@@ -84,5 +84,16 @@ public class GuanxiEntityManagerImpl implements EntityManager {
   /** @see org.guanxi.common.entity.EntityManager#getTrustEngine() */
   public TrustEngine getTrustEngine() {
     return trustEngine;
+  }
+
+  /** @see org.guanxi.common.entity.EntityManager#getEntityIDs() */
+  public String[] getEntityIDs() {
+    String[] entityIDs = new String[metadataHandlers.keySet().size()];
+    return metadataHandlers.keySet().toArray(entityIDs);
+  }
+
+  /** @see org.guanxi.common.entity.EntityManager#removeMetadata(String) */
+  public void removeMetadata(String entityID) {
+    metadataHandlers.remove(entityID);
   }
 }
