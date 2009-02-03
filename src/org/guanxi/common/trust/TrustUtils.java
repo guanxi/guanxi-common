@@ -317,13 +317,15 @@ public class TrustUtils {
     }
 
     // Try the CN
-    String cn = x509.getSubjectDN().getName().split(",")[0].split("=")[1];
-    logger.debug("trying CN : " + cn + " KeyName : " + keyName);
-    if (cn.equals(keyName)) {
-      logger.debug("matched CN");
-      return true;
+    String[] split;
+    for (String currentEntry : x509.getSubjectDN().getName().split(",\\s*")) {
+      split = currentEntry.split("=");
+      if (split[0].equals("CN") && split[1].equals(keyName)) {
+        logger.debug("matched CN");
+        return true;
+      }
     }
-
+    
     return false;
   }
 
