@@ -23,11 +23,27 @@ abstract class ProperFilterWriter extends FilterWriter {
 		super(out);
 	}
 	
+	@Override
 	public void write(String string, int offset, int length) throws IOException {
+		if ( string == null ) {
+			throw new NullPointerException();
+		}
+		if ( offset < 0 || length < 0 || offset + length > string.length()) {
+			throw new IndexOutOfBoundsException();
+		}
+		
 		write(string.toCharArray(), offset, length);
 	}
 	
+	@Override
 	public void write(char[] cbuffer, int offset, int length) throws IOException {
+		if ( cbuffer == null ) {
+			throw new NullPointerException();
+		}
+		if ( offset < 0 || length < 0 || offset + length > cbuffer.length) {
+			throw new IndexOutOfBoundsException();
+		}
+		
 		for ( int i = 0 ; i < length ; ++i ) {
 			write(cbuffer[i + offset]);
 		}
