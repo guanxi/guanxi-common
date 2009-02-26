@@ -117,7 +117,7 @@ public class FileName {
 		static {
 			escapeCharacters = new TreeMap<Character, String>();
 			
-			for ( char character : new char[]{ ':', ';', '\\', '/' } ) {
+			for ( char character : new char[]{ ':', ';', '\\', '/', '%' } ) {
 				escapeCharacters.put(character, String.format("%%%02X", (int)character) );
 			}
 		}
@@ -136,9 +136,10 @@ public class FileName {
 		 * 
 		 * @param c
 		 */
+		@Override
 		protected String escape(char c) {
 			if ( !escapeCharacters.containsKey(c) ) {
-				return String.format("%%%02X", c);
+				return String.format("%%%02X", (int)c);
 			}
 			
 			return escapeCharacters.get(c);
@@ -150,6 +151,7 @@ public class FileName {
 		 * 
 		 * @param c
 		 */
+		@Override
 		protected boolean requiresEscaping(char c) {
 			return escapeCharacters.containsKey(c) || Character.isISOControl(c);
 		}
