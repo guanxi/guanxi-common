@@ -73,6 +73,11 @@ public class RFC2253 {
 		decoderBuffer = new StringWriter();
 		decoder = new GenericDecoder(decoderBuffer, '\\');
 	}
+
+	/**
+	 * This class should not be instantiated.
+	 */
+	private RFC2253() { }
 	
 	/**
 	 * This will encode the String provided in an RFC2253 compliant way.
@@ -171,7 +176,7 @@ public class RFC2253 {
 		 * The value of this map is the escaped form, in a format that
 		 * can be written directly to the OutputStream.
 		 */
-		private Map<Character, String> escapeCharacters;
+		private final Map<Character, String> escapeCharacters;
 		
 		/**
 		 * This creates a new RFC2253 Encoder encoding only the characters
@@ -209,12 +214,13 @@ public class RFC2253 {
 		 * 
 		 * @param c
 		 */
+		@Override
 		protected String escape(char c) {
 			if ( !escapeCharacters.containsKey(c) ) {
-				return String.format("\\%02X", c);
+				return String.format("\\%02X", (int)c);
 			}
 			
-			return '\\' + escapeCharacters.get(c);
+			return escapeCharacters.get(c);
 		}
 
 		/**
@@ -222,8 +228,9 @@ public class RFC2253 {
 		 * it should be escaped.
 		 * @param c
 		 */
+		@Override
 		protected boolean requiresEscaping(char c) {
-			return escapeCharacters.containsKey(c);
+			return escapeCharacters.containsKey(c) || Character.isISOControl(c);
 		}
 	}
 }

@@ -52,6 +52,11 @@ public class FileName {
 	}
 	
 	/**
+	 * This class should not be instantiated.
+	 */
+	private FileName() {}
+	
+	/**
 	 * This will encode the String provided in an file name safe way.
 	 * 
 	 * @param string
