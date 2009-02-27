@@ -1,7 +1,7 @@
 /**
  * 
  */
-package org.guanxi.test.common.filters;
+package org.guanxi.common.filters;
 
 import static org.junit.Assert.assertEquals;
 
