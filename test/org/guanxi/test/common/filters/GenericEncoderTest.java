@@ -197,7 +197,7 @@ public class GenericEncoderTest {
 			
 			encoder.write(input);
 			for ( int j = 0;j < encoding.length;j++ ) {
-				input.replace(encoding[i][0], encoding[i][1]);
+				input = input.replace(encoding[j][0], encoding[j][1]);
 			}
 			
 			assertEquals("GenericEncoder has altered the data inappropriately", input, output.toString());
