@@ -191,6 +191,13 @@ public abstract class ShibbolethSAML2MetadataParser {
   protected boolean loadCAListFromMetadata(EntityManager manager) {
     boolean loaded = false;
 
+    /* Are there any extensions? If there aren't, it doesn't matter
+     * as the trust engine handling this metadata might not need them.
+     */
+    if (doc.getEntitiesDescriptor().getExtensions() == null) {
+      return false;
+    }
+
     try {
       CertificateFactory certFactory = CertificateFactory.getInstance("x.509");
       ExtensionsType extensions = doc.getEntitiesDescriptor().getExtensions();
