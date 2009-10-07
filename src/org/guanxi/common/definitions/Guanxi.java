@@ -118,4 +118,9 @@ public class Guanxi {
   public static final String CONTEXT_ATTR_IDP_ENTITY_FARM = "CONTEXT_ATTR_IDP_ENTITY_FARM";
   /** The servlet context attribute that holds the EntityFarm implementation for the Engine */
   public static final String CONTEXT_ATTR_ENGINE_ENTITY_FARM = "CONTEXT_ATTR_ENGINE_ENTITY_FARM";
+
+  /** The name of the request parameter that the Engine and Guard use to add and retrieve the
+   *  SAML attributes when the Engine POSTs them to the Guard.
+   */
+  public static final String REQUEST_PARAMETER_SAML_ATTRIBUTES = "REQUEST_PARAMETER_SAML_ATTRIBUTES";
 }
