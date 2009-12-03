@@ -44,4 +44,18 @@ public interface Metadata {
    * @return Anything you like!
    */
   public Object getPrivateData();
+
+  /**
+   * Sets the hostname for which this metadata is being used
+   *
+   * @param hostName the hostname
+   */
+  public void setHostName(String hostName);
+
+  /**
+   * Gets the hostname for which this metadata is being used
+   *
+   * @return the hostname
+   */
+  public String getHostName();
 }
