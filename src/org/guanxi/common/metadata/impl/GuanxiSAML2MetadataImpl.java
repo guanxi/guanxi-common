@@ -27,6 +27,8 @@ import java.util.ArrayList;
 public class GuanxiSAML2MetadataImpl implements IdPMetadata, SPMetadata {
   /** The SAML2 metadata backing this object */
   private EntityDescriptorType saml2Metadata = null;
+  /** The hostname the metadata is associated with */
+  private String hostName = null;
 
   /** @see org.guanxi.common.metadata.Metadata#getEntityID()  */
   public String getEntityID() {
@@ -73,5 +75,15 @@ public class GuanxiSAML2MetadataImpl implements IdPMetadata, SPMetadata {
   /** @see org.guanxi.common.metadata.IdPMetadata#getPrivateData()  */
   public Object getPrivateData() {
     return saml2Metadata;
+  }
+
+  /** @see org.guanxi.common.metadata.Metadata#setHostName(String)  */
+  public void setHostName(String hostName) {
+    this.hostName = hostName;
+  }
+
+  /** @see org.guanxi.common.metadata.Metadata#getHostName()  */
+  public String getHostName() {
+    return hostName;
   }
 }
