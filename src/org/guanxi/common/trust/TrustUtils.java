@@ -33,17 +33,14 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.*;
-import java.security.cert.CertificateFactory;
-import java.security.cert.X509Certificate;
-import java.security.cert.CertificateException;
-import java.security.cert.CertificateEncodingException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
+import java.security.cert.*;
+import java.security.*;
+import java.security.interfaces.RSAPublicKey;
+import java.security.interfaces.DSAPublicKey;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.Vector;
-import java.util.Arrays;
+import java.util.*;
 import java.net.URL;
 import java.net.MalformedURLException;
 
@@ -54,6 +51,10 @@ import java.net.MalformedURLException;
  * @author matthew
  */
 public class TrustUtils {
+  public static final int ENTITY_TYPE_SSO = 1;
+  public static final int ENTITY_TYPE_AA = 2;
+  public static final int ENTITY_TYPE_SP = 3;
+
   /** Our logger */
   private static final Logger logger = Logger.getLogger(TrustUtils.class.getName());
   /**
@@ -76,32 +77,38 @@ public class TrustUtils {
   }
 
   /**
-   * Performs trust validation via X509 certificates embedded in metadata. The trust is in the context
-   * of a secure connection to an AA.
+   * Performs trust validation via X509 certificates. The trust is in the context
+   * of a secure connection to an AA as seen by the IdP.
    *
    * @param saml2Metadata The metadata for the SP
    * @param clientCerts The SP's client certificates from the secure connection
+   * @param caCerts The list of CA root certs as trust anchors
+   * @param hostName The hostname for the validation context
    * @return true if validation succeeds otherwise false
    * @throws GuanxiException if an error occurs
    */
-  public static boolean validateClientCert(EntityDescriptorType saml2Metadata, X509Certificate[] clientCerts) throws GuanxiException {
-    X509Certificate[] x509sFromMetadata = getX509CertsFromSPMetadata(saml2Metadata);
-
-    // Try validation via direct X509 in metadata
-    for (X509Certificate clientCert : clientCerts) {
-      for (X509Certificate x509FromMetadata : x509sFromMetadata) {
-        if (x509FromMetadata.equals(clientCert)) {
-          return true;
-        }
-      }
+  public static boolean validateClientCert(EntityDescriptorType saml2Metadata, X509Certificate[] clientCerts,
+                                           Vector<X509Certificate> caCerts, String hostName) throws GuanxiException {
+    if (validateEmbeddedCert(saml2Metadata, clientCerts, TrustUtils.ENTITY_TYPE_SP)) {
+      return true;
     }
 
     // Try validation via PKIX path validation
-    String[] keyNames = getKeyNamesFromSPMetadata(saml2Metadata);
-    for (String keyName : keyNames) {
+    ArrayList<String> allKeyNames = new ArrayList<String>();
+    String[] spKeyNames = getKeyNamesFromSPMetadata(saml2Metadata);
+    for (String spKeyName : spKeyNames) {
+      allKeyNames.add(spKeyName);
+    }
+    if (hostName != null) {
+      allKeyNames.add(hostName);
+    }
+
+    for (String keyName : allKeyNames) {
       for (X509Certificate clientCert : clientCerts) {
         if (compareX509SubjectWithKeyName(clientCert, keyName)) {
-          return true;
+          if (validateCertPath(clientCert, caCerts)) {
+            return true;
+          }
         }
       }
     }
@@ -109,30 +116,74 @@ public class TrustUtils {
     return false;
   }
 
+
   /**
-   * Performs trust validation via X509 certificates embedded in metadata. The trust is in the context
-   * of a SAML Response coming from an IdP.
+   * Performs explicit key validation to check an entity's message or TLS public keys against those
+   * embedded in SAML2 metadata for the entity.
    *
-   * @param samlResponse The SAML Response from an IdP containing an AuthenticationStatement
-   * @param saml2Metadata The metadata for the IdP
-   * @return true if validation succeeds otherwise false
+   * @param saml2Metadata The SAML2 metadata for the entity
+   * @param clientCerts The X509 certificates from the message signature or secure connection
+   * @param entityType ENTITY_TYPE_SSO to validate an AuthenticationStatement
+   *                   ENTITY_TYPE_AA to validate a back channel secure connection to an Attribute Authority
+   *                   ENTITY_TYPE_SP to validate a back channel secure connection from a Service Provider
+   * @return true if explicit key validation passes, otherwise false
    * @throws GuanxiException if an error occurs
    */
-  public static boolean validateWithEmbeddedCert(ResponseDocument samlResponse, EntityDescriptorType saml2Metadata) throws GuanxiException {
-    X509Certificate[] x509sFromMetadata = getX509CertsFromIdPMetadata(saml2Metadata);
-    X509Certificate x509CertFromSig = getX509CertFromSignature(samlResponse);
+  public static boolean validateEmbeddedCert(EntityDescriptorType saml2Metadata, X509Certificate[] clientCerts, int entityType) throws GuanxiException {
+    try {
+      CertificateFactory certFactory = CertificateFactory.getInstance("x.509");
 
-    for (X509Certificate x509FromMetadata : x509sFromMetadata) {
-      if (x509CertFromSig.equals(x509FromMetadata)) {
-        return true;
+      KeyDescriptorType[] keyDescriptors = null;
+      if (entityType == ENTITY_TYPE_SSO) {
+        keyDescriptors = saml2Metadata.getIDPSSODescriptorArray(0).getKeyDescriptorArray();
       }
+      if (entityType == ENTITY_TYPE_AA) {
+        keyDescriptors = saml2Metadata.getAttributeAuthorityDescriptorArray(0).getKeyDescriptorArray();
+      }
+      if (entityType == ENTITY_TYPE_SP) {
+        keyDescriptors = saml2Metadata.getSPSSODescriptorArray(0).getKeyDescriptorArray();
+      }
+
+      for (KeyDescriptorType keyDescriptor : keyDescriptors) {
+        X509DataType[] x509Datas = keyDescriptor.getKeyInfo().getX509DataArray();
+
+        for (X509DataType x509Data : x509Datas) {
+          byte[][] x509CertsBytes = x509Data.getX509CertificateArray();
+
+          for (byte[] x509CertBytes : x509CertsBytes) {
+            ByteArrayInputStream certByteStream = new ByteArrayInputStream(x509CertBytes);
+            X509Certificate metadataCert = (X509Certificate)certFactory.generateCertificate(certByteStream);
+            certByteStream.close();
+
+            if ((metadataCert.getPublicKey() instanceof DSAPublicKey) &&
+                (clientCerts[0].getPublicKey() instanceof DSAPublicKey)) {
+              DSAPublicKey metadataDSA = (DSAPublicKey)metadataCert.getPublicKey();
+              DSAPublicKey clientDSA = (DSAPublicKey)clientCerts[0].getPublicKey();
+              if (metadataDSA.getY().equals(clientDSA.getY()) &&
+                  metadataDSA.getParams().getG().equals(clientDSA.getParams().getG()) &&
+                  metadataDSA.getParams().getP().equals(clientDSA.getParams().getP()) &&
+                  metadataDSA.getParams().getQ().equals(clientDSA.getParams().getQ())) {
+                return true;
+              }
+            }
+            else if ((metadataCert.getPublicKey() instanceof RSAPublicKey) &&
+                     (clientCerts[0].getPublicKey() instanceof RSAPublicKey)) {
+              RSAPublicKey metadataRSA = (RSAPublicKey)metadataCert.getPublicKey();
+              RSAPublicKey clientRSA = (RSAPublicKey)clientCerts[0].getPublicKey();
+              if (metadataRSA.getPublicExponent().equals(clientRSA.getPublicExponent()) &&
+                  metadataRSA.getModulus().equals(clientRSA.getModulus())) {
+                return true;
+              }
+            }
+          }
+        }
+      }
+
+      return false;
     }
-
-    /* Direct signature validation via RSAKeyValue
-     * @todo implement this
-     */
-
-    return false;
+    catch(Exception e) {
+      throw new GuanxiException(e);
+    }
   }
 
   /**
@@ -141,11 +192,13 @@ public class TrustUtils {
    * @param samlResponse The SAML Response from an IdP containing an AuthenticationStatement
    * @param saml2Metadata The metadata for the IdP
    * @param caCerts The list of CA root certs as trust anchors
+   * @param hostName The hostname for the validation context
    * @return true if validation succeeds otherwise false
    * @throws GuanxiException if an error occurs
    */
   public static boolean validatePKIX(ResponseDocument samlResponse, EntityDescriptorType saml2Metadata,
-                                     Vector<X509Certificate> caCerts) throws GuanxiException {
+                                     Vector<X509Certificate> caCerts,
+                                     String hostName) throws GuanxiException {
     /* PKIX Path Validation
      * quickie summary:
      * - Match X509 in SAML Response signature to KeyName in IdP metadata
@@ -155,7 +208,7 @@ public class TrustUtils {
     X509Certificate x509CertFromSig = getX509CertFromSignature(samlResponse);
 
     // First find a match between the X509 in the signature and a KeyName in the metadata...
-    if (matchCertToKeyName(x509CertFromSig, saml2Metadata)) {
+    if (matchCertToKeyName(x509CertFromSig, saml2Metadata, hostName)) {
       // ...then follow the chain from the X509 in the signature back to a supported CA in the metadata
       if (validateCertPath(x509CertFromSig, caCerts)) {
         return true;
@@ -171,12 +224,14 @@ public class TrustUtils {
    * @param x509CertFromConnection The certificate from the connection
    * @param saml2Metadata The metadata for the IdP
    * @param caCerts The list of CA root certs as trust anchors
+   * @param hostName The hostname for the validation context
    * @return true if validation succeeds otherwise false
    * @throws GuanxiException if an error occurs
    */
   public static boolean validatePKIXBC(X509Certificate x509CertFromConnection,
                                        EntityDescriptorType saml2Metadata,
-                                       Vector<X509Certificate> caCerts) throws GuanxiException {
+                                       Vector<X509Certificate> caCerts,
+                                       String hostName) throws GuanxiException {
     /* PKIX Path Validation
      * quickie summary:
      * - Match X509 from connection to KeyName in IdP metadata
@@ -185,7 +240,7 @@ public class TrustUtils {
      */
 
     // First find a match between the X509 from the connection and a KeyName in the metadata...
-    if (matchAACertToKeyName(x509CertFromConnection, saml2Metadata)) {
+    if (matchAACertToKeyName(x509CertFromConnection, saml2Metadata, hostName)) {
       // ...then follow the chain from the X509 in the signature back to a supported CA in the metadata
       if (validateCertPath(x509CertFromConnection, caCerts)) {
         return true;
@@ -228,15 +283,16 @@ public class TrustUtils {
    *
    * @param x509 The X509 to match with a KeyName
    * @param saml2Metadata The metadata which contains the KeyName
+   * @param hostName The hostname for the validation context
    * @return true if a match was made, otherwise false
    */
-  public static boolean matchCertToKeyName(X509Certificate x509, EntityDescriptorType saml2Metadata) {
+  public static boolean matchCertToKeyName(X509Certificate x509, EntityDescriptorType saml2Metadata, String hostName) {
     IDPSSODescriptorType[] idpSSOs = saml2Metadata.getIDPSSODescriptorArray();
 
     // EntityDescriptor/IDPSSODescriptor
     for (IDPSSODescriptorType idpSSO : idpSSOs) {
       // EntityDescriptor/IDPSSODescriptor/KeyDescriptor
-      if (validateX509WithKeyName(x509, idpSSO.getKeyDescriptorArray())) {
+      if (validateX509WithKeyName(x509, idpSSO.getKeyDescriptorArray(), hostName)) {
         return true;
       }
     }
@@ -249,15 +305,16 @@ public class TrustUtils {
    *
    * @param x509 The X509 to match with a KeyName
    * @param saml2Metadata The metadata which contains the KeyName
+   * @param hostName The hostname for the validation context
    * @return true if a match was made, otherwise false
    */
-  public static boolean matchAACertToKeyName(X509Certificate x509, EntityDescriptorType saml2Metadata) {
+  public static boolean matchAACertToKeyName(X509Certificate x509, EntityDescriptorType saml2Metadata, String hostName) {
     AttributeAuthorityDescriptorType[] aaList = saml2Metadata.getAttributeAuthorityDescriptorArray();
 
     // EntityDescriptor/AttributeAuthorityDescriptor
     for (AttributeAuthorityDescriptorType aa : aaList) {
       // EntityDescriptor/IDPSSODescriptor/KeyDescriptor
-      if (validateX509WithKeyName(x509, aa.getKeyDescriptorArray())) {
+      if (validateX509WithKeyName(x509, aa.getKeyDescriptorArray(), hostName)) {
         return true;
       }
     }
@@ -270,17 +327,27 @@ public class TrustUtils {
    *
    * @param x509 The X509 to match with a KeyName
    * @param keyDescriptors pointer to the list of key descriptors from the metadata
+   * @param hostName The hostname for the validation context
    * @return if a match was found
    */
-  public static boolean validateX509WithKeyName(X509Certificate x509, KeyDescriptorType[] keyDescriptors) {
+  public static boolean validateX509WithKeyName(X509Certificate x509, KeyDescriptorType[] keyDescriptors, String hostName) {
     for (KeyDescriptorType keyDescriptor : keyDescriptors) {
       // EntityDescriptor/IDPSSODescriptor/KeyDescriptor/KeyInfo
       if (keyDescriptor.getKeyInfo() != null) {
         // EntityDescriptor/IDPSSODescriptor/KeyDescriptor/KeyInfo/KeyName
         if (keyDescriptor.getKeyInfo().getKeyNameArray() != null) {
-          String[] keyNames = keyDescriptor.getKeyInfo().getKeyNameArray();
+          ArrayList<String> allKeyNames = new ArrayList<String>();
+          
+          String[] metadataKeyNames = keyDescriptor.getKeyInfo().getKeyNameArray();
+          for (String metadataKeyName : metadataKeyNames) {
+            allKeyNames.add(metadataKeyName);
+          }
+          // Shibboleth spec says the hostname is also a KeyName
+          if (hostName != null) {
+            allKeyNames.add(hostName);
+          }
 
-          for (String keyName : keyNames) {
+          for (String keyName : allKeyNames) {
             String metadataKeyName = new String(keyName.getBytes());
 
             // Do the hard work of comparison
@@ -325,7 +392,7 @@ public class TrustUtils {
         return true;
       }
     }
-    
+
     return false;
   }
 
@@ -340,11 +407,55 @@ public class TrustUtils {
   public static boolean validateCertPath(X509Certificate x509ToVerify, Vector<X509Certificate> caCerts) {
     for (X509Certificate caX509 : caCerts) {
       if (caX509.getSubjectDN().getName().equals(x509ToVerify.getIssuerDN().getName())) {
-        return true;
+        return validatePKIXPath(x509ToVerify, caX509);
       }
     }
 
     return false;
+  }
+
+  /**
+   * Performs PKIX path validation on a set of certificates
+   *
+   * @param x509ToVerify The X509Certificate to validate
+   * @param caX509 The root trust anchor X509Certificate
+   * @return true if successful otherwise false
+   */
+  public static boolean validatePKIXPath(X509Certificate x509ToVerify, X509Certificate caX509) {
+    try {
+      ArrayList<X509Certificate> certsList = new ArrayList<X509Certificate>();
+      certsList.add(caX509);
+      certsList.add(x509ToVerify);
+
+      CollectionCertStoreParameters certStoreParams = new CollectionCertStoreParameters(certsList);
+      CertStore certStore = CertStore.getInstance("Collection", certStoreParams, "BC");
+
+      CertificateFactory certFactory = CertificateFactory.getInstance("X.509", "BC");
+      ArrayList<X509Certificate> certChain = new ArrayList<X509Certificate>();
+      certChain.add(x509ToVerify);
+
+      CertPath certPath = certFactory.generateCertPath(certChain);
+      Set<TrustAnchor> trust = Collections.singleton(new TrustAnchor(caX509, null));
+
+      CertPathValidator validator = CertPathValidator.getInstance("PKIX", "BC");
+      PKIXParameters pkixParams = new PKIXParameters(trust);
+
+      pkixParams.addCertStore(certStore);
+      //pkixParams.setDate(new Date());
+
+      /* In case we get here via a "virtual" KeyName, we're not interested
+       * in the validity of the cert per se.
+       */
+      pkixParams.setRevocationEnabled(false);
+
+      // Do the path validation
+      validator.validate(certPath, pkixParams);
+
+      return true;
+    }
+    catch(Exception e) {
+      return false;
+    }
   }
 
   /**
@@ -388,11 +499,11 @@ public class TrustUtils {
       throw new GuanxiException(xse);
     }
   }
-  
+
   /**
    * This passes through the nodes of the document looking for the Reference Id and
    * then assigns that Id to the root node of the document.
-   * 
+   *
    * @param doc SAML Response document
    * @throws GuanxiException if an error occurs
    */
@@ -585,7 +696,7 @@ public class TrustUtils {
 
   /**
    * Returns the hex representation of a byte array.
-   * 
+   *
    * @param bytes byte array to be converted to hex
    * @return hex representation of bytes
    */
