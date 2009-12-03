@@ -38,7 +38,7 @@ public class ShibbolethTrustEngineImpl extends SimpleTrustEngine {
 
   public ShibbolethTrustEngineImpl() {
     super();
-    
+
     // Initialise the Apache security engine
     Init.init();
   }
@@ -50,7 +50,7 @@ public class ShibbolethTrustEngineImpl extends SimpleTrustEngine {
     // Handler private data is raw SAML2 metadata
     EntityDescriptorType saml2Metadata = (EntityDescriptorType)entityMetadata.getPrivateData();
 
-    // PKIX validation based on certs in metadata
+    // Message level validation
     if (entityData instanceof ResponseDocument) {
       // Entity data is the SAML Response from the IdP
       ResponseDocument samlResponse = (ResponseDocument)entityData;
@@ -62,22 +62,27 @@ public class ShibbolethTrustEngineImpl extends SimpleTrustEngine {
       }
 
       // Validation via embedded certificates
-      if (TrustUtils.validateWithEmbeddedCert((ResponseDocument)entityData, saml2Metadata)) {
+      X509Certificate x509CertFromSig = TrustUtils.getX509CertFromSignature(samlResponse);
+      if (TrustUtils.validateEmbeddedCert(saml2Metadata, new X509Certificate[] {x509CertFromSig}, TrustUtils.ENTITY_TYPE_SSO)) {
         return true;
       }
 
       // Validation via PKIX
-      if (TrustUtils.validatePKIX((ResponseDocument)entityData, saml2Metadata, caCerts)) {
+      if (TrustUtils.validatePKIX((ResponseDocument)entityData, saml2Metadata, caCerts, entityMetadata.getHostName())) {
         return true;
       }
     }
 
-    // PKIX validation based on certs from back channel connection
+    // Back channel connection validation
     if (entityData instanceof X509Certificate) {
       // Entity data is the X509 from the connection
       X509Certificate x509CertFromConnection = (X509Certificate)entityData;
-      
-      return TrustUtils.validatePKIXBC(x509CertFromConnection, saml2Metadata, caCerts);
+
+      if (!TrustUtils.validateEmbeddedCert(saml2Metadata, new X509Certificate[] {x509CertFromConnection}, TrustUtils.ENTITY_TYPE_AA)) {
+        return TrustUtils.validatePKIXBC(x509CertFromConnection, saml2Metadata, caCerts, entityMetadata.getHostName());
+      }
+
+      return true;
     }
 
 
