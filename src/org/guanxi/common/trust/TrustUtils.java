@@ -25,6 +25,7 @@ import org.apache.log4j.Logger;
 import org.apache.xml.security.signature.XMLSignature;
 import org.apache.xml.security.exceptions.XMLSecurityException;
 import org.apache.xml.security.utils.Constants;
+import org.apache.xmlbeans.XmlObject;
 import org.w3c.dom.*;
 import org.bouncycastle.openssl.PEMReader;
 import org.xml.sax.SAXException;
@@ -279,6 +280,32 @@ public class TrustUtils {
   }
 
   /**
+   * Retrieves the X509Certificate from a digital signature
+   *
+   * @param keyInfo The KeyInfo within the SAML message
+   * @return X509Certificate from the signature
+   * @throws GuanxiException if an error occurs
+   */
+  public static X509Certificate getX509CertFromSignature(KeyInfoType keyInfo) throws GuanxiException {
+    try {
+      byte[] x509CertBytes = keyInfo.getX509DataArray(0).getX509CertificateArray(0);
+      CertificateFactory certFactory = CertificateFactory.getInstance("x.509");
+      ByteArrayInputStream certByteStream = new ByteArrayInputStream(x509CertBytes);
+      X509Certificate cert = (X509Certificate)certFactory.generateCertificate(certByteStream);
+      certByteStream.close();
+      return cert;
+    }
+    catch(CertificateException ce) {
+      logger.error("Error obtaining certificate factory", ce);
+      throw new GuanxiException(ce);
+    }
+    catch(IOException ioe) {
+      logger.error("Error closing certificate byte stream", ioe);
+      throw new GuanxiException(ioe);
+    }
+  }
+
+  /**
    * Tries to match an X509 certificate subject to a KeyName in metadata
    *
    * @param x509 The X509 to match with a KeyName
@@ -461,11 +488,11 @@ public class TrustUtils {
   /**
    * Verifies the digital signature on a SAML Response
    *
-   * @param samlResponse The SAML Response document containing the signature
+   * @param samlMessage The SAML Response document containing the signature
    * @return true if the signature verifies otherwise false
    * @throws GuanxiException if an error occurs
    */
-  public static boolean verifySignature(ResponseDocument samlResponse) throws GuanxiException {
+  public static boolean verifySignature(XmlObject samlMessage) throws GuanxiException {
     try {
       /* We need to check for ID attributes, which requires DOM Level 3, which XMLBeans
        * does not support. So we need to jump into DOM land.
@@ -475,7 +502,7 @@ public class TrustUtils {
       dbf.setAttribute("http://xml.org/sax/features/namespaces", Boolean.TRUE);
       DocumentBuilder db = dbf.newDocumentBuilder();
       db.setErrorHandler(new org.apache.xml.security.utils.IgnoreAllErrorHandler());
-      Document doc = db.parse(samlResponse.newInputStream());
+      Document doc = db.parse(samlMessage.newInputStream());
 
       setIdNode(doc);
 
