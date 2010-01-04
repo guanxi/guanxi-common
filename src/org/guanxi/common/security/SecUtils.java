@@ -65,10 +65,6 @@ public class SecUtils {
     String privateKeyAlias = config.getPrivateKeyAlias();
     String privateKeyPass = config.getPrivateKeyPass();
     String certificateAlias = config.getCertificateAlias();
-    String keyType = config.getKeyType();
-
-    if (keyType.equalsIgnoreCase("dsa")) keyType = XMLSignature.ALGO_ID_SIGNATURE_DSA;
-    if (keyType.equalsIgnoreCase("rsa")) keyType = XMLSignature.ALGO_ID_SIGNATURE_RSA;
 
     try {
       KeyStore ks = null;
@@ -82,6 +78,10 @@ public class SecUtils {
 
       PrivateKey privateKey = null;
       privateKey = (PrivateKey)ks.getKey(privateKeyAlias, privateKeyPass.toCharArray());
+
+      String keyType = privateKey.getAlgorithm();
+      if (keyType.equalsIgnoreCase("dsa")) keyType = XMLSignature.ALGO_ID_SIGNATURE_DSA;
+      if (keyType.equalsIgnoreCase("rsa")) keyType = XMLSignature.ALGO_ID_SIGNATURE_RSA;
 
       XMLSignature sig = null;
       sig = new XMLSignature(inDocToSign, "", keyType, Canonicalizer.ALGO_ID_C14N_EXCL_OMIT_COMMENTS);
