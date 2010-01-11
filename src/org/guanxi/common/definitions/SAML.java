@@ -26,4 +26,10 @@ public class SAML {
 
   // Bindings
   public static final String BROWSER_POST_BINDING = "urn:oasis:names:tc:SAML:1.0:profiles:browser-post";
+
+  // SAML2
+  public static final String NS_SAML_20_PROTOCOL = "urn:oasis:names:tc:SAML:2.0:protocol";
+  public static final String NS_SAML_20_ASSERTION = "urn:oasis:names:tc:SAML:2.0:assertion";
+  public static final String NS_PREFIX_SAML_20_PROTOCOL = "samlp";
+  public static final String NS_PREFIX_SAML_20_ASSERTION = "saml";
 }
