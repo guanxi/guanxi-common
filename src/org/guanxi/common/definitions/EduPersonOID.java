@@ -17,7 +17,7 @@
 package org.guanxi.common.definitions;
 
 /**
- * EduPerson Object Class Specification (200604)
+ * EduPerson Object Class Specification (200806)
  *
  * @author alistair
  * @link http://middleware.internet2.edu/eduperson/docs/internet2-mace-dir-eduperson-200806.html
