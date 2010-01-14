@@ -259,9 +259,16 @@ public class TrustUtils {
    * @return X509Certificate from the signature
    * @throws GuanxiException if an error occurs
    */
-  public static X509Certificate getX509CertFromSignature(ResponseDocument samlResponse) throws GuanxiException {
+  public static X509Certificate getX509CertFromSignature(XmlObject samlResponse) throws GuanxiException {
+    KeyInfoType keyInfo = null;
+    if (samlResponse instanceof org.guanxi.xal.saml_1_0.protocol.ResponseDocument) {
+      keyInfo = ((org.guanxi.xal.saml_1_0.protocol.ResponseDocument)(samlResponse)).getResponse().getSignature().getKeyInfo();
+    }
+    else if (samlResponse instanceof org.guanxi.xal.saml_2_0.protocol.ResponseDocument) {
+      keyInfo = ((org.guanxi.xal.saml_2_0.protocol.ResponseDocument)(samlResponse)).getResponse().getSignature().getKeyInfo();
+    }
+
     try {
-      KeyInfoType keyInfo = samlResponse.getResponse().getSignature().getKeyInfo();
       byte[] x509CertBytes = keyInfo.getX509DataArray(0).getX509CertificateArray(0);
       CertificateFactory certFactory = CertificateFactory.getInstance("x.509");
       ByteArrayInputStream certByteStream = new ByteArrayInputStream(x509CertBytes);
