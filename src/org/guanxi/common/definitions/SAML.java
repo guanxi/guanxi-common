@@ -17,9 +17,14 @@
 package org.guanxi.common.definitions;
 
 public class SAML {
-  // URNs
+  // SAML1 URNs
   public static final String URN_AUTH_METHOD_PASSWORD = "urn:oasis:names:tc:SAML:1.0:am:password";
   public static final String URN_CONFIRMATION_METHOD_BEARER = "urn:oasis:names:tc:SAML:1.0:cm:bearer";
+
+  // SAML2 URNs
+  public static final String URN_SAML2_CONFIRMATION_METHOD_BEARER = "urn:oasis:names:tc:SAML:2.0:cm:bearer";
+  public static final String URN_SAML2_PASSWORD_PROTECTED_TRANSPORT = "urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport";
+  public static final String URN_SAML2_NAMEID_FORMAT_ENTITY = "urn:oasis:names:tc:SAML:2.0:nameid-format:entity";
 
   // Namespaces
   public static final String NS_SAML_ASSERTION = "urn:oasis:names:tc:SAML:1.0:assertion";
