@@ -37,4 +37,6 @@ public class SAML {
   public static final String NS_SAML_20_ASSERTION = "urn:oasis:names:tc:SAML:2.0:assertion";
   public static final String NS_PREFIX_SAML_20_PROTOCOL = "samlp";
   public static final String NS_PREFIX_SAML_20_ASSERTION = "saml";
+  public static final String SAML2_ATTRIBUTE_NAME_FORMAT_URI = "urn:oasis:names:tc:SAML:2.0:attrname-format:uri";
+  public static final String SAML2_ATTRIBUTE_FORMAT_NAMEID_PERSISTENT = "urn:oasis:names:tc:SAML:2.0:nameid-format:persistent";
 }
