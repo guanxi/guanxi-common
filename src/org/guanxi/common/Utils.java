@@ -25,8 +25,7 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.TimeZone;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
+import java.util.zip.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.xml.transform.Transformer;
@@ -55,6 +54,12 @@ import org.w3c.dom.NodeList;
 public class Utils {
   /** OS dependent line engine, e.g. \n */
   public static final String LINE_ENDING = System.getProperty("line.separator");
+  /** Doesn't provide compatibility with the compression format used by both GZIP and PKZIP */
+  public static final boolean RFC1951_WRAP = false;
+  /** Provides compatibility with the compression format used by both GZIP and PKZIP */
+  public static final boolean RFC1951_NO_WRAP = true;
+  /** Shortcut for using default compression level */
+  public static final int RFC1951_DEFAULT_COMPRESSION_LEVEL = Deflater.DEFAULT_COMPRESSION;
   
   /**
    * Returns the parameters and their values from an HTTP request
@@ -94,6 +99,10 @@ public class Utils {
     catch(TransformerException te) {
       return null;
     }
+  }
+
+  public static String base64(byte[] data) {
+    return Base64.encode(data);
   }
 
   public static String decodeBase64(String b64Data) {
@@ -328,5 +337,46 @@ public class Utils {
         // Closing the stream failed. Shouldn't stop us returning the data though
       }
     }
+  }
+
+  /**
+   * Reconstitutes data deflated according to RFC1951
+   *
+   * @param deflatedData the deflated data to reconstitute
+   * @param useWrap if true then the ZLIB header and checksum fields will not be used.
+   *        This provides compatibility with the compression format used by both GZIP and PKZIP.
+   * @return String representing the reconstituted data
+   * @throws GuanxiException if an error occurs
+   */
+  public static String inflate(String deflatedData, boolean useWrap) throws GuanxiException {
+    try {
+      byte[] inflatedData = new byte[1024];
+      Inflater decompresser = new Inflater(useWrap);
+      decompresser.setInput(deflatedData.getBytes(), 0, deflatedData.length());
+      int inflatedBytesLength = decompresser.inflate(inflatedData);
+      decompresser.end();
+      return new String(inflatedData, 0, inflatedBytesLength);
+    }
+    catch(DataFormatException dfe) {
+      throw new GuanxiException(dfe);
+    }
+  }
+
+  /**
+   * Deflates data according to RFC1951
+   *
+   * @param data the data to deflate
+   * @param compressionLevel the compression level to use
+   * @param useWrap if true then the ZLIB header and checksum fields will not be used.
+   *        This provides compatibility with the compression format used by both GZIP and PKZIP.
+   * @return String representing the deflated data
+   */
+  public static String deflate(String data, int compressionLevel, boolean useWrap) {
+    byte[] deflatedData = new byte[1024];
+    Deflater deflater = new Deflater(compressionLevel, useWrap);
+    deflater.setInput(data.getBytes());
+    deflater.finish();
+    int deflatedBytesLength = deflater.deflate(deflatedData);
+    return new String(deflatedData, 0, deflatedBytesLength);
   }
 }
