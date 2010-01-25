@@ -63,6 +63,8 @@ public class Guanxi {
 
   /** The Guard ID request parameter for WAYFLocation service */
   public static final String WAYF_PARAM_GUARD_ID = "guardid";
+  /** The Guard binding request parameter for WAYFLocation service */
+  public static final String WAYF_PARAM_GUARD_BINDING = "binding";
   /** The Guard Session ID request parameter for WAYFLocation service */
   public static final String WAYF_PARAM_SESSION_ID = "sessionid";
 
