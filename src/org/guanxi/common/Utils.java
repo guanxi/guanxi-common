@@ -350,7 +350,7 @@ public class Utils {
    */
   public static String inflate(String deflatedData, boolean useWrap) throws GuanxiException {
     try {
-      byte[] inflatedData = new byte[1024];
+      byte[] inflatedData = new byte[(10 * deflatedData.length())];
       Inflater decompresser = new Inflater(useWrap);
       decompresser.setInput(deflatedData.getBytes(), 0, deflatedData.length());
       int inflatedBytesLength = decompresser.inflate(inflatedData);
@@ -372,7 +372,7 @@ public class Utils {
    * @return String representing the deflated data
    */
   public static String deflate(String data, int compressionLevel, boolean useWrap) {
-    byte[] deflatedData = new byte[1024];
+    byte[] deflatedData = new byte[data.length()];
     Deflater deflater = new Deflater(compressionLevel, useWrap);
     deflater.setInput(data.getBytes());
     deflater.finish();
