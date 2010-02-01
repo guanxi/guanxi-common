@@ -153,10 +153,12 @@ public class SecUtils {
    * @param keystorePassword The password for the KeyStore
    * @param privateKeyPassword The password for the private key associated with the public key certificate
    * @param privateKeyAlias The alias under which the private key will be stored
+   * @param keyType The type of key, RSA or DSA
    * @throws GuanxiException if an error occurred
    */
   public void createSelfSignedKeystore(String cn, String keystoreFile, String keystorePassword,
-                                       String privateKeyPassword, String privateKeyAlias) throws GuanxiException {
+                                       String privateKeyPassword, String privateKeyAlias,
+                                       String keyType) throws GuanxiException {
     try {
       KeyStore ks = KeyStore.getInstance("JKS");
 
@@ -171,7 +173,13 @@ public class SecUtils {
         ks.load(null, null);
 
       // Generate a new public/private key pair
-      KeyPairGenerator keyGen = KeyPairGenerator.getInstance("DSA");
+      KeyPairGenerator keyGen = null;
+      if (keyType.toLowerCase().equals("rsa")) {
+        keyGen = KeyPairGenerator.getInstance("RSA");
+      }
+      else if (keyType.toLowerCase().equals("dsa")) {
+        keyGen = KeyPairGenerator.getInstance("DSA");
+      }
       keyGen.initialize(1024, new SecureRandom());
       KeyPair keypair = keyGen.generateKeyPair();
       PrivateKey privkey = keypair.getPrivate();
@@ -196,7 +204,12 @@ public class SecUtils {
 
       // Initialise the X509 Certificate information...
       X509V3CertificateGenerator x509 = new X509V3CertificateGenerator();
-      x509.setSignatureAlgorithm("SHA1withDSA");
+      if (keyType.toLowerCase().equals("rsa")) {
+        x509.setSignatureAlgorithm("SHA1withRSA");
+      }
+      else if (keyType.toLowerCase().equals("dsa")) {
+        x509.setSignatureAlgorithm("SHA1withDSA");
+      }
       x509.setIssuerDN(issuerDN);
       x509.setSubjectDN(subjectDN);
       x509.setPublicKey(pubkey);
