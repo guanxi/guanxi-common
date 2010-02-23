@@ -552,7 +552,16 @@ public class TrustUtils {
           sigReference.item(0).getAttributes().getNamedItem("URI") != null &&
           sigReference.item(0).getAttributes().getNamedItem("URI").getTextContent() != "") {
         // ...and mark the attribute with that value as an ID attribute
-        doc.getDocumentElement().setIdAttribute("ResponseID", true);
+        // Shibboleth
+        if ((doc.getDocumentElement().getAttribute("ResponseID") != null) &&
+            (!doc.getDocumentElement().getAttribute("ResponseID").equals(""))) {
+          doc.getDocumentElement().setIdAttribute("ResponseID", true);
+        }
+        // SAML2
+        else if ((doc.getDocumentElement().getAttribute("ID") != null) &&
+                 (!doc.getDocumentElement().getAttribute("ID").equals(""))) {
+          doc.getDocumentElement().setIdAttribute("ID", true);
+        }
       }
     }
     catch(XPathExpressionException xee) {
