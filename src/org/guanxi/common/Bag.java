@@ -18,6 +18,7 @@ package org.guanxi.common;
 
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.StringTokenizer;
 
 /**
  * The Bag contains SAML attributes as convenience objects (Strings). The Bag sits in a Pod which
@@ -32,16 +33,75 @@ import java.util.Hashtable;
 public class Bag {
   /** The value used as a delimiter in multi-valued attributes */
   public static final String ATTR_VALUE_DELIM = ";";
-
   /** String representing the raw SAML Response */
   private String samlResponse = null;
   /** The attributes as Strings */
   private Hashtable<String, String> attributes = null;
+  /** The session ID associated with this bag */
+  private String sessionID = null;
 
   /**
    * Default constructor
    */
   public Bag() {
+    init();
+  }
+
+  /**
+   * Constructs a Bag of attributes from JSON
+   *
+   * @param json the attributes in JSON format
+   */
+  public Bag(String json) {
+    init();
+    
+    String token = null;
+    String attributeName = null;
+    boolean inSessionID = false, inSAMLResponse = false,
+            inAttributeName = false, inAttributeValue = false;
+
+    StringTokenizer st = new StringTokenizer(json, "\":");
+    while (st.hasMoreTokens()) {
+      token = st.nextToken();
+      // Ignore whitespace
+      if (token.equals(" ")) continue;
+      else if (token.equals("sessionID")) {
+        inSessionID = true;
+      }
+      else if (token.equals("samlResponse")) {
+        inSAMLResponse = true;
+      }
+      else if (token.equals("attributeName")) {
+        inAttributeName = true;
+      }
+      else if (token.equals("attributeValue")) {
+        inAttributeValue = true;
+      }
+      else {
+        if (inSessionID) {
+          setSessionID(token);
+          inSessionID = false;
+        }
+        if (inSAMLResponse) {
+          setSamlResponse(Utils.decodeBase64(token));
+          inSAMLResponse = false;
+        }
+        if (inAttributeName) {
+          attributeName = token;
+          inAttributeName = false;
+        }
+        if (inAttributeValue) {
+          addAttribute(attributeName, token);
+          inAttributeValue = false;
+        }
+      }
+    }
+  }
+
+  /**
+   * Initialises the Bag
+   */
+  private void init() {
     attributes = new Hashtable<String, String>();
   }
 
@@ -110,4 +170,68 @@ public class Bag {
    * @return String representing the raw SAML Response. 
    */
   public String getSamlResponse() { return samlResponse; }
+
+  /**
+   * Sets the session ID for the bag
+   *
+   * @param sessionID the session ID
+   */
+  public void setSessionID(String sessionID) { this.sessionID = sessionID; }
+
+  /**
+   * Gets the session ID for the bag
+   *
+   * @return the session ID
+   */
+  public String getSessionID() { return sessionID; }
+
+  /**
+   * Emits the Bag as JSON
+   *
+   * @return the Bag in JSON format:
+   * 
+   * {
+   *   "bag": {
+   *     "sessionID": "2342342343",
+   *     "samlResponse": "bas64 encoded SAML Response",
+   *     "attributes": [
+   *       "attribute": {
+   *         "attributeName": "eduPersonTargetedID",
+   *         "attributeValue": "12312312312"
+   *       },
+   *       "attribute": {
+   *         "attributeName": "eduPersonAffiliation",
+   *         "attributeValue": "member"
+   *       }
+   *     ]
+   *  }
+   *}
+   */
+  public String toJSON() {
+    String json = "{";
+    json += "\"bag\": {";
+    json += "\"sessionID\": \"" + getSessionID() + "\",";
+    json += "\"samlResponse\": \"" + getSamlResponse() + "\",";
+    json += "\"attributes\": [";
+
+    Enumeration<String> names = getAttributeNames();
+    String name,value = null;
+    boolean first = true;
+    while (names.hasMoreElements()) {
+      name = (String)names.nextElement();
+      value = getAttributeValue(name);
+      if (!first) json += ",";
+      json += "\"attribute\": {";
+      json += "\"attributeName\": " + "\"" + name + "\",";
+      json += "\"attributeValue\": " + "\"" + value + "\"";
+      json += "}";
+      first = false;
+    }
+
+    json += "]"; // "attributes" [
+    json += "}"; // "bag" {
+    json += "}"; // {
+
+    return json;
+  }
 }
