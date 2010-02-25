@@ -60,11 +60,19 @@ public class Bag {
     boolean inSessionID = false, inSAMLResponse = false,
             inAttributeName = false, inAttributeValue = false;
 
-    StringTokenizer st = new StringTokenizer(json, "\":");
+    StringTokenizer st = new StringTokenizer(json, "\" ");
     while (st.hasMoreTokens()) {
       token = st.nextToken();
-      // Ignore whitespace
-      if (token.equals(" ")) continue;
+      // Ignore noise
+      if ((token.equals(" ")) ||
+          (token.contains("{")) ||
+          (token.contains("}")) ||
+          (token.contains("[")) ||
+          (token.contains("]")) ||
+          (token.equals(",")) ||
+          (token.equals(":"))) {
+        continue;
+      }
       else if (token.equals("sessionID")) {
         inSessionID = true;
       }
