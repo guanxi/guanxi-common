@@ -166,7 +166,7 @@ public class GenericDecoderTest {
 			input = TestUtils.randomString(100);
 			encoder.write(input);
 			decoder.write(encoderBuffer.toString());
-			assertEquals("GenericDecoder does not decode what GenericEncoder produces", input, decoderBuffer.toString());
+			assertEquals("GenericDecoder does not decode what GenericEncoder produces", input.toString(), decoderBuffer.toString());
 			
 			encoderBuffer.delete(0, encoderBuffer.length());
 			decoderBuffer.delete(0, decoderBuffer.length());
