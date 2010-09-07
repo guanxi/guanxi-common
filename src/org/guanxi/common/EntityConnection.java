@@ -33,6 +33,7 @@ import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLPeerUnverifiedException;
 
+import org.apache.log4j.Logger;
 import org.apache.xml.security.utils.Base64;
 import org.guanxi.common.security.ssl.GuanxiHostVerifier;
 import org.guanxi.common.security.ssl.SSL;
@@ -45,6 +46,7 @@ import org.guanxi.common.security.ssl.SSL;
  * @author matthew
  */
 public class EntityConnection {
+  private static final Logger logger = Logger.getLogger(EntityConnection.class.getName());
   /** 
    * For passing to EntityConnection when we want to probe a remote entity for it's X509 Certificate 
    */
@@ -105,7 +107,7 @@ public class EntityConnection {
       }
       probing = probeForServerCert;
     }
-    catch ( Exception e ) {
+    catch (Exception e) {
       throw new GuanxiException(e);
     }
   }
@@ -145,7 +147,7 @@ public class EntityConnection {
     try {
       connection.setDoOutput(doIt);
     }
-    catch ( IllegalStateException e ) { // already connected
+    catch (IllegalStateException e) { // already connected
       throw new GuanxiException(e);
     }
   }
@@ -167,7 +169,7 @@ public class EntityConnection {
     try {
       connection.connect();
     }
-    catch ( IOException e ) { // SocketTimeoutException is a subclass of IOException
+    catch (IOException e) { // SocketTimeoutException is a subclass of IOException
       throw new GuanxiException(e);
     }
   }
@@ -185,7 +187,8 @@ public class EntityConnection {
     try {
       return connection.getInputStream();
     }
-    catch ( IOException e ) {
+    catch (IOException e) {
+      logErrorStream(connection.getErrorStream(), e, connection);
       throw new GuanxiException(e);
     }
   }
@@ -201,7 +204,8 @@ public class EntityConnection {
     try {
       return connection.getOutputStream();
     }
-    catch ( IOException e ) {
+    catch (IOException e) {
+      logErrorStream(connection.getErrorStream(), e, connection);
       throw new GuanxiException(e);
     }
   }
@@ -222,7 +226,7 @@ public class EntityConnection {
     try {
       connection.setRequestProperty(key, value);
     }
-    catch ( Exception e ) {
+    catch (Exception e) {
       // IllegalStateException = already connected
       // NullPointerException  = key is null
       throw new GuanxiException(e);
@@ -243,11 +247,11 @@ public class EntityConnection {
       try {
         return ((HttpsURLConnection)connection).getServerCertificates();
       }
-      catch ( SSLPeerUnverifiedException e ) {
+      catch (SSLPeerUnverifiedException e) {
         // SSLPeerUnverifiedException = peer not verified
         return null;
       }
-      catch ( IllegalStateException e ) {
+      catch (IllegalStateException e) {
         // IllegalStateException      = called before the connection is made
         throw new GuanxiException(e);
       }
@@ -355,6 +359,29 @@ public class EntityConnection {
     
     authentication = Base64.encode((username + ':' + password).getBytes());
     connection.setRequestProperty("Authorization", "Basic " + authentication);
+  }
+
+  /**
+   * Logs the message available via the error stream, if any
+   *
+   * @param errorStream the error stream from a call to getErrorStream()
+   * @param originalException the original exception that caused the error stream to be of interest
+   * @param connection the connection that caused the error
+   */
+  private void logErrorStream(InputStream errorStream, Exception originalException, HttpURLConnection connection) {
+    if (errorStream != null) {
+      try {
+        String errorStreamText = new String(Utils.read(errorStream));
+        logger.error("===========================================================");
+        logger.error(connection.getURL(), originalException);
+        logger.error(errorStreamText);
+        logger.error("===========================================================");
+        errorStream.close();
+      }
+      catch(Exception ex) {
+        logger.error(ex);
+      }
+    }
   }
 }
 
