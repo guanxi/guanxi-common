@@ -188,7 +188,7 @@ public class EntityConnection {
       return connection.getInputStream();
     }
     catch (IOException e) {
-      logErrorStream(connection.getErrorStream(), e, connection);
+      logErrorStream(e, connection);
       throw new GuanxiException(e);
     }
   }
@@ -205,7 +205,7 @@ public class EntityConnection {
       return connection.getOutputStream();
     }
     catch (IOException e) {
-      logErrorStream(connection.getErrorStream(), e, connection);
+      logErrorStream(e, connection);
       throw new GuanxiException(e);
     }
   }
@@ -364,11 +364,11 @@ public class EntityConnection {
   /**
    * Logs the message available via the error stream, if any
    *
-   * @param errorStream the error stream from a call to getErrorStream()
    * @param originalException the original exception that caused the error stream to be of interest
    * @param connection the connection that caused the error
    */
-  private void logErrorStream(InputStream errorStream, Exception originalException, HttpURLConnection connection) {
+  private void logErrorStream(Exception originalException, HttpURLConnection connection) {
+    InputStream errorStream = connection.getErrorStream();
     if (errorStream != null) {
       try {
         String errorStreamText = new String(Utils.read(errorStream));
