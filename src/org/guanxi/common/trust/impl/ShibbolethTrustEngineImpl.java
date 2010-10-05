@@ -78,7 +78,18 @@ public class ShibbolethTrustEngineImpl extends SimpleTrustEngine {
       // Entity data is the X509 from the connection
       X509Certificate x509CertFromConnection = (X509Certificate)entityData;
 
-      if (!TrustUtils.validateEmbeddedCert(saml2Metadata, new X509Certificate[] {x509CertFromConnection}, TrustUtils.ENTITY_TYPE_AA)) {
+      /* SAML2 Web Browser SSO metadata may not have an AttributeAuthorityDescriptor.
+       * In this case the cert will be in the IdPSSODescriptor.
+       */
+      int entityType;
+      if (saml2Metadata.getAuthnAuthorityDescriptorArray().length > 0) {
+        entityType = TrustUtils.ENTITY_TYPE_AA;
+      }
+      else {
+        entityType = TrustUtils.ENTITY_TYPE_SSO;
+      }
+
+      if (!TrustUtils.validateEmbeddedCert(saml2Metadata, new X509Certificate[] {x509CertFromConnection}, entityType)) {
         return TrustUtils.validatePKIXBC(x509CertFromConnection, saml2Metadata, caCerts, entityMetadata.getHostName());
       }
 
