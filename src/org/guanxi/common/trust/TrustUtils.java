@@ -795,5 +795,35 @@ public class TrustUtils {
       throw new GuanxiException(ioe);
     }
   }
+
+  /**
+   * Compares two PublicKeys to see if they are the same
+   *
+   * @param keyOne PublicKey to compare
+   * @param keyTwo PublicKey to compare
+   * @return true if the keys are the same
+   * @throws GuanxiException if an error occurs
+   */
+  public static boolean compareKeys(PublicKey keyOne, PublicKey keyTwo) throws GuanxiException {
+    if ((keyOne instanceof DSAPublicKey) && (keyTwo instanceof DSAPublicKey)) {
+      DSAPublicKey keyOneDSA = (DSAPublicKey)keyOne;
+      DSAPublicKey keyTwoDSA = (DSAPublicKey)keyTwo;
+      if (keyOneDSA.getY().equals(keyTwoDSA.getY()) &&
+          keyOneDSA.getParams().getG().equals(keyTwoDSA.getParams().getG()) &&
+          keyOneDSA.getParams().getP().equals(keyTwoDSA.getParams().getP()) &&
+          keyOneDSA.getParams().getQ().equals(keyTwoDSA.getParams().getQ())) {
+        return true;
+      }
+    }
+    else if ((keyOne instanceof RSAPublicKey) && (keyTwo instanceof RSAPublicKey)) {
+      RSAPublicKey keyOneRSA = (RSAPublicKey)keyOne;
+      RSAPublicKey keyTwoRSA = (RSAPublicKey)keyTwo;
+      if (keyOneRSA.getPublicExponent().equals(keyTwoRSA.getPublicExponent()) &&
+          keyOneRSA.getModulus().equals(keyTwoRSA.getModulus())) {
+        return true;
+      }
+    }
+    throw new GuanxiException("Unsupported PublicKey type");
+  }
 }
 
