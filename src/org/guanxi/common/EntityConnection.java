@@ -383,5 +383,23 @@ public class EntityConnection {
       }
     }
   }
+
+  /**
+   * Sets the timeout for connecting to an entity
+   *
+   * @param milliseconds the number of milliseconds to wait before timing out
+   */
+  public void setConnectTimeout(int milliseconds) {
+    connection.setConnectTimeout(milliseconds);
+  }
+
+  /**
+   * Sets the timeout for reading from an entity
+   *
+   * @param milliseconds the number of milliseconds to wait before timing out
+   */
+  public void setReadTimeout(int milliseconds) {
+    connection.setReadTimeout(milliseconds);
+  }
 }
 
