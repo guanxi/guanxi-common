@@ -38,6 +38,8 @@ public class GuanxiPrincipal implements Principal {
   private Map<String, Creds> signingCreds = null;
   /** The issuer to use when communicating with a service provider on behalf of this principal */
   private Map<String, String> issuers = null;
+  /** The NameID Format to use with this principal if it needs to be released as a NameID */
+  private String nameIDFormat = null;
 
   public GuanxiPrincipal() {
     privateProfileData = new HashMap<String, Object>();
@@ -131,5 +133,13 @@ public class GuanxiPrincipal implements Principal {
 
   public Map<String, Object> getPrivateProfileData() {
     return privateProfileData;
+  }
+  
+  public void setNameIDFormat(String nameIDFormat) {
+    this.nameIDFormat = nameIDFormat;
+  }
+
+  public String getNameIDFormat() {
+    return nameIDFormat;
   }
 }
