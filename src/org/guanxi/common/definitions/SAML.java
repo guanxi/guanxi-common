@@ -40,6 +40,8 @@ public class SAML {
   public static final String SAML2_ATTRIBUTE_NAME_FORMAT_URI = "urn:oasis:names:tc:SAML:2.0:attrname-format:uri";
   public static final String SAML2_ATTRIBUTE_FORMAT_NAMEID_PERSISTENT = "urn:oasis:names:tc:SAML:2.0:nameid-format:persistent";
   public static final String SAML2_STATUS_SUCCESS = "urn:oasis:names:tc:SAML:2.0:status:Success";
+  public static final String SAML2_STATUS_NO_PASSIVE = "urn:oasis:names:tc:SAML:2.0:status:NoPassive";
+  public static final String SAML2_STATUS_RESPONDER = "urn:oasis:names:tc:SAML:2.0:status:Responder";
   public static final String SAML2_BINDING_HTTP_POST = "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST";
   public static final String SAML2_BINDING_HTTP_REDIRECT = "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect";
   public static final String SAML2_ATTRIBUTE_PROFILE_BASIC = "urn:oasis:names:tc:SAML:2.0:attrname-format:basic";
