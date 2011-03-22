@@ -25,6 +25,9 @@ import org.guanxi.common.GuanxiException;
 import org.bouncycastle.asn1.DERObjectIdentifier;
 import org.bouncycastle.asn1.x509.X509Name;
 import org.bouncycastle.x509.X509V3CertificateGenerator;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
 import java.security.*;
 import java.security.cert.X509Certificate;
 import java.io.*;
@@ -103,6 +106,84 @@ public class SecUtils {
       transforms.item(1).getElement().appendChild(inDocToSign.createTextNode(new InclusiveNamespaces(inDocToSign, "#default saml samlp ds code kind rw typens").getInclusiveNamespaces()));
 
       sig.addDocument(inElementToSign, transforms);
+
+      //Add in the KeyInfo for the certificate that we used the private key of
+      X509Certificate cert = null;
+      cert = (X509Certificate)ks.getCertificate(certificateAlias);
+
+      sig.addKeyInfo(cert);
+
+      sig.addKeyInfo(cert.getPublicKey());
+
+      sig.sign(privateKey);
+    }
+    catch(Exception e) {
+      throw new GuanxiException(e);
+    }
+
+    return inDocToSign;
+  }
+
+  public Document saml2Sign(SecUtilsConfig config, Document inDocToSign, String elementIDToSign) throws GuanxiException {
+    String keystoreType = config.getKeystoreType();
+    String keystoreFile = config.getKeystoreFile();
+    String keystorePass = config.getKeystorePass();
+    String privateKeyAlias = config.getPrivateKeyAlias();
+    String privateKeyPass = config.getPrivateKeyPass();
+    String certificateAlias = config.getCertificateAlias();
+
+    try {
+      KeyStore ks = null;
+      ks = KeyStore.getInstance(keystoreType);
+
+      FileInputStream fis = null;
+      fis = new FileInputStream(keystoreFile);
+
+      ks.load(fis, keystorePass.toCharArray());
+      fis.close();
+
+      PrivateKey privateKey = null;
+      privateKey = (PrivateKey)ks.getKey(privateKeyAlias, privateKeyPass.toCharArray());
+
+      String keyType = privateKey.getAlgorithm();
+      if (keyType.equalsIgnoreCase("dsa")) keyType = XMLSignature.ALGO_ID_SIGNATURE_DSA;
+      if (keyType.equalsIgnoreCase("rsa")) keyType = XMLSignature.ALGO_ID_SIGNATURE_RSA;
+
+      XMLSignature sig = null;
+      sig = new XMLSignature(inDocToSign, "", keyType, Canonicalizer.ALGO_ID_C14N_EXCL_OMIT_COMMENTS);
+
+      // For SAML2, <ds:Signature> must be the first element after the Issuer
+      NodeList nodes = inDocToSign.getDocumentElement().getChildNodes();
+      Node issuerNode = null;
+      for (int c=0; c < nodes.getLength(); c++) {
+        issuerNode = nodes.item(c);
+        if (issuerNode.getLocalName() != null) {
+          if (issuerNode.getLocalName().equals("Issuer")) {
+            break;
+          }
+        }
+      }
+      inDocToSign.getDocumentElement().insertBefore(sig.getElement(), issuerNode.getNextSibling().getNextSibling());
+
+      Transforms transforms = new Transforms(sig.getDocument());
+
+      /* First we have to strip away the signature element (it's not part of the
+       * signature calculations). The enveloped transform can be used for this.
+       */
+      transforms.addTransform(Transforms.TRANSFORM_ENVELOPED_SIGNATURE);
+      transforms.addTransform(Transforms.TRANSFORM_C14N_EXCL_OMIT_COMMENTS);
+      /* Have to use a text node for compatibility with Internet2 Shibboleth SP 1.3
+       * otherwise the signature fails to verify. The correct way do add it is:
+       * transforms.item(1).getElement().appendChild(new InclusiveNamespaces(inDocToSign, "#default saml samlp ds code kind rw typens").getElement());
+       */
+      transforms.item(1).getElement().appendChild(inDocToSign.createTextNode(new InclusiveNamespaces(inDocToSign, "#default saml samlp ds code kind rw typens").getInclusiveNamespaces()));
+
+      if ((elementIDToSign != null) && (!elementIDToSign.equals(""))) {
+        sig.addDocument("#" + elementIDToSign, transforms);
+      }
+      else {
+        sig.addDocument("", transforms);
+      }
 
       //Add in the KeyInfo for the certificate that we used the private key of
       X509Certificate cert = null;
