@@ -290,6 +290,9 @@ public class Utils {
       if (attr.getNodeName().equals("AuthenticationInstant")) {
         attr.setNodeValue(zulu.format(calNow.getTime()));
       }
+      if (attr.getNodeName().equals("AuthnInstant")) {
+        attr.setNodeValue(zulu.format(calNow.getTime()));
+      }
     }
   }
 
