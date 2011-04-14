@@ -114,6 +114,15 @@ public class Utils {
     }
   }
 
+  public static byte[] decodeBase64b(String b64Data) {
+    try {
+      return Base64.decode(b64Data);
+    }
+    catch(Base64DecodingException bde) {
+      return null;
+    }
+  }
+
   /**
    * Gets the text value of a particular node in the config file
    *
@@ -351,11 +360,11 @@ public class Utils {
    * @return String representing the reconstituted data
    * @throws GuanxiException if an error occurs
    */
-  public static String inflate(String deflatedData, boolean useWrap) throws GuanxiException {
+  public static String inflate(byte[] deflatedData, boolean useWrap) throws GuanxiException {
     try {
-      byte[] inflatedData = new byte[(10 * deflatedData.length())];
+      byte[] inflatedData = new byte[(10 * deflatedData.length)];
       Inflater decompresser = new Inflater(useWrap);
-      decompresser.setInput(deflatedData.getBytes(), 0, deflatedData.length());
+      decompresser.setInput(deflatedData, 0, deflatedData.length);
       int inflatedBytesLength = decompresser.inflate(inflatedData);
       decompresser.end();
       return new String(inflatedData, 0, inflatedBytesLength);
