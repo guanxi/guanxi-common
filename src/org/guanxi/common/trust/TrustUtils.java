@@ -16,6 +16,7 @@
 
 package org.guanxi.common.trust;
 
+import org.apache.xml.security.signature.ObjectContainer;
 import org.guanxi.xal.saml_2_0.metadata.*;
 import org.guanxi.xal.w3.xmldsig.X509DataType;
 import org.guanxi.xal.w3.xmldsig.KeyInfoType;
@@ -516,6 +517,47 @@ public class TrustUtils {
       NodeList nodes = doc.getElementsByTagNameNS(Constants.SignatureSpecNS, "Signature");
       Element sigElement = (Element)nodes.item(0);
       XMLSignature xmlSignature = new XMLSignature(sigElement, "");
+
+      /* Stop the Signature/Object attack where the original Response is copied
+       * into Signature/Object and the signature removed from the copied Response.
+       * The ID of the real Response is then changed which means the
+       * Signature/SignedInfo/Reference now points to the original Response that
+       * was copied to Signature/Object.
+       * So the signature is verified on Signature/Object/Response and the root
+       * Response is then modified to anything required to break into the system
+       * with different attributes.
+       */
+      if (xmlSignature.getObjectLength() > 1) {
+        for (int c=0; c < xmlSignature.getObjectLength(); c++) {
+          ObjectContainer object = xmlSignature.getObjectItem(c);
+          if (object.getBaseLocalName() != null) {
+            if (object.getBaseLocalName().equals("Response")) {
+              throw new GuanxiException("There is a Response in signature/object#" + c);
+            }
+          }
+        }
+      }
+
+      // Make sure the signature reference is not suspicious
+      String rootResponseID = null;
+      if (doc.getFirstChild().getAttributes().getNamedItem("ID") != null) {
+        // SAML2
+        rootResponseID = doc.getFirstChild().getAttributes().getNamedItem("ID").getTextContent();
+      }
+      else if (doc.getFirstChild().getAttributes().getNamedItem("ResponseID") != null) {
+        // Shibboleth
+        rootResponseID = doc.getFirstChild().getAttributes().getNamedItem("ResponseID").getTextContent();
+      }
+
+      if (rootResponseID == null) {
+        throw new GuanxiException("No Response ID");
+      }
+
+      String signatureReference = xmlSignature.getSignedInfo().getReferencedContentBeforeTransformsItem(0).getSourceURI();
+      if ((!signatureReference.equals("")) && (!(("#" + rootResponseID).equals(signatureReference)))) {
+        throw new GuanxiException("The signature reference is not for the Response");
+      }
+
       X509Certificate cert = xmlSignature.getKeyInfo().getX509Certificate();
 
       return xmlSignature.checkSignatureValue(cert);
