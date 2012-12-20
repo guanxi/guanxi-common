@@ -422,9 +422,20 @@ public class TrustUtils {
     String[] split;
     for (String currentEntry : x509.getSubjectDN().getName().split(",\\s*")) {
       split = currentEntry.split("=");
-      if (split[0].equals("CN") && split[1].equals(keyName)) {
-        logger.debug("matched CN");
-        return true;
+      if (split[0].equals("CN")) {
+        if (split[1].equals(keyName)) {
+          logger.debug("matched CN");
+          return true;
+        }
+
+        // Try getting down to the hostname
+        String[] nameParts = split[1].split("/");
+        for (String namePart : nameParts) {
+          if (namePart.equalsIgnoreCase(keyName)) {
+            logger.debug("matched hostname : " + keyName);
+            return true;
+          }
+        }
       }
     }
 
