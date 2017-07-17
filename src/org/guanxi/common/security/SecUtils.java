@@ -172,11 +172,7 @@ public class SecUtils {
        */
       transforms.addTransform(Transforms.TRANSFORM_ENVELOPED_SIGNATURE);
       transforms.addTransform(Transforms.TRANSFORM_C14N_EXCL_OMIT_COMMENTS);
-      /* Have to use a text node for compatibility with Internet2 Shibboleth SP 1.3
-       * otherwise the signature fails to verify. The correct way do add it is:
-       * transforms.item(1).getElement().appendChild(new InclusiveNamespaces(inDocToSign, "#default saml samlp ds code kind rw typens").getElement());
-       */
-      transforms.item(1).getElement().appendChild(inDocToSign.createTextNode(new InclusiveNamespaces(inDocToSign, "#default saml samlp ds code kind rw typens").getInclusiveNamespaces()));
+      transforms.item(1).getElement().appendChild(new InclusiveNamespaces(inDocToSign, "#default saml samlp ds code kind rw typens").getElement());
 
       if ((elementIDToSign != null) && (!elementIDToSign.equals(""))) {
         sig.addDocument("#" + elementIDToSign, transforms);
